@@ -15,6 +15,11 @@
 
 package charlie.trs;
 
+import charlie.terms.FunctionSymbol;
+import charlie.terms.TermFactory;
+import charlie.terms.TheoryFactory;
+import charlie.types.Type;
+import charlie.types.TypeFactory;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Set;
@@ -108,6 +113,7 @@ public class TrsFactory {
                               boolean includeEta, TrsKind kind) {
     // build the list of rule schemes
     ImmutableList.Builder<TRS.RuleScheme> newschemes = ImmutableList.<TRS.RuleScheme>builder();
+    newschemes.add(TRS.RuleScheme.Mem);
     if (kind._restrictions.queryLevel().compareTo(Level.LAMBDA) >= 0) {
       newschemes.add(TRS.RuleScheme.Beta);
       if (includeEta) newschemes.add(TRS.RuleScheme.Eta);

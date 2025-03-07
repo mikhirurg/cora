@@ -42,6 +42,7 @@ public class Reducer {
     _arity = new TreeMap<FunctionSymbol,Integer>();
     for (int i = 0; i < trs.querySchemeCount(); i++) {
       switch (trs.queryScheme(i)) {
+        case RuleScheme.Mem: _components.add(new MemReducer()); break;
         case RuleScheme.Eta: _components.add(new EtaReducer()); break;
         case RuleScheme.Beta: _components.add(new BetaReducer()); break;
         case RuleScheme.Calc: _components.add(new CalcReducer()); break;

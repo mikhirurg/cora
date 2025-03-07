@@ -1,0 +1,81 @@
+/* list data structure */
+nil :: list
+cons :: Int -> list -> list
+
+/* graph data structure */
+nilG :: graph
+consG :: list -> graph -> graph
+
+/* number of nodes in graph */
+numNodes :: graph -> Int
+numNodes(nilG) -> 0
+numNodes(consG(l, g)) -> 1 + numNodes(g)
+
+/* genList */
+genList :: Int -> list
+genList(n) -> nil | n = 0
+genList(n) -> cons(0, genList(n-1)) | n > 0
+
+/* Fill */
+fill :: list -> Int -> list
+fill(nil, a) -> nil
+fill(cons(a, l), v) -> cons(v, fill(l, v))
+
+/* Get from list */
+getl :: Int -> list -> Int
+getl(n, cons(m, l)) -> m | n = 0
+getl(n, cons(m, l)) -> getl(n-1, l) | n > 0
+
+/* Set value in the list */
+setl :: Int -> Int -> list -> list
+setl(n, v, cons(m, l)) -> cons(v, l) | n = 0
+setl(n, v, cons(m, l)) -> cons(m, setl(n-1, v, l)) | n > 0
+
+/* Get from graph */
+getg :: Int -> graph -> list
+getg(n, consG(l, g)) -> l | n = 0
+getg(n, consG(l, g)) -> getg(n-1, g) | n > 0
+
+/* bfs */
+/* graph, currentNode, queue, visitedNodes */
+bfs :: graph -> Int -> list
+bfsLoop1 :: graph -> list -> list -> list
+bfsLoop2 :: graph -> Int -> list -> list -> list
+bfsLoop3 :: graph -> Int -> list -> list -> list -> list
+bfsLoop4 :: graph -> Int -> list -> list -> list -> Int -> list
+
+bfs(graph, v) -> bfsLoop1(graph, cons(v, nil), genList(numNodes(graph)))
+bfsLoop1(graph, nil, visited) -> visited
+bfsLoop1(graph, cons(x, q), visited) -> bfsLoop2(graph, x, q, visited)
+bfsLoop2(graph, x, q, visited) -> bfsLoop3(graph, x, q, setl(x, 1, visited), getg(x, graph))
+bfsLoop3(graph, x, q, visited, nil) -> bfsLoop1(graph, q, visited)
+bfsLoop3(graph, x, q, visited, cons(u, l)) ->
+    bfsLoop4(graph, x, q, visited, cons(u, l), getl(u, visited))
+bfsLoop4(graph, x, q, visited, cons(u, l), isVisited) ->
+    bfsLoop3(graph, x, cons(u, q), visited, l) | isVisited = 0
+bfsLoop4(graph, x, q, visited, cons(u, l), isVisited) ->
+    bfsLoop3(graph, x, q, visited, l) | isVisited = 1
+
+/* Example list: [1, 2, 3, 4] */
+list1 :: list
+list1 -> cons(1, cons(2, cons(3, cons(4, nil))))
+
+/* Example graph:
+   (1) --> (2)
+    |       ^
+    |       |
+    |    > (5)
+    |   /
+    |  /
+    v /
+   (3) --> (4) */
+graph1 :: graph
+graph1 -> consG(                    /* 1 */
+            cons(1, cons(2, nil)),
+          consG(nil,                /* 2 */
+          consG(                    /* 3 */
+            cons(3, cons(4, nil)),
+          consG(nil,                /* 4 */
+          consG(                    /* 5 */
+            cons(1, nil),
+          nilG)))))

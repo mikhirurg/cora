@@ -24,7 +24,7 @@ import charlie.types.TypeFactory;
  * They are theory symbols, and specifically correspond to the elements of the mathematical set
  * Z of integer numbers.
  */
-class IntegerValue extends ValueInherit {
+public class IntegerValue extends ValueInherit {
   private final int _value;
 
   IntegerValue(int i) {
