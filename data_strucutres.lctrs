@@ -1,0 +1,304 @@
+READ :: Int
+WRITE :: Int -> Bool
+
+GET :: Int -> Int
+SET :: Int -> Int -> Bool
+
+/* list data structure */
+nil :: list
+cons :: Int -> list -> list
+
+/* list size */
+listLen :: list -> Int
+listLen(nil) -> 0
+listLen(cons(e, l)) -> 1 + listLen(l)
+
+/* Read range - reads a range from memory and returns a list with the corresponding memory values */
+readRange :: Int -> Int -> list
+readRange1 :: Int -> Int -> list -> list
+readRange(start, end) -> readRange1(start, end, nil)
+readRange1(start, end, l) -> cons(GET(start), readRange1(start + 1, end, l)) | start <= end
+readRange1(start, end, l) -> l | start > end
+
+/* binary search tree */
+leaf :: bTree
+node :: Int -> bTree -> bTree -> bTree
+
+tree1 :: bTree
+tree1 -> node (1, node(2, leaf, leaf), leaf)
+
+insert :: Int -> bTree -> bTree
+insert(e, leaf) -> node(e, leaf, leaf)
+insert(e, node(n, l, r)) -> node(n, insert(e, l), r) | e <= n
+insert(e, node(n, l, r)) -> node(n, l, insert(e, r)) | e > n
+
+getMin :: bTree -> Int
+getMin(node(n, leaf, leaf)) -> n
+getMin(node(n, l, r)) -> getMin(l)
+
+getMax :: bTree -> Int
+getMax(node(n, leaf, leaf)) -> n
+getMax(node(n, l, r)) -> getMin(l)
+
+/* array */
+/* CREATE ARRAY */
+/* signature: address -> size -> Bool */
+createArray :: Int -> Int -> Bool
+createArray1 :: Int -> Int -> Bool -> Bool
+createArray2 :: Int -> Int -> Bool -> Bool
+createArray(addr, size) -> createArray1(addr + 1, size, SET(addr, size)) | size > 0
+createArray(addr, size) -> true | size <= 0
+createArray1(addr, size, false) -> false
+createArray1(addr, size, true) -> createArray2(addr + 1, size - 1, SET(addr, 0)) | size > 0
+createArray1(addr, size, true) -> true | size <= 0
+createArray2(addr, size, status) -> createArray1(addr, size, status)
+
+/* ACCESS Array element */
+/* addr -> index -> value */
+getArr :: Int -> Int -> Int
+getArr1 :: Int -> Int -> Int -> Int
+getArr(addr, i) -> getArr1(addr, i, GET(addr))
+getArr1(addr, i, size) -> GET(addr + i + 1) | i < size
+
+/* SET Array element */
+/* addr -> index -> value -> is successful? */
+setArr :: Int -> Int -> Int -> Bool
+setArr1 :: Int -> Int -> Int -> Int -> Bool
+setArr(addr, i, value) -> setArr1(addr, i, value, GET(addr))
+setArr1(addr, i, value, size) -> SET(addr + i + 1, value) | i < size
+setArr1(addr, i, value, size) -> false | i >= size
+
+/* Get Array size */
+getArrSize :: Int -> Int
+getArrSize(addr) -> GET(addr)
+
+/* Set Array size */
+/* addr -> new size -> Bool */
+setArrSize :: Int -> Int -> Bool
+setArrSize1 :: Int -> Int -> Int -> Bool
+setArrSize2 :: Int -> Int -> Bool -> Bool
+setArrSize(addr, newSize) -> false | newSize < 0
+setArrSize(addr, newSize) -> setArrSize1(addr, newSize, GET(addr))
+setArrSize1(addr, newSize, oldSize) -> SET(addr, newSize) | newSize <= oldSize
+setArrSize1(addr, newSize, oldSize) ->
+    setArrSize2(addr + oldSize + 1, newSize - oldSize, SET(addr, newSize)) | newSize > oldSize
+setArrSize2(addr, leftover, false) -> false
+setArrSize2(addr, leftover, true) -> true | leftover <= 0
+setArrSize2(addr, leftover, true) ->
+    setArrSize2(addr + 1, leftover - 1, SET(addr, 0)) | leftover > 0
+
+/* Swap Array elements */
+/* addr -> i1 -> i2 -> Bool */
+swapArr :: Int -> Int -> Int -> Bool
+swapArr1 :: Int -> Int -> Int -> Int -> Bool
+swapArr2 :: Int -> Int -> Int -> Int -> Int -> Bool
+swapArr3 :: Bool -> Bool -> Bool
+swapArr(addr, i1, i2) -> swapArr1(addr, i1, i2, GET(addr))
+swapArr1(addr, i1, i2, size) -> false | (i1 >= size) \/ (i2 >= size)
+swapArr1(addr, i1, i2, size) ->
+    swapArr2(addr, i1, i2, GET(addr + i1 + 1), GET(addr + i2 + 1)) | (i1 < size) /\ (i2 < size)
+swapArr2(addr, i1, i2, val1, val2) -> swapArr3(SET(addr + i2 + 1, val1), SET(addr + i1 + 1, val2))
+swapArr3(status1, status2) -> true | status1 /\ status2
+swapArr3(status1, status2) -> false | not(status1 /\ status2)
+
+/* Array to List */
+arrayToList :: Int -> list
+arrayToList1 :: Int -> Int -> list
+arrayToList(addr) -> arrayToList1(addr, GET(addr))
+arrayToList1(addr, size) -> readRange(addr + 1, addr + size)
+
+/* List to Array */
+listToArray :: list -> Int -> Bool
+listToArray1 :: list -> Int -> Int -> Bool -> Bool
+listToArray2 :: list -> Int -> Int -> Int -> Bool
+listToArray3 :: list -> Int -> Int -> Int -> Bool -> Bool
+listToArray(l, addr) -> listToArray1(l, addr, listLen(l), createArray(addr, listLen(l)))
+listToArray1(l, addr, size, false) -> false
+listToArray1(l, addr, size, true) -> listToArray2(l, addr, size, 0)
+listToArray2(cons(el, l), addr, size, i) ->
+    listToArray3(l, addr, size, i, setArr(addr, i, el)) | i < size
+listToArray3(l, addr, size, i, false) -> false
+listToArray3(l, addr, size, i, true) -> listToArray2(l, addr, size, i + 1)
+listToArray2(nil, addr, size, i) -> true
+
+/* minimum heap */
+
+/* Heap Sift down - transforming the heap to satisfy the heap properties */
+/*
+Used to fix the heap when some element value increases
+If ith element is less than the smallest of the children,
+we swap the element with the child, and perform this procedure again
+*/
+/* addr -> index -> status? */
+heapSiftDown :: Int -> Int -> Bool
+heapSiftDown1 :: Int -> Int -> Int -> Bool
+heapSiftDown2 :: Int -> Int -> Int -> Int -> Bool
+heapSiftDown3 :: Int -> Int -> Int -> Int -> Int -> Bool
+heapSiftDown4 :: Int -> Int -> Int -> Int -> Int -> Int -> Bool
+heapSiftDown5 :: Int -> Int -> Int -> Bool -> Bool
+
+heapSiftDown(addr, i) -> heapSiftDown1(addr, i, GET(addr))
+heapSiftDown1(addr, 0, 0) -> true
+heapSiftDown1(addr, i, size) -> false | i >= size /\ size > 0
+heapSiftDown1(addr, i, size) -> true | 2 * i + 1 >= size
+heapSiftDown1(addr, i, size) ->
+    heapSiftDown2(addr, i, size, getArr(addr, 2 * i + 1)) | 2 * i + 1 < size
+heapSiftDown2(addr, i, size, left) ->
+    heapSiftDown3(addr, i, size, left, getArr(addr, 2 * i + 2)) | 2 * i + 2 < size
+heapSiftDown2(addr, i, size, left) ->
+    heapSiftDown4(addr, i, size, 2 * i + 1, left, getArr(addr, i)) | 2 * i + 2 >= size
+heapSiftDown3(addr, i, size, left, right) ->
+    heapSiftDown4(addr, i, size, 2 * i + 1, left, getArr(addr, i)) | right >= left
+heapSiftDown3(addr, i, size, left, right) ->
+    heapSiftDown4(addr, i, size, 2 * i + 2, right, getArr(addr, i)) | right < left
+heapSiftDown4(addr, i, size, childIndex, childVal, nodeVal) -> true | nodeVal <= childVal
+heapSiftDown4(addr, i, size, childIndex, childVal, nodeVal) ->
+    heapSiftDown5(addr, i, childIndex, swapArr(addr, i, childIndex))
+heapSiftDown5(addr, i, childIndex, true) -> heapSiftDown(addr, childIndex)
+heapSiftDown5(addr, i, childIndex, false) -> false
+
+/* Heap Sift up */
+/* If some element is smaller than the parent node, we swap them,
+then we perform this operation for the parent */
+heapSiftUp :: Int -> Int -> Bool
+heapSiftUp1 :: Int -> Int -> Int -> Bool
+heapSiftUp2 :: Int -> Int -> Int -> Int -> Int -> Bool
+heapSiftUp3 :: Int -> Int -> Bool -> Bool
+heapSiftUp(addr, i) -> true | i <= 0
+heapSiftUp(addr, i) -> heapSiftUp1(addr, i, GET(addr)) | i > 0
+heapSiftUp1(addr, i, size) -> false | i >= size
+heapSiftUp1(addr, i, size) ->
+    heapSiftUp2(addr, i, size, getArr(addr, i), getArr(addr, (i - 1) / 2)) | i < size
+heapSiftUp2(addr, i, size, nodeVal, parentVal) -> true | nodeVal >= parentVal
+heapSiftUp2(addr, i, size, nodeVal, parentVal) ->
+    heapSiftUp3(addr, i, swapArr(addr, i, (i - 1) / 2)) | nodeVal < parentVal
+heapSiftUp3(addr, i, true) -> heapSiftUp(addr, (i - 1) / 2)
+heapSiftUp3(addr, i, false) -> false
+
+/* Heap insert */
+heapInsert :: Int -> Int -> Bool
+heapInsert1 :: Int -> Int -> Int -> Bool
+heapInsert2 :: Int -> Int -> Int -> Bool -> Bool
+heapInsert3 :: Int -> Int -> Int -> Bool -> Bool
+heapInsert(addr, el) -> heapInsert1(addr, el, GET(addr))
+heapInsert1(addr, el, size) -> heapInsert2(addr, el, size, SET(addr, size + 1))
+heapInsert2(addr, el, size, false) -> false
+heapInsert2(addr, el, size, true) -> heapInsert3(addr, el, size, setArr(addr, size, el))
+heapInsert3(addr, el, size, false) -> false
+heapInsert3(addr, el, size, true) -> heapSiftUp(addr, size)
+
+/* Heap extract minimum */
+heapExtractMin :: Int -> Int
+heapExtractMin1 :: Int -> Int -> Int -> Int
+heapExtractMin2 :: Int -> Int -> Int -> Bool -> Int
+heapExtractMin3 :: Int -> Int -> Bool -> Int
+heapExtractMin4 :: Int -> Int -> Bool -> Int
+heapExtractMin(addr) -> heapExtractMin1(addr, getArr(addr, 0), GET(addr))
+heapExtractMin1(addr, minVal, size) ->
+    heapExtractMin2(addr, minVal, size, setArr(addr, 0, getArr(addr, size - 1)))
+heapExtractMin2(addr, minVal, size, true) ->
+    heapExtractMin3(addr, minVal, SET(addr, size - 1))
+heapExtractMin3(addr, minVal, true) -> heapExtractMin4(addr, minVal, heapSiftDown(addr, 0))
+heapExtractMin4(addr, minVal, true) ->  minVal
+
+/* Heap sort */
+heapSort :: Int -> Int -> Int -> Bool
+heapSort1 :: Int -> Int -> Int -> Int -> Bool -> Bool
+heapSort2 :: Int -> Int -> Int -> Int -> Int -> Bool
+heapSort3 :: Int -> Int -> Int -> Int -> Int -> Bool -> Bool
+heapSort4 :: Int -> Int -> Int -> Bool
+heapSort5 :: Int -> Int -> Int -> Bool -> Bool
+heapSort6 :: Int -> Int -> Int -> Int -> Bool
+heapSort7 :: Int -> Int -> Int -> Int -> Bool -> Bool
+heapSort(addr1, addr2, addr3) ->
+    heapSort1(addr1, addr2, addr3, getArrSize(addr1), SET(addr2, 0))
+heapSort1(addr1, addr2, addr3, size, true) -> heapSort2(addr1, addr2, addr3, size, 0)
+heapSort2(addr1, addr2, addr3, size, i) ->
+    heapSort3(addr1, addr2, addr3, size, i, heapInsert(addr2, getArr(addr1, i))) | i < size
+heapSort3(addr1, addr2, addr3, size, i, false) -> false
+heapSort3(addr1, addr2, addr3, size, i, true) -> heapSort2(addr1, addr2, addr3, size, i + 1)
+heapSort2(addr1, addr2, addr3, size, i) -> heapSort4(addr2, addr3, size) | i >= size
+heapSort4(addr2, addr3, size) ->
+    heapSort5(addr2, addr3, size, createArray(addr3, size))
+heapSort5(addr2, addr3, size, false) -> false
+heapSort5(addr2, addr3, size, true) -> heapSort6(addr2, addr3, size, 0)
+heapSort6(addr2, addr3, size, i) ->
+    heapSort7(addr2, addr3, size, i, setArr(addr3, i, heapExtractMin(addr2))) | i < size
+heapSort7(addr2, addr3, size, i, false) -> false
+heapSort7(addr2, addr3, size, i, true) -> heapSort6(addr2, addr3, size, i + 1)
+heapSort6(addr2, addr3, size, i) -> true | i >= size
+
+
+/* Quick Sort */
+qSortPartition :: Int -> Int -> Int -> Int
+qSortPartition1 :: Int -> Int -> Int -> Int -> Int
+qSortPartition2 :: Int -> Int -> Int -> Int -> Int -> Int -> Int
+qSortPartition3 :: Int -> Int -> Int -> Int -> Bool -> Int
+qSortPartition4 :: Int -> Int -> Int -> Int -> Bool -> Int
+qSortPartition(addr, l, r) -> qSortPartition1(addr, l, r, l)
+qSortPartition1(addr, l, r, i) ->
+    qSortPartition2(addr, l, r, i, getArr(addr, l), getArr(addr, r - 1)) | l < r - 1
+qSortPartition2(addr, l, r, i, val1, val2) ->
+    qSortPartition3(addr, l, r, i, swapArr(addr, i, l)) | val1 <= val2
+qSortPartition3(addr, l, r, i, true) -> qSortPartition1(addr, l + 1, r, i + 1)
+qSortPartition2(addr, l, r, i, val1, val2) ->
+    qSortPartition1(addr, l + 1, r, i) | val1 > val2
+qSortPartition1(addr, l, r, i) ->
+    qSortPartition4(addr, l, r, i, swapArr(addr, i, r - 1)) | l >= r - 1
+qSortPartition4(addr, l, r, i, true) -> i
+
+qSort :: Int -> Int -> Int -> Bool
+qSort1 :: Int -> Int -> Int -> Int -> Bool
+qSort2 :: Bool -> Bool -> Bool
+qSort(addr, l, r) -> true | r - l <= 1
+qSort(addr, l, r) -> qSort1(addr, l, r, qSortPartition(addr, l, r)) | r - l > 1
+qSort1(addr, l, r, q) -> qSort2(qSort(addr, l, q), qSort(addr, q + 1, r))
+qSort2(left, right) -> left /\ right
+
+c1 :: Int -> Bool -> Bool
+c2 :: Bool -> Bool
+
+c1(x, true) -> c2(setArr(0, 1, 15))
+c2(true) -> swapArr(0, 1, 2)
+
+exec1 :: Int -> list
+exec2 :: Int -> Bool -> list
+exec3 :: Int -> Bool -> list
+exec4 :: Int -> Bool -> list
+exec5 :: Int -> Bool -> list
+exec6 :: Int -> Bool -> list
+exec7 :: Int -> Int -> list
+exec8 :: Int -> Int -> list
+exec9 :: Int -> Int -> list
+exec1(addr) -> exec2(addr, SET(addr, 0))
+exec2(addr, true) -> exec3(addr, heapInsert(addr, 3))
+exec3(addr, true) -> exec4(addr, heapInsert(addr, 6))
+exec4(addr, true) -> exec5(addr, heapInsert(addr, 2))
+exec5(addr, true) -> exec6(addr, heapInsert(addr, 4))
+exec6(addr, true) -> exec7(addr, heapExtractMin(addr))
+exec7(addr, 2) -> exec8(addr, heapExtractMin(addr))
+exec8(addr, 3) -> exec9(addr, heapExtractMin(addr))
+exec9(addr, 4) -> arrayToList(addr)
+
+randList1 :: list
+randList1 -> cons(-43, cons(85, cons(-55, cons(56, cons(-96, cons(88, cons(23, cons(8, cons(-51, cons(-72, cons(62, cons(38, cons(-45, cons(-76, cons(-19, cons(-47, cons(81, cons(66, cons(-49, cons(-84, cons(37, cons(-65, cons(41, cons(-41, cons(48, cons(-95, cons(75, cons(-32, cons(-50, cons(94, cons(37, cons(18, cons(43, cons(24, cons(17, cons(-17, cons(89, cons(-17, cons(30, cons(-9, cons(-97, cons(-53, cons(37, cons(-91, cons(67, cons(13, cons(12, cons(98, cons(63, cons(65, cons(-81, cons(-47, cons(-95, cons(11, cons(71, cons(-26, cons(-67, cons(-70, cons(-69, cons(4, cons(70, cons(21, cons(-86, cons(-95, cons(41, cons(25, cons(-85, cons(24, cons(-14, cons(92, cons(68, cons(19, cons(56, cons(97, cons(38, cons(98, cons(-37, cons(-48, cons(-86, cons(-84, cons(70, cons(1, cons(45, cons(17, cons(39, cons(93, cons(14, cons(-13, cons(52, cons(66, cons(8, cons(-9, cons(79, cons(-39, cons(-86, cons(11, cons(-62, cons(-67, cons(60, cons(-67, nil))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+
+randList2 :: list
+randList2 -> cons(-22, cons(54, cons(-97, cons(70, cons(13, cons(-98, cons(-57, cons(-48, cons(-6, cons(-82, nil))))))))))
+
+randList3 :: list
+randList3 -> cons(-65, cons(-29, cons(-27, cons(97, cons(76, nil)))))
+
+e1 :: list -> list
+e2 :: Int -> Bool -> list
+e3 :: Int -> Bool -> list
+e1(l) -> e2(listLen(l), listToArray(l, 0))
+e2(size, true) -> e3(2 * size + 2, heapSort(0, size + 1, 2 * size + 2))
+e3(addr, true) -> arrayToList(addr)
+
+ex1 :: list -> list
+ex2 :: Int -> Bool -> list
+ex3 :: Int -> Bool -> list
+ex1(l) -> ex2(listLen(l), listToArray(l, 0))
+ex2(size, true) -> ex3(0, qSort(0, 0, size))
+ex3(addr, true) -> arrayToList(addr)

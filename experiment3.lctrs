@@ -1,48 +1,12 @@
 READ :: Int
 WRITE :: Int -> Bool
 
+GET :: Int -> Int
+SET :: Int -> Int -> Bool
+
 /* list data structure */
 nil :: list
 cons :: Int -> list -> list
-
-intITE :: Bool -> Int -> Int -> Int
-intITE(true, a, b) -> a
-intITE(false, a, b) -> b
-
-boolITE :: Bool -> Bool -> Bool -> Bool
-boolITE(true, a, b) -> a
-boolITE(false, a, b) -> b
-
-/* list -> size -> index -> intList */
-getBList :: Int -> Int -> Bool
-getBList(list, i) -> boolITE(list % 2 = 0, false, true) | i = 0
-getBList(list, i) -> getBList(list / 2, i - 1) | i > 0
-
-/* list -> size -> index -> value -> tail -> pow2 -> intList */
-setBList1 :: Int -> Int -> Int -> Bool -> Int -> Int -> Int
-setBList1(list, size, i, val, tail, pow2) -> tail | size <= 0
-setBList1(list, size, i, val, tail, pow2) ->
-    setBList1(list / 2, size - 1, i - 1, val,
-                tail + intITE(val, 1, 0) * pow2, pow2 * 2) | i = 0
-setBList1(list, size, i, val, tail, pow2) ->
-    setBList1(list / 2, size - 1, i - 1, val, tail + (list % 2) * pow2, pow2 * 2) | i != 0
-
-/* list -> size -> index -> value -> intList */
-setBList :: Int -> Int -> Int -> Bool -> Int
-setBList(list, size, i, val) -> setBList1(list, size, i, val, 0, 1)
-
-/* bList -> size -> list */
-bListToList1 :: Int -> Int -> list
-bListToList1(bList, i) -> nil | i = 0
-bListToList1(bList, i) -> cons(bList % 2, bListToList1(bList / 2, i - 1)) | i > 0
-
-/* bList -> size -> list */
-bListToList :: Int -> Int -> list
-bListToList(bList, size) -> bListToList1(bList, size)
-
-/* numlist1 */
-numList1 :: Int
-numList1 -> setBList(0, 3, 1, true)
 
 /* graph data structure */
 nilG :: graph
@@ -80,6 +44,24 @@ getg(n, consG(l, g)) -> getg(n-1, g) | n > 0
 
 c :: Int -> Int -> Int -> Int -> Int -> Int
 
+/* Memory functions */
+
+/* filling the range in the memory with the value */
+fillRange :: Int -> Int -> Int -> Bool
+fillRange1 :: Int -> Int -> Int -> Bool -> Bool
+
+fillRange(start, end, val) -> fillRange1(start, end, val, SET(start, val)) | start <= end
+fillRange(start, end, val) -> true | start > end
+fillRange1(start, end, val, false) -> false
+fillRange1(start, end, val, true) -> fillRange(start + 1, end, val)
+
+/* Read range - reads a range from memory and returns a list with the corresponding memory values */
+readRange :: Int -> Int -> list
+readRange1 :: Int -> Int -> list -> list
+readRange(start, end) -> readRange1(start, end, nil)
+readRange1(start, end, l) -> cons(GET(start), readRange1(start + 1, end, l)) | start <= end
+readRange1(start, end, l) -> l | start > end
+
 /* bfs */
 /* graph, currentNode */
 bfs :: graph -> Int -> list
@@ -94,36 +76,33 @@ bfs2 :: graph -> Int -> list -> list
 bfs3 :: graph -> Int -> list -> list -> Bool -> list
 
 /* graph, currentNode, stack, visitedNodes, node neighbours, is neighbour visited */
-bfs4 :: graph -> Int -> list -> list -> Bool -> list
+bfs4 :: graph -> Int -> list -> list -> Int -> list
 
 /* bfs algorithm */
-bfs(graph, start) -> bfs1(graph, cons(start, nil), WRITE(0))
+bfs(graph, start) -> bfs1(graph, cons(start, nil), fillRange(0, numNodes(graph), 0))
 
 /* Stack with nodes is empty - return the list of visited nodes */
-bfs1(graph, nil, true) -> bListToList(READ(), numNodes(graph))
+bfs1(graph, nil, true) -> readRange(0, numNodes(graph))
 
 /* Stack with nodes is not empty - proceed with the algorithm */
 bfs1(graph, cons(x, stk), true) -> bfs2(graph, x, stk)
 
 /* Starting processing neighbours of the node x */
-bfs2(graph, x, stk) ->
-        bfs3(graph, x, stk, getg(x, graph),
-                WRITE(setBList(READ, numNodes(graph), x, true)))
+bfs2(graph, x, stk) -> bfs3(graph, x, stk, getg(x, graph), SET(x, 1))
 
 /* Neighbours list is empty - return to pick node from the stack */
 bfs3(graph, x, stk, nil, true) -> bfs1(graph, stk, true)
 
 /* Neighbours list is not empty - process the next one */
 bfs3(graph, x, stk, cons(u, l), true) ->
-    bfs4(graph, x, stk, cons(u, l), getBList(visited, u))
+    bfs4(graph, x, stk, cons(u, l), GET(u))
 
 /* Neighbour node is not visited - add node to the stack */
-bfs4(graph, x, stk, cons(u, l), false) ->
+bfs4(graph, x, stk, cons(u, l), 0) ->
     bfs3(graph, x, cons(u, stk), l, true)
 
 /* Neighbour node is visited - move to the next one */
-bfs4(graph, x, stk, cons(u, l), true) -> bfs3(graph, x, stk, l, true)
-
+bfs4(graph, x, stk, cons(u, l), 1) -> bfs3(graph, x, stk, l, true)
 
 /* Example list: [1, 2, 3, 4] */
 list1 :: list
@@ -161,3 +140,8 @@ graph2 -> consG(cons(1, nil),
           consG(cons(7, cons(10, nil)),
           consG(cons(8, nil),
           nilG)))))))))))
+
+c1 :: Int -> Bool -> list
+c2 :: list -> Int
+
+c1(x, true) -> readRange(0, 10)
