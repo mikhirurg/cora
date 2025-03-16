@@ -8,8 +8,11 @@ SET :: Int -> Int -> Bool
 nil :: list
 cons :: Int -> list -> list
 
-freshAddr :: Int -> Int
+freshAddr :: Int
 freshAddr -> GET(0)
+
+shiftFreshAddr :: Int -> Bool
+shiftFreshAddr(shift) -> SET(0, freshAddr + shift)
 
 /* list size */
 listLen :: list -> Int
@@ -25,16 +28,17 @@ readRange1(start, end, l) -> l | start > end
 
 /* array */
 /* CREATE ARRAY */
-/* signature: address -> size -> Bool */
-createArray :: Int -> Int -> Bool
-createArray1 :: Int -> Int -> Bool -> Bool
-createArray2 :: Int -> Int -> Bool -> Bool
-createArray(addr, size) -> createArray1(addr + 1, size, SET(addr, size)) | size > 0
-createArray(addr, size) -> true | size <= 0
-createArray1(addr, size, false) -> false
-createArray1(addr, size, true) -> createArray2(addr + 1, size - 1, SET(addr, 0)) | size > 0
-createArray1(addr, size, true) -> true | size <= 0
-createArray2(addr, size, status) -> createArray1(addr, size, status)
+/* signature: size -> Bool */
+createArray :: Int -> Int
+createArray1 :: Int -> Int -> Bool -> Bool -> Int
+createArray2 :: Int -> Int -> Int -> Int
+createArray3 :: Int -> Int -> Int -> Bool -> Int
+createArray(size) -> createArray1(freshAddr, size, SET(freshAddr, size), shiftFreshAddr(size + 1))
+createArray1(addr, size, true, true) -> createArray2(addr, addr + 1, size) | size > 0
+createArray2(arrAddr, addr, size) ->
+    createArray3(arrAddr, addr + 1, size - 1, SET(addr, 0)) | size > 0
+createArray2(arrAddr, addr, size) -> arrAddr | size <= 0
+createArray3(arrAddr, addr, size, true) -> createArray2(arrAddr, addr, size)
 
 /* ACCESS Array element */
 /* addr -> index -> value */
@@ -54,21 +58,6 @@ setArr1(addr, i, value, size) -> false | i >= size
 /* Get Array size */
 getArrSize :: Int -> Int
 getArrSize(addr) -> GET(addr)
-
-/* Set Array size */
-/* addr -> new size -> Bool */
-setArrSize :: Int -> Int -> Bool
-setArrSize1 :: Int -> Int -> Int -> Bool
-setArrSize2 :: Int -> Int -> Bool -> Bool
-setArrSize(addr, newSize) -> false | newSize < 0
-setArrSize(addr, newSize) -> setArrSize1(addr, newSize, GET(addr))
-setArrSize1(addr, newSize, oldSize) -> SET(addr, newSize) | newSize <= oldSize
-setArrSize1(addr, newSize, oldSize) ->
-    setArrSize2(addr + oldSize + 1, newSize - oldSize, SET(addr, newSize)) | newSize > oldSize
-setArrSize2(addr, leftover, false) -> false
-setArrSize2(addr, leftover, true) -> true | leftover <= 0
-setArrSize2(addr, leftover, true) ->
-    setArrSize2(addr + 1, leftover - 1, SET(addr, 0)) | leftover > 0
 
 /* Swap Array elements */
 /* addr -> i1 -> i2 -> Bool */
@@ -91,20 +80,27 @@ arrayToList(addr) -> arrayToList1(addr, GET(addr))
 arrayToList1(addr, size) -> readRange(addr + 1, addr + size)
 
 /* List to Array */
-listToArray :: list -> Int -> Bool
-listToArray1 :: list -> Int -> Int -> Bool -> Bool
-listToArray2 :: list -> Int -> Int -> Int -> Bool
-listToArray3 :: list -> Int -> Int -> Int -> Bool -> Bool
-listToArray(l, addr) -> listToArray1(l, addr, listLen(l), createArray(addr, listLen(l)))
-listToArray1(l, addr, size, false) -> false
-listToArray1(l, addr, size, true) -> listToArray2(l, addr, size, 0)
+listToArray :: list -> Int
+listToArray1 :: list -> Int -> Int -> Int
+listToArray2 :: list -> Int -> Int -> Int -> Int
+listToArray3 :: list -> Int -> Int -> Int -> Bool -> Int
+listToArray(l) -> listToArray1(l, createArray(listLen(l)), listLen(l))
+listToArray1(l, addr, size) -> listToArray2(l, addr, size, 0)
 listToArray2(cons(el, l), addr, size, i) ->
     listToArray3(l, addr, size, i, setArr(addr, i, el)) | i < size
-listToArray3(l, addr, size, i, false) -> false
 listToArray3(l, addr, size, i, true) -> listToArray2(l, addr, size, i + 1)
-listToArray2(nil, addr, size, i) -> true
+listToArray2(nil, addr, size, i) -> addr
+
 
 /* minimum heap */
+
+/* create min heap */
+createMinHeap :: Int -> Int
+createMinHeap1 :: Int -> Int
+createMinHeap2 :: Int -> Bool -> Int
+createMinHeap(cap) -> createMinHeap1(createArray(cap + 1))
+createMinHeap1(addr) -> createMinHeap2(addr, SET(addr, GET(addr) - 1))
+createMinHeap2(addr, true) -> addr
 
 /* Heap Sift down - transforming the heap to satisfy the heap properties */
 /*
@@ -160,11 +156,12 @@ heapSiftUp3(addr, i, false) -> false
 
 /* Heap insert */
 heapInsert :: Int -> Int -> Bool
-heapInsert1 :: Int -> Int -> Int -> Bool
+heapInsert1 :: Int -> Int -> Int -> Int -> Bool
 heapInsert2 :: Int -> Int -> Int -> Bool -> Bool
 heapInsert3 :: Int -> Int -> Int -> Bool -> Bool
-heapInsert(addr, el) -> heapInsert1(addr, el, GET(addr))
-heapInsert1(addr, el, size) -> heapInsert2(addr, el, size, SET(addr, size + 1))
+heapInsert(addr, el) -> heapInsert1(addr + 1, el, GET(addr), GET(addr + 1))
+heapInsert1(addr, el, cap, size) -> heapInsert2(addr, el, size, SET(addr, size + 1)) | size < cap
+heapInsert1(addr, el, cap, size) -> false | size >= cap
 heapInsert2(addr, el, size, false) -> false
 heapInsert2(addr, el, size, true) -> heapInsert3(addr, el, size, setArr(addr, size, el))
 heapInsert3(addr, el, size, false) -> false
@@ -176,7 +173,7 @@ heapExtractMin1 :: Int -> Int -> Int -> Int
 heapExtractMin2 :: Int -> Int -> Int -> Bool -> Int
 heapExtractMin3 :: Int -> Int -> Bool -> Int
 heapExtractMin4 :: Int -> Int -> Bool -> Int
-heapExtractMin(addr) -> heapExtractMin1(addr, getArr(addr, 0), GET(addr))
+heapExtractMin(addr) -> heapExtractMin1(addr + 1, getArr(addr + 1, 0), GET(addr + 1))
 heapExtractMin1(addr, minVal, size) ->
     heapExtractMin2(addr, minVal, size, setArr(addr, 0, getArr(addr, size - 1)))
 heapExtractMin2(addr, minVal, size, true) ->
@@ -184,32 +181,32 @@ heapExtractMin2(addr, minVal, size, true) ->
 heapExtractMin3(addr, minVal, true) -> heapExtractMin4(addr, minVal, heapSiftDown(addr, 0))
 heapExtractMin4(addr, minVal, true) ->  minVal
 
+/* Heap to list */
+heapToList :: Int -> list
+heapToList(addr) -> arrayToList(addr + 1)
+
 /* Heap sort */
-heapSort :: Int -> Int -> Int -> Bool
-heapSort1 :: Int -> Int -> Int -> Int -> Bool -> Bool
-heapSort2 :: Int -> Int -> Int -> Int -> Int -> Bool
-heapSort3 :: Int -> Int -> Int -> Int -> Int -> Bool -> Bool
+heapSort :: Int -> Bool
+heapSort1 :: Int -> Int -> Int -> Bool
+heapSort2 :: Int -> Int -> Int -> Int -> Bool
+heapSort3 :: Int -> Int -> Int -> Int -> Bool -> Bool
 heapSort4 :: Int -> Int -> Int -> Bool
-heapSort5 :: Int -> Int -> Int -> Bool -> Bool
-heapSort6 :: Int -> Int -> Int -> Int -> Bool
-heapSort7 :: Int -> Int -> Int -> Int -> Bool -> Bool
-heapSort(addr1, addr2, addr3) ->
-    heapSort1(addr1, addr2, addr3, getArrSize(addr1), SET(addr2, 0))
-heapSort1(addr1, addr2, addr3, size, true) -> heapSort2(addr1, addr2, addr3, size, 0)
-heapSort2(addr1, addr2, addr3, size, i) ->
-    heapSort3(addr1, addr2, addr3, size, i, heapInsert(addr2, getArr(addr1, i))) | i < size
-heapSort3(addr1, addr2, addr3, size, i, false) -> false
-heapSort3(addr1, addr2, addr3, size, i, true) -> heapSort2(addr1, addr2, addr3, size, i + 1)
-heapSort2(addr1, addr2, addr3, size, i) -> heapSort4(addr2, addr3, size) | i >= size
-heapSort4(addr2, addr3, size) ->
-    heapSort5(addr2, addr3, size, createArray(addr3, size))
-heapSort5(addr2, addr3, size, false) -> false
-heapSort5(addr2, addr3, size, true) -> heapSort6(addr2, addr3, size, 0)
-heapSort6(addr2, addr3, size, i) ->
-    heapSort7(addr2, addr3, size, i, setArr(addr3, i, heapExtractMin(addr2))) | i < size
-heapSort7(addr2, addr3, size, i, false) -> false
-heapSort7(addr2, addr3, size, i, true) -> heapSort6(addr2, addr3, size, i + 1)
-heapSort6(addr2, addr3, size, i) -> true | i >= size
+heapSort5 :: Int -> Int -> Int -> Int -> Bool
+heapSort6 :: Int -> Int -> Int -> Int -> Bool -> Bool
+heapSort(addr1) ->
+    heapSort1(addr1, createMinHeap(getArrSize(addr1)), getArrSize(addr1))
+heapSort1(addr1, addr2, size) -> heapSort2(addr1, addr2, size, 0)
+heapSort2(addr1, addr2, size, i) ->
+    heapSort3(addr1, addr2, size, i, heapInsert(addr2, getArr(addr1, i))) | i < size
+heapSort3(addr1, addr2, size, i, false) -> false
+heapSort3(addr1, addr2, size, i, true) -> heapSort2(addr1, addr2, size, i + 1)
+heapSort2(addr1, addr2, size, i) -> heapSort4(addr1, addr2, size) | i >= size
+heapSort4(addr1, addr2, size) -> heapSort5(addr1, addr2, size, 0)
+heapSort5(addr1, addr2, size, i) ->
+    heapSort6(addr1, addr2, size, i, setArr(addr1, i, heapExtractMin(addr2))) | i < size
+heapSort6(addr1, addr2, size, i, false) -> false
+heapSort6(addr1, addr2, size, i, true) -> heapSort5(addr1, addr2, size, i + 1)
+heapSort5(addr1, addr2, size, i) -> true | i >= size
 
 
 /* Quick Sort */
@@ -244,8 +241,9 @@ c2 :: Bool -> Bool
 c1(x, true) -> c2(setArr(0, 1, 15))
 c2(true) -> swapArr(0, 1, 2)
 
-exec1 :: Int -> list
-exec2 :: Int -> Bool -> list
+exec0 :: list
+exec1 :: Bool -> list
+exec2 :: Int -> list
 exec3 :: Int -> Bool -> list
 exec4 :: Int -> Bool -> list
 exec5 :: Int -> Bool -> list
@@ -253,15 +251,16 @@ exec6 :: Int -> Bool -> list
 exec7 :: Int -> Int -> list
 exec8 :: Int -> Int -> list
 exec9 :: Int -> Int -> list
-exec1(addr) -> exec2(addr, SET(addr, 0))
-exec2(addr, true) -> exec3(addr, heapInsert(addr, 3))
+exec0 -> exec1(SET(0, 1))
+exec1(true) -> exec2(createMinHeap(4))
+exec2(addr) -> exec3(addr, heapInsert(addr, 3))
 exec3(addr, true) -> exec4(addr, heapInsert(addr, 6))
 exec4(addr, true) -> exec5(addr, heapInsert(addr, 2))
 exec5(addr, true) -> exec6(addr, heapInsert(addr, 4))
 exec6(addr, true) -> exec7(addr, heapExtractMin(addr))
 exec7(addr, 2) -> exec8(addr, heapExtractMin(addr))
 exec8(addr, 3) -> exec9(addr, heapExtractMin(addr))
-exec9(addr, 4) -> arrayToList(addr)
+exec9(addr, 4) -> heapToList(addr)
 
 randList1 :: list
 randList1 -> cons(-43, cons(85, cons(-55, cons(56, cons(-96, cons(88, cons(23, cons(8, cons(-51, cons(-72, cons(62, cons(38, cons(-45, cons(-76, cons(-19, cons(-47, cons(81, cons(66, cons(-49, cons(-84, cons(37, cons(-65, cons(41, cons(-41, cons(48, cons(-95, cons(75, cons(-32, cons(-50, cons(94, cons(37, cons(18, cons(43, cons(24, cons(17, cons(-17, cons(89, cons(-17, cons(30, cons(-9, cons(-97, cons(-53, cons(37, cons(-91, cons(67, cons(13, cons(12, cons(98, cons(63, cons(65, cons(-81, cons(-47, cons(-95, cons(11, cons(71, cons(-26, cons(-67, cons(-70, cons(-69, cons(4, cons(70, cons(21, cons(-86, cons(-95, cons(41, cons(25, cons(-85, cons(24, cons(-14, cons(92, cons(68, cons(19, cons(56, cons(97, cons(38, cons(98, cons(-37, cons(-48, cons(-86, cons(-84, cons(70, cons(1, cons(45, cons(17, cons(39, cons(93, cons(14, cons(-13, cons(52, cons(66, cons(8, cons(-9, cons(79, cons(-39, cons(-86, cons(11, cons(-62, cons(-67, cons(60, cons(-67, nil))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
@@ -272,16 +271,20 @@ randList2 -> cons(-22, cons(54, cons(-97, cons(70, cons(13, cons(-98, cons(-57, 
 randList3 :: list
 randList3 -> cons(-65, cons(-29, cons(-27, cons(97, cons(76, nil)))))
 
-e1 :: list -> list
-e2 :: Int -> Bool -> list
+e0 :: list -> list
+e1 :: list -> Bool -> list
+e2 :: Int -> Int -> list
 e3 :: Int -> Bool -> list
-e1(l) -> e2(listLen(l), listToArray(l, 0))
-e2(size, true) -> e3(2 * size + 2, heapSort(0, size + 1, 2 * size + 2))
+e0(l) -> e1(l, SET(0, 1))
+e1(l, true) -> e2(listLen(l), listToArray(l))
+e2(size, addr) -> e3(addr, heapSort(addr))
 e3(addr, true) -> arrayToList(addr)
 
-ex1 :: list -> list
-ex2 :: Int -> Bool -> list
+ex0 :: list -> list
+ex1 :: list -> Bool -> list
+ex2 :: Int -> Int -> list
 ex3 :: Int -> Bool -> list
-ex1(l) -> ex2(listLen(l), listToArray(l, 0))
-ex2(size, true) -> ex3(0, qSort(0, 0, size))
+ex0(l) -> ex1(l, SET(0, 1))
+ex1(l, true) -> ex2(listLen(l), listToArray(l))
+ex2(size, addr) -> ex3(addr, qSort(addr, 0, size))
 ex3(addr, true) -> arrayToList(addr)
