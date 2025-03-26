@@ -1,0 +1,44 @@
+/* bfs */
+/* graph, currentNode */
+bfs :: graph -> Int -> Int
+bfs1 :: graph -> Int -> Int -> Int
+bfs2 :: graph -> list -> Int -> Int
+bfs3 :: graph -> Int -> Int -> list -> Int
+bfs4 :: graph -> Int -> Int -> list -> list -> Bool -> Int
+bfs5 :: graph -> Int -> Int -> list -> list -> Int -> Int
+
+bfs(graph, start) -> bfs1(graph, start, createArray(numNodes(graph)))
+bfs1(graph, start, addr) -> bfs2(graph, cons(start, nil), addr)
+bfs2(graph, nil, addr) -> addr
+bfs2(graph, cons(x, stk), addr) -> bfs3(graph, addr, x, stk)
+bfs3(graph, addr, x, stk) -> bfs4(graph, addr, x, stk, getg(x, graph), setArr(addr, x, 1))
+bfs4(graph, addr, x, stk, nil, true) -> bfs2(graph, stk, addr)
+bfs4(graph, addr, x, stk, cons(u, l), true) ->
+    bfs5(graph, addr, x, stk, cons(u, l), getArr(addr, u))
+bfs5(graph, addr, x, stk, cons(u, l), 0) -> bfs4(graph, addr, x, cons(u, stk), l, true)
+bfs5(graph, addr, x, stk, cons(u, l), 1) -> bfs4(graph, addr, x, stk, l, true)
+
+/* bfs: multi-core (2 cores) */
+mc_bfs :: graph -> Int -> Int
+mc_bfs1 :: graph -> Int -> Int -> Int
+mc_bfs2 :: graph -> list -> Int -> Int
+mc_bfs3 :: graph -> Int -> Int -> list -> Int
+mc_bfs4 :: graph -> Int -> Int -> list -> list -> Bool -> Int
+mc_bfs5 :: graph -> Int -> Int -> list -> list -> Int -> Int
+mc_bfs_env :: Int -> Int -> Int
+
+mc_bfs(graph, start) -> mc_bfs1(graph, start, createArray(numNodes(graph)))
+mc_bfs1(graph, start, addr) -> mc_bfs2(graph, cons(start, nil), addr)
+mc_bfs2(graph, nil, addr) -> addr
+mc_bfs2(graph, cons(x1, cons(x2, stk)), addr) ->
+    mc_bfs_env(mc_bfs3(graph, addr, x1, stk), mc_bfs3(graph, addr, x2, stk))
+mc_bfs2(graph, cons(x1, nil), addr) ->
+    mc_bfs_env(mc_bfs3(graph, addr, x1, nil), addr)
+mc_bfs3(graph, addr, x, stk) -> mc_bfs4(graph, addr, x, stk, getg(x, graph), setArr(addr, x, 1))
+mc_bfs4(graph, addr, x, stk, nil, true) -> mc_bfs2(graph, stk, addr)
+mc_bfs4(graph, addr, x, stk, cons(u, l), true) ->
+    mc_bfs5(graph, addr, x, stk, cons(u, l), getArr(addr, u))
+mc_bfs5(graph, addr, x, stk, cons(u, l), 0) -> mc_bfs4(graph, addr, x, cons(u, stk), l, true)
+mc_bfs5(graph, addr, x, stk, cons(u, l), 1) -> mc_bfs4(graph, addr, x, stk, l, true)
+
+mc_bfs_env(addr, addr) -> addr

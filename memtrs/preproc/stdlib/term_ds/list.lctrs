@@ -1,0 +1,34 @@
+/* ==================================== TERMS: LIST ============================================= */
+
+/* list data structure */
+nil :: list
+cons :: Int -> list -> list
+
+/* list size */
+listLen :: list -> Int
+listLen(nil) -> 0
+listLen(cons(e, l)) -> 1 + listLen(l)
+
+/* Set value in the list */
+setl :: Int -> Int -> list -> list
+setl(n, v, cons(m, l)) -> cons(v, l) | n = 0
+setl(n, v, cons(m, l)) -> cons(m, setl(n-1, v, l)) | n > 0
+
+/* Get from list */
+getl :: Int -> list -> Int
+getl(n, cons(m, l)) -> m | n = 0
+getl(n, cons(m, l)) -> getl(n-1, l) | n > 0
+
+/* genList */
+genList :: Int -> list
+genList(n) -> nil | n = 0
+genList(n) -> cons(0, genList(n-1)) | n > 0
+
+/* Read range - reads a range from memory and returns a list with the corresponding memory values */
+readRange :: Int -> Int -> list
+readRange1 :: Int -> Int -> list -> list
+readRange(start, end) -> readRange1(start, end, nil)
+readRange1(start, end, l) -> cons(GET(start), readRange1(start + 1, end, l)) | start <= end
+readRange1(start, end, l) -> l | start > end
+
+/* ============================================================================================== */

@@ -1,0 +1,54 @@
+/* ================================== IN-MEM DS: MATRIX ========================================= */
+
+createMatrix :: Int -> Int -> Int
+createMatrix1 :: Int -> Int -> Int
+createMatrix2 :: Int -> Int -> Int -> Int
+createMatrix3 :: Int -> Int -> Int -> Int -> Int
+createMatrix4 :: Bool -> Int -> Int -> Int -> Int -> Int
+createMatrix(w, h) -> createMatrix1(createArray(w), h)
+createMatrix1(arrsAddr, h) -> createMatrix2(arrsAddr, h, 0)
+createMatrix2(arrsAddr, h, i) -> createMatrix3(createArray(h), arrsAddr, h, i)
+createMatrix3(addr, arrsAddr, h, i) ->
+    createMatrix4(setArr(arrsAddr, i, addr), addr, arrsAddr, h, i)
+createMatrix4(true, addr, arrsAddr, h, i) -> createMatrix2(arrsAddr, h, i + 1) | i < h - 1
+createMatrix4(true, addr, arrsAddr, h, i) -> arrsAddr | i >= h - 1
+
+/* Get matrix width */
+getMatrixWidth :: Int -> Int
+getMatrixWidth(addr) -> getArrSize(addr)
+
+/* Get matrix height */
+getMatrixHeight :: Int -> Int
+getMatrixHeight(addr) -> getArrSize(getArr(addr, 0))
+
+/* Get element from matrix */
+getMatrix :: Int -> Int -> Int -> Int
+getMatrix1 :: Int -> Int -> Int -> Int -> Int -> Int
+getMatrix(addr, x, y) -> getMatrix1(addr, getMatrixWidth(addr), getMatrixHeight(addr), x, y)
+getMatrix1(addr, width, height, x, y) ->
+    getArr(getArr(addr, x), y) | 0 <= x /\ x < width /\ 0 <= y /\ y < height
+
+/* Set element in matrix */
+setMatrix :: Int -> Int -> Int -> Int -> Bool
+setMatrix1 :: Int -> Int -> Int -> Int -> Int -> Int -> Bool
+setMatrix(addr, x, y, val) ->
+    setMatrix1(addr, getMatrixWidth(addr), getMatrixHeight(addr), x, y, val)
+setMatrix1(addr, width, height, x, y, val) ->
+    setArr(getArr(addr, x), y, val) | 0 <= x /\ x < width /\ 0 <= y /\ y < height
+
+/* Graph to Matrix */
+graphToMatrix :: graph -> Int
+graphToMatrix1 :: graph -> Int -> Int
+graphToMatrix2 :: graph -> Int -> Int -> Int
+graphToMatrix3 :: graph -> list -> Int -> Int -> Int -> Int
+graphToMatrix4 :: graph -> list -> Int -> Int -> Int -> Bool -> Int
+graphToMatrix(graph) -> graphToMatrix1(graph, numNodes(graph))
+graphToMatrix1(graph, size) -> graphToMatrix2(graph, createMatrix(size, size), 0)
+graphToMatrix2(consG(l, graph), addr, i) ->
+    graphToMatrix3(graph, l, addr, i, 0)
+graphToMatrix2(nilG, addr, i) -> addr
+graphToMatrix3(graph, cons(x, l), addr, i, j) ->
+    graphToMatrix4(graph, l, addr, i, j, setMatrix(addr, i, j, 1))
+graphToMatrix3(graph, nil, addr, i, j) -> graphToMatrix2(graph, addr, i + 1)
+graphToMatrix4(graph, l, addr, i, j, true) ->
+    graphToMatrix3(graph, l, addr, i, j + 1)

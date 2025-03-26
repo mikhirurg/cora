@@ -1,0 +1,11 @@
+/* ===================================== ALGORITHMS ============================================= */
+
+#include algorithms/heapsort.lctrs
+
+#include algorithms/quicksort.lctrs
+
+#include algorithms/bfs.lctrs
+
+/* Floyd Warshall algorithm */
+
+/* ============================================================================================== */

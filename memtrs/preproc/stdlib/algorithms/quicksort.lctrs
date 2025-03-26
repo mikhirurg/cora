@@ -1,0 +1,25 @@
+/* Quick Sort */
+qSortPartition :: Int -> Int -> Int -> Int
+qSortPartition1 :: Int -> Int -> Int -> Int -> Int
+qSortPartition2 :: Int -> Int -> Int -> Int -> Int -> Int -> Int
+qSortPartition3 :: Int -> Int -> Int -> Int -> Bool -> Int
+qSortPartition4 :: Int -> Int -> Int -> Int -> Bool -> Int
+qSortPartition(addr, l, r) -> qSortPartition1(addr, l, r, l)
+qSortPartition1(addr, l, r, i) ->
+    qSortPartition2(addr, l, r, i, getArr(addr, l), getArr(addr, r - 1)) | l < r - 1
+qSortPartition2(addr, l, r, i, val1, val2) ->
+    qSortPartition3(addr, l, r, i, swapArr(addr, i, l)) | val1 <= val2
+qSortPartition3(addr, l, r, i, true) -> qSortPartition1(addr, l + 1, r, i + 1)
+qSortPartition2(addr, l, r, i, val1, val2) ->
+    qSortPartition1(addr, l + 1, r, i) | val1 > val2
+qSortPartition1(addr, l, r, i) ->
+    qSortPartition4(addr, l, r, i, swapArr(addr, i, r - 1)) | l >= r - 1
+qSortPartition4(addr, l, r, i, true) -> i
+
+qSort :: Int -> Int -> Int -> Bool
+qSort1 :: Int -> Int -> Int -> Int -> Bool
+qSort2 :: Bool -> Bool -> Bool
+qSort(addr, l, r) -> true | r - l <= 1
+qSort(addr, l, r) -> qSort1(addr, l, r, qSortPartition(addr, l, r)) | r - l > 1
+qSort1(addr, l, r, q) -> qSort2(qSort(addr, l, q), qSort(addr, q + 1, r))
+qSort2(left, right) -> left /\ right

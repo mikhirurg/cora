@@ -1,0 +1,22 @@
+/* Heap sort */
+heapSort :: Int -> Bool
+heapSort1 :: Int -> Int -> Int -> Bool
+heapSort2 :: Int -> Int -> Int -> Int -> Bool
+heapSort3 :: Int -> Int -> Int -> Int -> Bool -> Bool
+heapSort4 :: Int -> Int -> Int -> Bool
+heapSort5 :: Int -> Int -> Int -> Int -> Bool
+heapSort6 :: Int -> Int -> Int -> Int -> Bool -> Bool
+heapSort(addr1) ->
+    heapSort1(addr1, createMinHeap(getArrSize(addr1)), getArrSize(addr1))
+heapSort1(addr1, addr2, size) -> heapSort2(addr1, addr2, size, 0)
+heapSort2(addr1, addr2, size, i) ->
+    heapSort3(addr1, addr2, size, i, heapInsert(addr2, getArr(addr1, i))) | i < size
+heapSort3(addr1, addr2, size, i, false) -> false
+heapSort3(addr1, addr2, size, i, true) -> heapSort2(addr1, addr2, size, i + 1)
+heapSort2(addr1, addr2, size, i) -> heapSort4(addr1, addr2, size) | i >= size
+heapSort4(addr1, addr2, size) -> heapSort5(addr1, addr2, size, 0)
+heapSort5(addr1, addr2, size, i) ->
+    heapSort6(addr1, addr2, size, i, setArr(addr1, i, heapExtractMin(addr2))) | i < size
+heapSort6(addr1, addr2, size, i, false) -> false
+heapSort6(addr1, addr2, size, i, true) -> heapSort5(addr1, addr2, size, i + 1)
+heapSort5(addr1, addr2, size, i) -> true | i >= size

@@ -1,0 +1,20 @@
+/* ==================================== TERMS: GRAPH ============================================ */
+
+/* graph data structure */
+nilG :: graph
+consG :: list -> graph -> graph
+
+/* number of nodes in graph */
+numNodes :: graph -> Int
+numNodes(nilG) -> 0
+numNodes(consG(l, g)) -> 1 + numNodes(g)
+
+/* Fill */
+fill :: list -> Int -> list
+fill(nil, a) -> nil
+fill(cons(a, l), v) -> cons(v, fill(l, v))
+
+/* Get from graph */
+getg :: Int -> graph -> list
+getg(n, consG(l, g)) -> l | n = 0
+getg(n, consG(l, g)) -> getg(n-1, g) | n > 0

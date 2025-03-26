@@ -17,6 +17,8 @@ package charlie.parser;
 
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 import charlie.util.LookupMap;
@@ -858,6 +860,10 @@ public class CoraParser {
    */
   public static ParserProgram readProgramFromFile(String filename, boolean constrained,
                                                   ErrorCollector collector) throws IOException {
+
+    Preprocessor preprocessor = new Preprocessor(filename);
+    filename = preprocessor.preprocess();
+
     TokenQueue queue;
     if (constrained) queue = CoraTokenData.getConstrainedFileLexer(filename);
     else queue = CoraTokenData.getUnconstrainedFileLexer(filename);
@@ -866,6 +872,8 @@ public class CoraParser {
     CoraParser parser = new CoraParser(status);
     ParserProgram program = parser.readTRS();
     finish(status, collector == null || program == null);
+
+    Files.delete(Path.of(filename));
     return program;
   }
 }

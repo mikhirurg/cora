@@ -1,0 +1,70 @@
+/* ================================== IN-MEM DS: ARRAY ========================================== */
+
+/* Create Array */
+
+/* signature: size -> Bool */
+createArray :: Int -> Int
+createArray1 :: Int -> Int -> Int
+createArray2 :: Int -> Int -> Bool -> Int
+createArray3 :: Int -> Int -> Int -> Int
+createArray4 :: Int -> Int -> Int -> Bool -> Int
+createArray(size) -> createArray1(alloc(size + 1), size)
+createArray1(addr, size) -> createArray2(addr, size, SET(addr, size))
+createArray2(addr, size, true) -> createArray3(addr, addr + 1, size) | size > 0
+createArray3(arrAddr, addr, size) ->
+    createArray4(arrAddr, addr + 1, size - 1, SET(addr, 0)) | size > 0
+createArray3(arrAddr, addr, size) -> arrAddr | size <= 0
+createArray4(arrAddr, addr, size, true) -> createArray3(arrAddr, addr, size)
+
+/* ACCESS Array element */
+/* addr -> index -> value */
+getArr :: Int -> Int -> Int
+getArr1 :: Int -> Int -> Int -> Int
+getArr(addr, i) -> getArr1(addr, i, GET(addr))
+getArr1(addr, i, size) -> GET(addr + i + 1) | i < size
+
+/* SET Array element */
+/* addr -> index -> value -> is successful? */
+setArr :: Int -> Int -> Int -> Bool
+setArr1 :: Int -> Int -> Int -> Int -> Bool
+setArr(addr, i, value) -> setArr1(addr, i, value, GET(addr))
+setArr1(addr, i, value, size) -> SET(addr + i + 1, value) | i < size
+setArr1(addr, i, value, size) -> false | i >= size
+
+/* Get Array size */
+getArrSize :: Int -> Int
+getArrSize(addr) -> GET(addr)
+
+/* Swap Array elements */
+/* addr -> i1 -> i2 -> Bool */
+swapArr :: Int -> Int -> Int -> Bool
+swapArr1 :: Int -> Int -> Int -> Int -> Bool
+swapArr2 :: Int -> Int -> Int -> Int -> Int -> Bool
+swapArr3 :: Bool -> Bool -> Bool
+swapArr(addr, i1, i2) -> swapArr1(addr, i1, i2, GET(addr))
+swapArr1(addr, i1, i2, size) -> false | (i1 >= size) \/ (i2 >= size)
+swapArr1(addr, i1, i2, size) ->
+    swapArr2(addr, i1, i2, GET(addr + i1 + 1), GET(addr + i2 + 1)) | (i1 < size) /\ (i2 < size)
+swapArr2(addr, i1, i2, val1, val2) -> swapArr3(SET(addr + i2 + 1, val1), SET(addr + i1 + 1, val2))
+swapArr3(status1, status2) -> true | status1 /\ status2
+swapArr3(status1, status2) -> false | not(status1 /\ status2)
+
+/* Array to List */
+arrayToList :: Int -> list
+arrayToList1 :: Int -> Int -> list
+arrayToList(addr) -> arrayToList1(addr, GET(addr))
+arrayToList1(addr, size) -> readRange(addr + 1, addr + size)
+
+/* List to Array */
+listToArray :: list -> Int
+listToArray1 :: list -> Int -> Int -> Int
+listToArray2 :: list -> Int -> Int -> Int -> Int
+listToArray3 :: list -> Int -> Int -> Int -> Bool -> Int
+listToArray(l) -> listToArray1(l, createArray(listLen(l)), listLen(l))
+listToArray1(l, addr, size) -> listToArray2(l, addr, size, 0)
+listToArray2(cons(el, l), addr, size, i) ->
+    listToArray3(l, addr, size, i, setArr(addr, i, el)) | i < size
+listToArray3(l, addr, size, i, true) -> listToArray2(l, addr, size, i + 1)
+listToArray2(nil, addr, size, i) -> addr
+
+/* ============================================================================================== */
