@@ -1,6 +1,8 @@
+#include list.lctrs
+
 /* ==================================== TERMS: GRAPH ============================================ */
 
-/* graph data structure */
+/* unweighted graph data structure */
 nilG :: graph
 consG :: list -> graph -> graph
 

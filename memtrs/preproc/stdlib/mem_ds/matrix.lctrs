@@ -1,3 +1,7 @@
+#include array.lctrs
+#include ../term_ds/graph.lctrs
+#include ../term_ds/matrix_term.lctrs
+
 /* ================================== IN-MEM DS: MATRIX ========================================= */
 
 createMatrix :: Int -> Int -> Int
@@ -36,19 +40,50 @@ setMatrix(addr, x, y, val) ->
 setMatrix1(addr, width, height, x, y, val) ->
     setArr(getArr(addr, x), y, val) | 0 <= x /\ x < width /\ 0 <= y /\ y < height
 
+/* Fill Matrix */
+fillMatrix :: Int -> Int -> Bool
+fillMatrix1 :: Int -> Int -> Int -> Int -> Bool
+fillMatrix2 :: Int -> Int -> Int -> Int -> Bool -> Bool
+fillMatrix(addr, val) -> fillMatrix1(addr, val, getMatrixWidth(addr), 0)
+fillMatrix1(addr, val, width, i) ->
+    fillMatrix2(addr, val, width, i, fillArray(getArr(addr, i), val)) | i < width
+fillMatrix2(addr, val, width, i, true) -> fillMatrix1(addr, val, width, i + 1)
+fillMatrix1(addr, val, width, i) -> true | i >= width
+
+fillMatrixDiag :: Int -> Int -> Bool
+fillMatrixDiag1 :: Int -> Int -> Int -> Int -> Bool
+fillMatrixDiag2 :: Int -> Int -> Int -> Int -> Bool -> Bool
+fillMatrixDiag(addr, val) -> fillMatrixDiag1(addr, val, getMatrixWidth(addr), 0)
+fillMatrixDiag1(addr, val, width, i) ->
+    fillMatrixDiag2(addr, val, width, i, setMatrix(addr, i, i, val)) | i < width
+fillMatrixDiag2(addr, val, width, i, true) -> fillMatrixDiag1(addr, val, width, i + 1)
+fillMatrixDiag1(addr, val, width, i) -> true | i >= width
+
+/* Matrix to Term */
+matrixToTerm :: Int -> matrix
+matrixToTerm1 :: Int -> Int -> Int -> matrix -> matrix
+matrixToTerm2 :: Int -> Int -> Int -> matrix -> matrix
+matrixToTerm(addr) -> matrixToTerm1(addr, getMatrixWidth(addr), 0, rowNil)
+matrixToTerm1(addr, size, i, m) ->
+    row(arrayToList(getArr(addr, i)), matrixToTerm2(addr, size, i, m)) | i < size
+matrixToTerm2(addr, size, i, m) -> matrixToTerm1(addr, size, i + 1, m)
+matrixToTerm1(addr, size, i, m) -> m | i >= size
+
 /* Graph to Matrix */
-graphToMatrix :: graph -> Int
-graphToMatrix1 :: graph -> Int -> Int
-graphToMatrix2 :: graph -> Int -> Int -> Int
-graphToMatrix3 :: graph -> list -> Int -> Int -> Int -> Int
-graphToMatrix4 :: graph -> list -> Int -> Int -> Int -> Bool -> Int
-graphToMatrix(graph) -> graphToMatrix1(graph, numNodes(graph))
-graphToMatrix1(graph, size) -> graphToMatrix2(graph, createMatrix(size, size), 0)
-graphToMatrix2(consG(l, graph), addr, i) ->
-    graphToMatrix3(graph, l, addr, i, 0)
-graphToMatrix2(nilG, addr, i) -> addr
-graphToMatrix3(graph, cons(x, l), addr, i, j) ->
-    graphToMatrix4(graph, l, addr, i, j, setMatrix(addr, i, j, 1))
-graphToMatrix3(graph, nil, addr, i, j) -> graphToMatrix2(graph, addr, i + 1)
-graphToMatrix4(graph, l, addr, i, j, true) ->
-    graphToMatrix3(graph, l, addr, i, j + 1)
+graphToMatrix :: graph -> Int -> Int
+graphToMatrix1 :: graph -> Int -> Int -> Int
+graphToMatrix2 :: graph -> Int -> Int -> Int -> Int
+graphToMatrix3 :: graph -> Int -> Int -> Bool -> Int
+graphToMatrix4 :: graph -> list -> Int -> Int -> Int
+graphToMatrix5 :: graph -> list -> Int -> Int -> Bool -> Int
+graphToMatrix(graph, default) -> graphToMatrix1(graph, default, numNodes(graph))
+graphToMatrix1(graph, default, size) -> graphToMatrix2(graph, default, createMatrix(size, size), 0)
+graphToMatrix2(graph, default, addr, i) ->
+    graphToMatrix3(graph, addr, i, fillMatrix(addr, default))
+graphToMatrix3(consG(l, graph), addr, i, true) ->
+    graphToMatrix4(graph, l, addr, i)
+graphToMatrix3(nilG, addr, i, true) -> addr
+graphToMatrix4(graph, cons(x, l), addr, i) ->
+    graphToMatrix5(graph, l, addr, i, setMatrix(addr, i, x, 1))
+graphToMatrix4(graph, nil, addr, i) -> graphToMatrix3(graph, addr, i + 1, true)
+graphToMatrix5(graph, l, addr, i, true) -> graphToMatrix4(graph, l, addr, i)

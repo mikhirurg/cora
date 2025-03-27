@@ -1,0 +1,29 @@
+#include ../mem_ds/array.lctrs
+#include ../term_ds/graph.lctrs
+
+mc_bfs_sp :: graph -> Int -> Int
+mc_bfs1_sp :: graph -> Int -> Int -> Int
+mc_bfs2_sp :: graph -> list -> Int -> Bool -> Bool -> Int
+mc_bfs3_sp :: graph -> Int -> Int -> list -> Int
+mc_bfs4_sp :: graph -> Int -> Int -> list -> list -> Int
+mc_bfs5_sp :: graph -> Int -> Int -> list -> list -> Int -> Int
+mc_bfs6_sp :: graph -> Int -> Int -> list -> list -> Bool -> Int
+mc_bfs_parallel_sp :: graph -> list -> Int -> list -> Int
+
+mc_bfs_sp(graph, start) -> mc_bfs1_sp(graph, start, createArray(numNodes(graph)))
+mc_bfs1_sp(graph, start, addr) ->
+    mc_bfs2_sp(graph, cons(start, nil), addr, fillArray(addr, -1), setArr(addr, start, 0))
+mc_bfs2_sp(graph, stk, addr, true, true) -> mc_bfs_parallel_sp(graph, stk, addr, nil)
+mc_bfs_parallel_sp(graph, cons(x1, stk), addr, l) ->
+    mc_bfs_parallel_sp(graph, stk, addr, cons(mc_bfs3_sp(graph, addr, x1, stk), l))
+mc_bfs_parallel_sp(graph, nil, addr, l) -> addr
+mc_bfs3_sp(graph, addr, x, stk) ->
+    mc_bfs4_sp(graph, addr, x, stk, getg(x, graph))
+mc_bfs4_sp(graph, addr, x, stk, nil) -> mc_bfs2_sp(graph, stk, addr, true, true)
+mc_bfs4_sp(graph, addr, x, stk, cons(u, l)) ->
+    mc_bfs5_sp(graph, addr, x, stk, cons(u, l), getArr(addr, u))
+mc_bfs5_sp(graph, addr, x, stk, cons(u, l), d) ->
+    mc_bfs6_sp(graph, addr, x, stk, cons(u, l), setArr(addr, u, getArr(addr, x) + 1)) | d = -1
+mc_bfs6_sp(graph, addr, x, stk, cons(u, l), true) ->
+    mc_bfs4_sp(graph, addr, x, cons(u, stk), l)
+mc_bfs5_sp(graph, addr, x, stk, cons(u, l), d) -> mc_bfs4_sp(graph, addr, x, stk, l) | d >= 0

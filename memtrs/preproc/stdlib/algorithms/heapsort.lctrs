@@ -1,3 +1,6 @@
+#include ../mem_ds/min_heap.lctrs
+#include ../mem_ds/array.lctrs
+
 /* Heap sort */
 heapSort :: Int -> Bool
 heapSort1 :: Int -> Int -> Int -> Bool

@@ -1,3 +1,6 @@
+#include ../kernel.lctrs
+#include ../term_ds/list.lctrs
+
 /* ================================== IN-MEM DS: ARRAY ========================================== */
 
 /* Create Array */
@@ -9,7 +12,7 @@ createArray2 :: Int -> Int -> Bool -> Int
 createArray3 :: Int -> Int -> Int -> Int
 createArray4 :: Int -> Int -> Int -> Bool -> Int
 createArray(size) -> createArray1(alloc(size + 1), size)
-createArray1(addr, size) -> createArray2(addr, size, SET(addr, size))
+createArray1(addr, size) -> createArray2(addr, size, SET(addr, size)) | addr = addr
 createArray2(addr, size, true) -> createArray3(addr, addr + 1, size) | size > 0
 createArray3(arrAddr, addr, size) ->
     createArray4(arrAddr, addr + 1, size - 1, SET(addr, 0)) | size > 0
@@ -34,6 +37,15 @@ setArr1(addr, i, value, size) -> false | i >= size
 /* Get Array size */
 getArrSize :: Int -> Int
 getArrSize(addr) -> GET(addr)
+
+/* Fill Array */
+fillArray :: Int -> Int -> Bool
+fillArray1 :: Int -> Int -> Int -> Int -> Bool
+fillArray2 :: Int -> Int -> Int -> Int -> Bool -> Bool
+fillArray(addr, val) -> fillArray1(addr, val, 0, getArrSize(addr))
+fillArray1(addr, val, i, size) -> fillArray2(addr, val, i, size, setArr(addr, i, val)) | i < size
+fillArray1(addr, val, i, size) -> true | i >= size
+fillArray2(addr, val, i, size, true) -> fillArray1(addr, val, i + 1, size)
 
 /* Swap Array elements */
 /* addr -> i1 -> i2 -> Bool */

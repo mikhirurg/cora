@@ -1,3 +1,5 @@
+#include ../mem_ds/array.lctrs
+
 /* Quick Sort */
 qSortPartition :: Int -> Int -> Int -> Int
 qSortPartition1 :: Int -> Int -> Int -> Int -> Int

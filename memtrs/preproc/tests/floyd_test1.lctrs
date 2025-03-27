@@ -1,0 +1,7 @@
+#include ../stdlib/algorithms/floyd_warshall.lctrs
+#include test_structs.lctrs
+
+exec0 :: graph -> matrix
+exec1 :: graph -> Bool -> matrix
+exec0(g) -> exec1(g, SET(0, 1))
+exec1(g, true) -> matrixToTerm(floyd_warshall(g))

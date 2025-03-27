@@ -10,7 +10,7 @@ alloc :: Int -> Int
 alloc1 :: Int -> Int -> Int
 alloc2 :: Int -> Bool -> Int
 alloc(size) -> alloc1(size, GET(0))
-alloc1(size, freshAddr) -> alloc2(freshAddr, SET(0, freshAddr + size))
+alloc1(size, freshAddr) -> alloc2(freshAddr, SET(0, freshAddr + size)) | freshAddr = freshAddr
 alloc2(addr, true) -> addr
 
 /* ============================================================================================== */

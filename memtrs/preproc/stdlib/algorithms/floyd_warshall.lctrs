@@ -1,0 +1,26 @@
+#include ../mem_ds/array.lctrs
+#include ../mem_ds/matrix.lctrs
+#include ../term_ds/graph.lctrs
+#include ../term_ds/matrix_term.lctrs
+#include ../math.lctrs
+
+floyd_warshall :: graph -> Int
+floyd_warshall1 :: Int -> Int
+floyd_warshall2 :: Int -> Int -> Bool -> Int
+floyd_warshall3 :: Int -> Int -> Int -> Int -> Int -> Int
+floyd_warshall4 :: Int -> Int -> Int -> Int -> Int -> Int
+floyd_warshall5 :: Int -> Int -> Int -> Int -> Int -> Int
+floyd_warshall6 :: Int -> Int -> Int -> Int -> Int -> Bool -> Int
+floyd_warshall(g) -> floyd_warshall1(graphToMatrix(g, numNodes(g) * 100))
+floyd_warshall1(addr) -> floyd_warshall2(addr, getMatrixWidth(addr), fillMatrixDiag(addr, 0))
+floyd_warshall2(addr, size, true) -> floyd_warshall3(addr, size, 0, 0, 0)
+floyd_warshall3(addr, size, i, j, k) -> floyd_warshall4(addr, size, i, j, k) | k < size
+floyd_warshall4(addr, size, i, j, k) -> floyd_warshall5(addr, size, i, j, k) | i < size
+floyd_warshall5(addr, size, i, j, k) ->
+    floyd_warshall6(addr, size, i, j, k,
+        setMatrix(addr, i, j,
+            min(getMatrix(addr, i, j), getMatrix(addr, i, k) + getMatrix(addr, k, j)))) | j < size
+floyd_warshall6(addr, size, i, j, k, true) -> floyd_warshall5(addr, size, i, j + 1, k)
+floyd_warshall5(addr, size, i, j, k) -> floyd_warshall4(addr, size, i + 1, 0, k) | j >= size
+floyd_warshall4(addr, size, i, j, k) -> floyd_warshall3(addr, size, 0, j, k + 1) | i >= size
+floyd_warshall3(addr, size, i, j, k) -> addr | k >= size
