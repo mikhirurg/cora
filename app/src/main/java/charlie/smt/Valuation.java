@@ -15,6 +15,7 @@
 
 package charlie.smt;
 
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.TreeMap;
 
@@ -27,12 +28,14 @@ public class Valuation {
   private TreeSet<Integer> _trueBVars;
   private TreeMap<Integer,Integer> _iVarValues;
   private TreeMap<Integer,String> _sVarValues;
+  private TreeMap<Integer, Map<Integer, Integer>> _aVarValues;
 
   /** Creates a new valuation with all booleans set to false, and no integer/string values set. */
   public Valuation() {
     _trueBVars = new TreeSet<Integer>();
     _iVarValues = new TreeMap<Integer,Integer>();
     _sVarValues = new TreeMap<Integer,String>();
+    _aVarValues = new TreeMap<Integer, Map<Integer, Integer>>();
   }
 
   /** Returns the valuation for the boolean variable with the given index */
@@ -52,6 +55,14 @@ public class Valuation {
     else return "";
   }
 
+  public Map<Integer, Integer> queryArrayAssignment(int index) {
+    if (_aVarValues.containsKey(index)) {
+      return _aVarValues.get(index);
+    } else {
+      return Map.of();
+    }
+  }
+
   /** Returns the valuation for the given boolean variable */
   public boolean queryAssignment(BVar x) {
     return queryBoolAssignment(x.queryIndex());
@@ -65,6 +76,10 @@ public class Valuation {
   /** Returns the valuation for the given String variable */
   public String queryAssignment(SVar x) {
     return queryStringAssignment(x.queryIndex());
+  }
+
+  public Map<Integer, Integer> queryAssignment(AVar x) {
+    return queryArrayAssignment(x.queryIndex());
   }
 
   /** Set a boolean variable to the given value. */
@@ -83,6 +98,10 @@ public class Valuation {
     _sVarValues.put(index, value);
   }
 
+  public void setArray(int index, Map<Integer, Integer> value) {
+    _aVarValues.put(index, value);
+  }
+
   /** Give a human-readable representation of the valuation, for use in debugging. */
   public String toString() {
     StringBuilder ret = new StringBuilder();
@@ -95,6 +114,10 @@ public class Valuation {
     if (_sVarValues.size() > 0) ret.append("Stirng variables:");
     for (Integer i : _sVarValues.keySet()) {
       ret.append("  s" + i.toString() + " : " + _sVarValues.get(i).toString() + "\n");
+    }
+    if (_aVarValues.size() > 0) ret.append("Array variables:");
+    for (Integer i : _aVarValues.keySet()) {
+      ret.append(" a" + i.toString() + " : " + _aVarValues.get(i).toString() + "\n");
     }
     return ret.toString();
   }

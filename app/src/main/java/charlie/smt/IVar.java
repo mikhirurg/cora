@@ -56,9 +56,11 @@ public final class IVar extends IntegerExpression {
     builder.append("i" + _index);
   }
 
+  // TODO: requires revision (Select case)
   public int compareTo(IntegerExpression other) {
     return switch (other) {
       case IValue v -> 1;
+      case Select select -> 1;
       case IVar x -> _index  - x.queryIndex();
       case CMult cm -> compareTo(cm.queryChild()) <= 0 ? -1 : 1;
       case Addition a -> -1;

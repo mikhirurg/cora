@@ -24,12 +24,14 @@ public class SmtProblem implements Iterable<Constraint> {
   private int _lastBooleanIndex;
   private int _lastIntegerIndex;
   private int _lastStringIndex;
+  private int _lastArrayIndex;
   private ArrayList<Constraint> _constraints;
 
   public SmtProblem() {
     _lastBooleanIndex = 0;
     _lastIntegerIndex = 0;
     _lastStringIndex = 0;
+    _lastArrayIndex = 0;
     _constraints = new ArrayList<Constraint>();
   }
 
@@ -78,6 +80,16 @@ public class SmtProblem implements Iterable<Constraint> {
     return new SVar(_lastStringIndex, name);
   }
 
+  public AVar createArrayVariable() {
+    _lastArrayIndex++;
+    return new AVar(_lastArrayIndex);
+  }
+
+  public AVar createArrayVariable(String name) {
+    _lastArrayIndex++;
+    return new AVar(_lastArrayIndex, name);
+  }
+
   /**
    * This requires that the constraint holds.  Note that all variables in the constraint must have
    * been created through the create<kind>Variable functions, since this ensures that they are
@@ -123,6 +135,10 @@ public class SmtProblem implements Iterable<Constraint> {
    */
   public int numberStringVariables() {
     return _lastStringIndex;
+  }
+
+  public int numberArrayVariables() {
+    return _lastArrayIndex;
   }
 
   /**

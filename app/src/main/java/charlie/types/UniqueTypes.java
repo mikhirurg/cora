@@ -32,6 +32,7 @@ final class UniqueTypes {
   /** Returns the sort used to represent the set of strings. */
   public static final Base stringSort = new Base("String");
 
+  public static final Base arraySort = new Base("Array");
   /** 
    * Returns the default sort.
    * This is not a theory sort, but used for instance as the one sort in unsorted first-order TRSs.

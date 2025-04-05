@@ -216,10 +216,12 @@ public final class Addition extends IntegerExpression {
     builder.append(")");
   }
 
+  // TODO: requires revision (Select case)
   public int compareTo(IntegerExpression other) {
     return switch (other) {
       case IValue v -> 1;
       case IVar x -> 1;
+      case Select s -> 1;
       case CMult cm -> compareTo(cm.queryChild()) <= 0 ? -1 : 1;
       case Addition a -> {
         for (int i = _children.size()-1, j = a._children.size()-1; i >= 0 && j >= 0; i--, j--) {

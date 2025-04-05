@@ -57,6 +57,9 @@ public class TermAnalyser {
       Constraint c = translator.translateConstraint(t);
       return TheoryFactory.createValue(c.evaluate());
     }
+    if (t.queryType().equals(TypeFactory.arraySort)) {
+
+    }
     if (t.isValue()) return t.toValue();
     throw new UnsupportedTheoryException(t.toString(), "Type " + t.queryType().toString() + " is " +
       "not a supported theory sort.");

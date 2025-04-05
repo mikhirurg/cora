@@ -32,6 +32,8 @@ public class TypeFactory {
   /** The theory sort String, representing the set of Strings. */
   public static final Base stringSort = UniqueTypes.stringSort;
 
+  public static final Base arraySort = UniqueTypes.arraySort;
+
   /** The default sort is the unique sort that is used for "unsorted" term rewriting. */
   public static final Base defaultSort = UniqueTypes.defaultSort;
 

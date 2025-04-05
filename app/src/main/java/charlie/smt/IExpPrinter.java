@@ -21,6 +21,13 @@ package charlie.smt;
  * to use unicode symbols, ascii-art, html, print smt-style or whatever is needed.
  */
 public class IExpPrinter {
+
+  private final AExpPrinter aExpPrinter;
+
+  public IExpPrinter() {
+    this.aExpPrinter = new AExpPrinter();
+  }
+
   /**
    * Returns a string representation of the given IntegerExpression (using the other print method).
    * This is only supplied as a public access function, and is not meant to be overridden.
@@ -49,6 +56,7 @@ public class IExpPrinter {
       case Multiplication m: printMultiplication(m, builder); break;
       case CMult c: printCMult(c, builder); break;
       case Addition a: printAddition(a, builder); break;
+      case Select s: printSelect(s, builder); break;
     }
   }
 
@@ -154,6 +162,13 @@ public class IExpPrinter {
       builder.append(" + ");
       print(a.queryChild(i), builder);
     }
+  }
+
+  protected final void printSelect(Select select, StringBuilder builder) {
+    aExpPrinter.print(select.queryArray());
+    builder.append("[");
+    print(select.queryIndex());
+    builder.append("]");
   }
 }
 

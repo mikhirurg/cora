@@ -15,8 +15,6 @@
 
 package charlie.smt;
 
-import charlie.util.Pair;
-
 import java.util.ArrayList;
 
 /** Not a public class on purpose: use Constraint, or use Geq0, Is0 or Neq0 directly. */
@@ -138,7 +136,9 @@ abstract sealed class Comparison extends Constraint permits Geq0, Is0, Neq0 {
       case Junction _ -> -1;
       case Iff _ -> -1;
       case EqS _ -> -1;
+      case EqA _ -> -1;
       case UneqS _ -> -1;
+      case UneqA _ -> -1;
     };
   }
 }
