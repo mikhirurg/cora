@@ -108,8 +108,10 @@ abstract sealed class Junction extends Constraint permits Conjunction, Disjuncti
       }
       case Iff _ -> -1; 
       case EqS _ -> -1; 
-      case UneqS _ -> -1; 
-    };  
+      case UneqS _ -> -1;
+      case EqA eqA -> -1;
+      case UneqA uneqA -> -1;
+    };
   }
 }
 

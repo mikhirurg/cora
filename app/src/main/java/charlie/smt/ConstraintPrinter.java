@@ -29,9 +29,12 @@ public class ConstraintPrinter {
   /** The printer used to print string expressions */
   protected SExpPrinter _stringPrinter;
 
+  protected AExpPrinter _arrayPrinter;
+
   public ConstraintPrinter() {
     _expPrinter = new IExpPrinter();
     _stringPrinter = new SExpPrinter();
+    _arrayPrinter = new AExpPrinter();
   }
 
   public ConstraintPrinter(IExpPrinter e, SExpPrinter s) {
@@ -73,6 +76,8 @@ public class ConstraintPrinter {
       case Iff i: printIff(i, builder); break;
       case EqS e: printEqS(e, builder); break;
       case UneqS u: printUneqS(u, builder); break;
+      case EqA eqA: printEqA(eqA, builder); break;
+      case UneqA uneqA: printUneqA(uneqA, builder); break;
     }
   }
 
@@ -233,6 +238,18 @@ public class ConstraintPrinter {
     _stringPrinter.print(u.queryLeft(), builder);
     builder.append(" # ");
     _stringPrinter.print(u.queryRight(), builder);
+  }
+
+  protected void printEqA(EqA e, StringBuilder builder) {
+    _arrayPrinter.print(e.queryLeft(), builder);
+    builder.append(" = ");
+    _arrayPrinter.print(e.queryRight(), builder);
+  }
+
+  protected void printUneqA(UneqA u, StringBuilder builder) {
+    _arrayPrinter.print(u.queryLeft(), builder);
+    builder.append(" # ");
+    _arrayPrinter.print(u.queryRight(), builder);
   }
 }
 

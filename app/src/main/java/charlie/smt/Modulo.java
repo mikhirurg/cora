@@ -101,6 +101,7 @@ public final class Modulo extends IntegerExpression {
   public int compareTo(IntegerExpression other) {
     return switch (other) {
       case IValue v -> 1;
+      case Select select -> 1;
       case IVar x -> 1;
       case CMult cm -> compareTo(cm.queryChild()) <= 0 ? -1 : 1;
       case Addition a -> 1;
@@ -110,7 +111,7 @@ public final class Modulo extends IntegerExpression {
         int c = _denominator.compareTo(m._denominator);
         if (c != 0) yield c;
         else yield _numerator.compareTo(m._numerator);
-      }   
+      }
     };
   }
 

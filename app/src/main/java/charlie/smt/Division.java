@@ -104,6 +104,7 @@ public final class Division extends IntegerExpression {
   public int compareTo(IntegerExpression other) {
     return switch (other) {
       case IValue v -> 1;
+      case Select select -> 1;
       case IVar x -> 1;
       case CMult cm -> compareTo(cm.queryChild()) <= 0 ? -1 : 1;
       case Addition a -> 1;
