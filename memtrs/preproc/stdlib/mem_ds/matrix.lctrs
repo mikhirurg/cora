@@ -5,32 +5,32 @@
 /* ================================== IN-MEM DS: MATRIX ========================================= */
 
 createMatrix :: Int -> Int -> Int
-createMatrix1 :: Int -> Int -> Int
-createMatrix2 :: Int -> Int -> Int -> Int
-createMatrix3 :: Int -> Int -> Int -> Int -> Int
-createMatrix4 :: Bool -> Int -> Int -> Int -> Int -> Int
-createMatrix(w, h) -> createMatrix1(createArray(w), h)
-createMatrix1(arrsAddr, h) -> createMatrix2(arrsAddr, h, 0)
-createMatrix2(arrsAddr, h, i) -> createMatrix3(createArray(h), arrsAddr, h, i)
-createMatrix3(addr, arrsAddr, h, i) ->
-    createMatrix4(setArr(arrsAddr, i, addr), addr, arrsAddr, h, i)
-createMatrix4(true, addr, arrsAddr, h, i) -> createMatrix2(arrsAddr, h, i + 1) | i < h - 1
-createMatrix4(true, addr, arrsAddr, h, i) -> arrsAddr | i >= h - 1
+createMatrix1 :: Int -> Int -> Int -> Int
+createMatrix2 :: Int -> Int -> Int -> Int -> Int
+createMatrix3 :: Int -> Int -> Int -> Int -> Int -> Int
+createMatrix4 :: Bool -> Int -> Int -> Int -> Int -> Int -> Int
+createMatrix(w, h) -> createMatrix1(createArray(h), w, h)
+createMatrix1(arrsAddr, w, h) -> createMatrix2(arrsAddr, w, h, 0)
+createMatrix2(arrsAddr, w, h, i) -> createMatrix3(createArray(w), arrsAddr, w, h, i) | i < h
+createMatrix3(addr, arrsAddr, w, h, i) ->
+    createMatrix4(setArr(arrsAddr, i, addr), addr, arrsAddr, w, h, i)
+createMatrix4(true, addr, arrsAddr, w, h, i) -> createMatrix2(arrsAddr, w, h, i + 1)
+createMatrix2(arrsAddr, w, h, i) -> arrsAddr | i >= h
 
 /* Get matrix width */
 getMatrixWidth :: Int -> Int
-getMatrixWidth(addr) -> getArrSize(addr)
+getMatrixWidth(addr) -> getArrSize(getArr(addr, 0))
 
 /* Get matrix height */
 getMatrixHeight :: Int -> Int
-getMatrixHeight(addr) -> getArrSize(getArr(addr, 0))
+getMatrixHeight(addr) -> getArrSize(addr)
 
 /* Get element from matrix */
 getMatrix :: Int -> Int -> Int -> Int
 getMatrix1 :: Int -> Int -> Int -> Int -> Int -> Int
 getMatrix(addr, x, y) -> getMatrix1(addr, getMatrixWidth(addr), getMatrixHeight(addr), x, y)
 getMatrix1(addr, width, height, x, y) ->
-    getArr(getArr(addr, x), y) | 0 <= x /\ x < width /\ 0 <= y /\ y < height
+    getArr(getArr(addr, y), x) | 0 <= x /\ x < width /\ 0 <= y /\ y < height
 
 /* Set element in matrix */
 setMatrix :: Int -> Int -> Int -> Int -> Bool
@@ -38,17 +38,17 @@ setMatrix1 :: Int -> Int -> Int -> Int -> Int -> Int -> Bool
 setMatrix(addr, x, y, val) ->
     setMatrix1(addr, getMatrixWidth(addr), getMatrixHeight(addr), x, y, val)
 setMatrix1(addr, width, height, x, y, val) ->
-    setArr(getArr(addr, x), y, val) | 0 <= x /\ x < width /\ 0 <= y /\ y < height
+    setArr(getArr(addr, y), x, val) | 0 <= x /\ x < width /\ 0 <= y /\ y < height
 
 /* Fill Matrix */
 fillMatrix :: Int -> Int -> Bool
 fillMatrix1 :: Int -> Int -> Int -> Int -> Bool
 fillMatrix2 :: Int -> Int -> Int -> Int -> Bool -> Bool
-fillMatrix(addr, val) -> fillMatrix1(addr, val, getMatrixWidth(addr), 0)
-fillMatrix1(addr, val, width, i) ->
-    fillMatrix2(addr, val, width, i, fillArray(getArr(addr, i), val)) | i < width
-fillMatrix2(addr, val, width, i, true) -> fillMatrix1(addr, val, width, i + 1)
-fillMatrix1(addr, val, width, i) -> true | i >= width
+fillMatrix(addr, val) -> fillMatrix1(addr, val, getMatrixHeight(addr), 0)
+fillMatrix1(addr, val, height, i) ->
+    fillMatrix2(addr, val, height, i, fillArray(getArr(addr, i), val)) | i < height
+fillMatrix2(addr, val, height, i, true) -> fillMatrix1(addr, val, height, i + 1)
+fillMatrix1(addr, val, height, i) -> true | i >= height
 
 fillMatrixDiag :: Int -> Int -> Bool
 fillMatrixDiag1 :: Int -> Int -> Int -> Int -> Bool
@@ -63,7 +63,7 @@ fillMatrixDiag1(addr, val, width, i) -> true | i >= width
 matrixToTerm :: Int -> matrix
 matrixToTerm1 :: Int -> Int -> Int -> matrix -> matrix
 matrixToTerm2 :: Int -> Int -> Int -> matrix -> matrix
-matrixToTerm(addr) -> matrixToTerm1(addr, getMatrixWidth(addr), 0, rowNil)
+matrixToTerm(addr) -> matrixToTerm1(addr, getMatrixHeight(addr), 0, rowNil)
 matrixToTerm1(addr, size, i, m) ->
     row(arrayToList(getArr(addr, i)), matrixToTerm2(addr, size, i, m)) | i < size
 matrixToTerm2(addr, size, i, m) -> matrixToTerm1(addr, size, i + 1, m)
@@ -84,6 +84,6 @@ graphToMatrix3(consG(l, graph), addr, i, true) ->
     graphToMatrix4(graph, l, addr, i)
 graphToMatrix3(nilG, addr, i, true) -> addr
 graphToMatrix4(graph, cons(x, l), addr, i) ->
-    graphToMatrix5(graph, l, addr, i, setMatrix(addr, i, x, 1))
+    graphToMatrix5(graph, l, addr, i, setMatrix(addr, x, i, 1))
 graphToMatrix4(graph, nil, addr, i) -> graphToMatrix3(graph, addr, i + 1, true)
 graphToMatrix5(graph, l, addr, i, true) -> graphToMatrix4(graph, l, addr, i)

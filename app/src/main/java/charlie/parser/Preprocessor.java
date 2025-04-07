@@ -15,9 +15,21 @@ public class Preprocessor {
 
   private final Set<Path> includedFiles;
 
-  Preprocessor(String filename) {
-    this.source = Path.of(filename);
+  Preprocessor(Path file) {
+    this.source = file;
     this.includedFiles = new HashSet<>();
+  }
+
+  Preprocessor(String definition) {
+    try {
+      Path tmpFile = Files.createTempFile("cora_preprocessor_", ".lctrs");
+      Files.writeString(tmpFile, definition);
+
+      this.source = tmpFile;
+      this.includedFiles = new HashSet<>();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private void unpack(Path source, Path dest) throws IOException {

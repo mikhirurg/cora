@@ -1,5 +1,7 @@
 package memtrs.util.matrix;
 
+import java.util.Arrays;
+
 public class Matrix {
   private final int width;
   private final int height;
@@ -31,5 +33,13 @@ public class Matrix {
 
   public void set(int x, int y, int val) {
     matrix[y][x] = val;
+  }
+
+  public boolean equals(Object other) {
+    if (!(other instanceof Matrix otherMatrix)) {
+      return false;
+    }
+
+    return Arrays.deepEquals(matrix, otherMatrix.matrix);
   }
 }
