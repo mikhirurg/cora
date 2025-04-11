@@ -18,8 +18,13 @@ package cora.reduction;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.TreeMap;
 import java.util.Collections;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import charlie.util.Pair;
@@ -34,6 +39,8 @@ import cora.config.Settings;
 
 /** A Reducer is a straightforward class to reduce terms for a given TRS. */
 public class Reducer {
+  private static Random random = new Random();
+
   private ArrayList<ReduceObject> _components;
   private TreeMap<FunctionSymbol,Integer> _arity;
 
@@ -136,16 +143,70 @@ public class Reducer {
       case Settings.Strategy.Innermost:
         // we do nothing: the list is already ordered in (leftmost) innermost order
     }
-    // go over all the subterms and all the rules, and find the first matching one!
-    for (int i = 0; i < subterms.size(); i++) {
-      Term sub = subterms.get(i).fst();
-      Position pos = subterms.get(i).snd();
-      Term result = null;
-      for (int j = 0; j < _components.size() && result == null; j++) {
-        result = _components.get(j).apply(sub);
+
+    if (Settings.queryReductionMode() == Settings.ReductionMode.FirstMatch) {
+      // go over all the subterms and all the rules, and find the first matching one!
+
+      for (int i = 0; i < subterms.size(); i++) {
+        Term sub = subterms.get(i).fst();
+        Position pos = subterms.get(i).snd();
+        Term result = null;
+        for (int j = 0; j < _components.size() && result == null; j++) {
+          result = _components.get(j).apply(sub);
+        }
+        if (result != null) return s.replaceSubterm(pos, result);
       }
-      if (result != null) return s.replaceSubterm(pos, result);
+
+      return null;
+    } else if (Settings.queryReductionMode() == Settings.ReductionMode.Random) {
+
+      List<Pair<Position, Term>> matchingSubterms = new ArrayList<>();
+
+      for (int i = 0; i < subterms.size(); i++) {
+        Term sub = subterms.get(i).fst();
+        Position pos = subterms.get(i).snd();
+        Term result = null;
+        for (int j = 0; j < _components.size() && result == null; j++) {
+          result = _components.get(j).apply(sub);
+        }
+        if (result != null) {
+          matchingSubterms.add(new Pair<>(pos, result));
+        }
+      }
+      if (!matchingSubterms.isEmpty()) {
+        int reduction = random.nextInt(0, matchingSubterms.size());
+        //System.out.println(reduction);
+        return s.replaceSubterm(
+          matchingSubterms.get(reduction).fst(),
+          matchingSubterms.get(reduction).snd()
+        );
+      }
+      return null;
+    } else if (Settings.queryReductionMode() == Settings.ReductionMode.Parallel) {
+      try (ExecutorService executor = Executors.newFixedThreadPool(10)) {
+        List<Future<Pair<Position, Term>>> results = new ArrayList<>();
+        for (int i = 0; i < subterms.size(); i++) {
+          Term sub = subterms.get(i).fst();
+          Position pos = subterms.get(i).snd();
+          for (int j = 0; j < _components.size(); j++) {
+            int finalJ = j;
+            results.add(executor.submit(() ->
+              new Pair<>(pos, _components.get(finalJ).apply(sub))));
+          }
+        }
+        for (Future<Pair<Position, Term>> future : results) {
+          Pair<Position, Term> p = future.get();
+          if (p.snd() != null) {
+            // We need simultaneous replacement on n positions
+            s = s.replaceSubterm(p.fst(),p.snd());
+          }
+        }
+        return s;
+      } catch (ExecutionException | InterruptedException e) {
+        throw new RuntimeException(e);
+      }
     }
+
     return null;
   }
 

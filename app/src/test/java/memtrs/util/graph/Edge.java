@@ -1,6 +1,6 @@
 package memtrs.util.graph;
 
-public record Edge(Vertice from, Vertice to) {
+public record Edge(Vertex from, Vertex to) {
   @Override
   public String toString() {
     return from + " -> " + to;

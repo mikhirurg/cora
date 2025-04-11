@@ -42,4 +42,8 @@ public class Matrix {
 
     return Arrays.deepEquals(matrix, otherMatrix.matrix);
   }
+
+  public String toString() {
+    return Arrays.deepToString(matrix);
+  }
 }

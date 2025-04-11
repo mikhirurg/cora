@@ -1,14 +1,14 @@
 package memtrs.util.graph;
 
-public record Vertice(int id) implements Comparable<Vertice> {
+public record Vertex(int id) implements Comparable<Vertex> {
 
   @Override
   public boolean equals(Object other) {
-    if (!(other instanceof Vertice otherVertice)) {
+    if (!(other instanceof Vertex otherVertex)) {
       return false;
     }
 
-    return id == otherVertice.id;
+    return id == otherVertex.id;
   }
 
   @Override
@@ -17,7 +17,7 @@ public record Vertice(int id) implements Comparable<Vertice> {
   }
 
   @Override
-  public int compareTo(Vertice other) {
+  public int compareTo(Vertex other) {
     return Integer.compare(id, other.id);
   }
 }

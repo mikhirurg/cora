@@ -26,8 +26,11 @@ import java.util.Set;
  */
 public class Settings {
   public enum Strategy { Full , Innermost , CallByValue };
+  public enum ReductionMode { FirstMatch, Random, Parallel }
+
   private static Set<String> _disabled = Set.of();
   private static Strategy _strategy = Strategy.Full;
+  private static ReductionMode _reductionMode = ReductionMode.Random;
 
   /** The SMT solver that any SMT-encoding submodule should use. */
   public static SmtSolver smtSolver = new ProcessSmtSolver(ProcessSmtSolver.PhysicalSolver.Z3);
@@ -40,6 +43,10 @@ public class Settings {
   /** Use this to check the rewriting strategy the user wishes to consider by default. */
   public static Strategy queryRewritingStrategy() {
     return _strategy;
+  }
+
+  public static ReductionMode queryReductionMode() {
+    return _reductionMode;
   }
 
   /** Used to set up the SMT solver. */
@@ -55,5 +62,9 @@ public class Settings {
   /** Used to set up the strategy. */
   public static void setStrategy(Strategy strat) {
     _strategy = strat;
+  }
+
+  public static void setReductionMode(ReductionMode reductionMode) {
+    _reductionMode = reductionMode;
   }
 }

@@ -1,5 +1,7 @@
 package memtrs.util.graph;
 
+import com.sun.source.tree.Tree;
+
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -8,20 +10,20 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public class Graph {
-  private final Set<Vertice> vertices;
+  private final Set<Vertex> vertices;
   private final Set<Edge> edges;
 
-  public Graph(Set<Vertice> vertices, Set<Edge> edges) {
+  public Graph(Set<Vertex> vertices, Set<Edge> edges) {
     this.vertices = new TreeSet<>(vertices);
     this.edges = new HashSet<>(edges);
   }
 
   public Graph() {
-    this.vertices = new HashSet<>();
+    this.vertices = new TreeSet<>();
     this.edges = new HashSet<>();
   }
 
-  public Set<Vertice> getVertices() {
+  public Set<Vertex> getVertices() {
     return vertices;
   }
 
@@ -29,20 +31,20 @@ public class Graph {
     return edges;
   }
 
-  public List<Edge> getNeighbours(Vertice vertice) {
+  public List<Edge> getNeighbours(Vertex vertex) {
     return edges.stream()
-      .filter(edge -> edge.from().equals(vertice))
+      .filter(edge -> edge.from().equals(vertex))
       .sorted(Comparator.comparing(Edge::to))
       .collect(Collectors.toList());
   }
 
-  public void addEdge(Vertice from, Vertice to) {
+  public void addEdge(Vertex from, Vertex to) {
     vertices.add(from);
     vertices.add(to);
     edges.add(new Edge(from, to));
   }
 
-  public void addVertice(Vertice vertice) {
-    vertices.add(vertice);
+  public void addVertice(Vertex vertex) {
+    vertices.add(vertex);
   }
 }

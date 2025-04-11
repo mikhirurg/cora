@@ -24,3 +24,34 @@ floyd_warshall6(addr, size, i, j, k, true) -> floyd_warshall5(addr, size, i, j +
 floyd_warshall5(addr, size, i, j, k) -> floyd_warshall4(addr, size, i + 1, 0, k) | j >= size
 floyd_warshall4(addr, size, i, j, k) -> floyd_warshall3(addr, size, 0, j, k + 1) | i >= size
 floyd_warshall3(addr, size, i, j, k) -> addr | k >= size
+
+bnil :: blist
+bcons :: Bool -> blist -> blist
+
+floyd_warshall_par :: graph -> Int
+floyd_warshall_par1 :: Int -> blist -> Int
+floyd_warshall_par2 :: Int -> Int -> Bool -> blist -> Int
+floyd_warshall_par3 :: Int -> Int -> Int -> Int -> Int -> blist -> Int
+floyd_warshall_par4 :: Int -> Int -> Int -> Int -> Int -> blist -> Int
+floyd_warshall_par5 :: Int -> Int -> Int -> Int -> Int -> blist -> Int
+floyd_warshall_par6 :: Int -> Int -> Int -> Int -> Int -> blist -> Int
+floyd_warshall_par(g) -> floyd_warshall_par1(graphToMatrix(g, numNodes(g) * 100), bnil)
+floyd_warshall_par1(addr, l) ->
+    floyd_warshall_par2(addr, getMatrixWidth(addr), fillMatrixDiag(addr, 0), l)
+floyd_warshall_par2(addr, size, true, l) -> floyd_warshall_par3(addr, size, 0, 0, 0, l)
+floyd_warshall_par3(addr, size, i, j, k, l) ->
+    floyd_warshall_par4(addr, size, i, j, k, l) | k < size
+floyd_warshall_par4(addr, size, i, j, k, l) ->
+    floyd_warshall_par5(addr, size, i, j, k, l) | i < size
+floyd_warshall_par5(addr, size, i, j, k, l) ->
+    floyd_warshall_par6(addr, size, i, j, k,
+        bcons(setMatrix(addr, i, j,
+            min(getMatrix(addr, i, j),
+                getMatrix(addr, i, k) + getMatrix(addr, k, j))), l)) | j < size
+floyd_warshall_par6(addr, size, i, j, k, l) ->
+    floyd_warshall_par5(addr, size, i, j + 1, k, l)
+floyd_warshall_par5(addr, size, i, j, k, l) ->
+    floyd_warshall_par4(addr, size, i + 1, 0, k, l) | j >= size
+floyd_warshall_par4(addr, size, i, j, k, l) ->
+    floyd_warshall_par3(addr, size, 0, j, k + 1, l) | i >= size
+floyd_warshall_par3(addr, size, i, j, k, l) -> addr | k >= size
