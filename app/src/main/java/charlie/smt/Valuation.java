@@ -78,10 +78,6 @@ public class Valuation {
     return queryStringAssignment(x.queryIndex());
   }
 
-  public Map<Integer, Integer> queryAssignment(AVar x) {
-    return queryArrayAssignment(x.queryIndex());
-  }
-
   /** Set a boolean variable to the given value. */
   public void setBool(int index, boolean value) {
     if (value) _trueBVars.add(index);

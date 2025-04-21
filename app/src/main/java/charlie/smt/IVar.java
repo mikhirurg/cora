@@ -60,8 +60,8 @@ public final class IVar extends IntegerExpression {
   public int compareTo(IntegerExpression other) {
     return switch (other) {
       case IValue v -> 1;
-      case Select select -> 1;
       case IVar x -> _index  - x.queryIndex();
+      case Get g -> compareTo(g.queryAddr()) <= 0 ? -1 : 1;
       case CMult cm -> compareTo(cm.queryChild()) <= 0 ? -1 : 1;
       case Addition a -> -1;
       case Multiplication m -> -1;

@@ -25,7 +25,7 @@ import java.lang.Comparable;
  */
 
 public sealed abstract class IntegerExpression implements Comparable<IntegerExpression>
-  permits IVar, IValue, Division, Modulo, CMult, Multiplication, Addition, Select {
+  permits IVar, IValue, Division, Modulo, CMult, Multiplication, Addition, Get {
 
   /**
    * This variable should be set to true in the constructor if the IntegerExpression is simplified.

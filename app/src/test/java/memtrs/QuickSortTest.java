@@ -1,6 +1,7 @@
 package memtrs;
 
 import charlie.terms.Term;
+import charlie.terms.TermFactory;
 import charlie.trs.TRS;
 import memtrs.util.MemTRSUtil;
 import org.junit.jupiter.api.Test;
@@ -34,12 +35,21 @@ public class QuickSortTest {
         test3(addr, true) -> arrayToList(addr)
         """
     );
+    for (int i : new int[] {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024}) {
+      for (int j = 0; j < 3; j++) {
+        int[] arr = MemTRSUtil.genRandomArray(i, -100, 100);
+        //System.out.println(Arrays.toString(arr));
 
-    int[] arr = MemTRSUtil.genRandomArray(10, -100, 100);
+        Term term = trs.lookupSymbol("test").apply(MemTRSUtil.arrayToListTerm(arr, trs));
+        Arrays.sort(arr);
 
-    Term term = MemTRSUtil.constructTerm("test(" + MemTRSUtil.arrayToListTerm(arr) + ")", trs);
+        long start = System.currentTimeMillis();
+        int[] arr2 = MemTRSUtil.termToArray(term, trs);
+        long end = System.currentTimeMillis();
+        System.out.println("n: " + i + ", i: " + (j + 1) + ", delta: " + (end - start));
 
-    Arrays.sort(arr);
-    assertArrayEquals(arr, MemTRSUtil.termToArray(term, trs));
+        assertArrayEquals(arr, arr2);
+      }
+    }
   }
 }

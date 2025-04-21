@@ -136,9 +136,7 @@ abstract sealed class Comparison extends Constraint permits Geq0, Is0, Neq0 {
       case Junction _ -> -1;
       case Iff _ -> -1;
       case EqS _ -> -1;
-      case EqA _ -> -1;
       case UneqS _ -> -1;
-      case UneqA _ -> -1;
     };
   }
 }

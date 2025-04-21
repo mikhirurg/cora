@@ -7,6 +7,7 @@ import charlie.terms.TheoryFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MemReducer implements ReduceObject {
 
@@ -23,7 +24,27 @@ public class MemReducer implements ReduceObject {
       (t.queryArgument(1) instanceof IntegerValue);
   }
 
-  private static final Map<Integer, Integer> MEMORY = new HashMap<>();
+  public static final Map<Integer, Integer> MEMORY = new ConcurrentHashMap<>();
+
+  public static int GET(int addr) {
+    if (MEMORY.containsKey(addr)) {
+      return MEMORY.get(addr);
+    } else {
+      int randVal = random.nextInt();
+      MEMORY.put(addr, randVal);
+      return randVal;
+    }
+  }
+
+  public static boolean SET(int addr, int val) {
+    if (addr >= 0) {
+      MEMORY.put(addr, val);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   private static final Random random = new Random();
 
   private boolean checkIfSet(Term t) {
@@ -56,22 +77,11 @@ public class MemReducer implements ReduceObject {
       return TheoryFactory.createValue(true);
     } else if (checkIfGet(t)) {
       int agr1 = ((IntegerValue) t.queryArgument(1)).getInt();
-      if (MEMORY.containsKey(agr1)) {
-        return TheoryFactory.createValue(MEMORY.get(agr1));
-      } else {
-        int randVal = random.nextInt();
-        MEMORY.put(agr1, randVal);
-        return TheoryFactory.createValue(randVal);
-      }
+      return TheoryFactory.createValue(GET(agr1));
     } else if (checkIfSet(t)) {
       int agr1 = ((IntegerValue) t.queryArgument(1)).getInt();
       int agr2 = ((IntegerValue) t.queryArgument(2)).getInt();
-      if (agr1 >= 0) {
-        MEMORY.put(agr1, agr2);
-        return TheoryFactory.createValue(true);
-      } else {
-        return TheoryFactory.createValue(false);
-      }
+      return TheoryFactory.createValue(SET(agr1, agr2));
     }
     return null;
   }

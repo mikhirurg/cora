@@ -1,0 +1,9 @@
+#include preproc/stdlib/kernel.lctrs
+
+test :: Int -> Int
+test1 :: Int -> Bool -> Int
+test2 :: Int -> Bool -> Int
+test(n) -> test1(n, SET(0, 0))
+test1(n, true) -> test2(n, true)
+test2(n, true) -> test2(n + 1, SET(0, n * n)) | GET(0) < 100
+test2(n, true) -> n | GET(0) >= 100

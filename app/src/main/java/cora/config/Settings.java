@@ -29,8 +29,8 @@ public class Settings {
   public enum ReductionMode { FirstMatch, Random, Parallel }
 
   private static Set<String> _disabled = Set.of();
-  private static Strategy _strategy = Strategy.Full;
-  private static ReductionMode _reductionMode = ReductionMode.Random;
+  private static Strategy _strategy = Strategy.CallByValue;
+  private static ReductionMode _reductionMode = ReductionMode.FirstMatch;
 
   /** The SMT solver that any SMT-encoding submodule should use. */
   public static SmtSolver smtSolver = new ProcessSmtSolver(ProcessSmtSolver.PhysicalSolver.Z3);

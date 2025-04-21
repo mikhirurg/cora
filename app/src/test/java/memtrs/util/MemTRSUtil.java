@@ -2,7 +2,10 @@ package memtrs.util;
 
 import charlie.reader.CoraInputReader;
 import charlie.terms.Term;
+import charlie.terms.TermFactory;
+import charlie.terms.TheoryFactory;
 import charlie.trs.TRS;
+import charlie.types.TypeFactory;
 import cora.config.Settings;
 import cora.reduction.Reducer;
 import memtrs.util.graph.Graph;
@@ -12,7 +15,6 @@ import memtrs.util.matrix.Matrix;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public class MemTRSUtil {
 
@@ -21,7 +23,7 @@ public class MemTRSUtil {
 
   public static Settings.Strategy STRATEGY = Settings.Strategy.CallByValue;
 
-  private static Random random = new Random();
+  private static Random random = new Random(1337);
 
   public static Term reduceToNF(Term start, TRS trs, Settings.Strategy strategy) {
     Settings.Strategy oldStrategy = Settings.queryRewritingStrategy();
@@ -77,7 +79,7 @@ public class MemTRSUtil {
     return arr;
   }
 
-  public static String arrayToListTerm(int[] arr) {
+  public static String arrayToListTermString(int[] arr) {
     StringBuilder builder = new StringBuilder();
     for (int j : arr) {
       builder.append("cons(")
@@ -87,6 +89,16 @@ public class MemTRSUtil {
     builder.append("nil");
     builder.append(")".repeat(arr.length));
     return builder.toString();
+  }
+
+  public static Term arrayToListTerm(int[] arr, TRS trs) {
+    Term list = trs.lookupSymbol("nil");
+    for (int i = arr.length - 1; i >= 0; i--) {
+      list = trs.lookupSymbol("cons")
+        .apply(TheoryFactory.createValue(arr[i]))
+        .apply(list);
+    }
+    return list;
   }
 
   public static int[] genRandomArray(int size, int min, int max) {
@@ -162,7 +174,7 @@ public class MemTRSUtil {
         arr[i] = graph.getNeighbours(v).get(i).to().id();
       }
       builder.append("consG(");
-      builder.append(arrayToListTerm(arr));
+      builder.append(arrayToListTermString(arr));
       builder.append(", ");
     }
     builder.append("nilG")

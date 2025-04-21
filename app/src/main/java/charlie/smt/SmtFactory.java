@@ -83,6 +83,11 @@ public class SmtFactory {
     return new Modulo(arg1, arg2);
   }
 
+  public static IntegerExpression createGet(IntegerExpression arg) {
+    if (arg == null) throw new NullStorageException("Get", "argument");
+    return new Get(arg);
+  }
+
   /** Creates a string variable with an index that has not yet been used. */
   public static SVar createStringVariable(SmtProblem problem) {
     return problem.createStringVariable();
@@ -230,32 +235,6 @@ public class SmtFactory {
     if (a == null) throw new NullStorageException("Iff", "left argument");
     if (b == null) throw new NullStorageException("Iff", "right argument");
     return new Iff(a, b);
-  }
-
-  public static Select createSelect(ArrayExpression array, IntegerExpression index) {
-    if (array == null) throw new NullStorageException("Select", "array argument");
-    if (index == null) throw new NullStorageException("Select", "index argument");
-    return new Select(array, index);
-  }
-
-  public static Store createStore(ArrayExpression array, IntegerExpression index,
-                                  IntegerExpression value) {
-    if (array == null) throw new NullStorageException("Store", "array argument");
-    if (index == null) throw new NullStorageException("Store", "index argument");
-    if (value == null) throw new NullStorageException("Store", "value argument");
-    return new Store(array, index, value);
-  }
-
-  public static EqA createEqual(ArrayExpression left, ArrayExpression right) {
-    if (left == null) throw new NullStorageException("Equal", "left argument");
-    if (right == null) throw new NullStorageException("Equal", "right argument");
-    return new EqA(left, right);
-  }
-
-  public static UneqA createUnequal(ArrayExpression left, ArrayExpression right) {
-    if (left == null) throw new NullStorageException("Distinct", "left argument");
-    if (right == null) throw new NullStorageException("Distinct", "right argument");
-    return new UneqA(left, right);
   }
 }
 

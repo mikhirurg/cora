@@ -5,7 +5,7 @@
  in compliance with the License.
  You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+ http://www.apache.org/licenses/LICENSE-2.0
 
  Unless required by applicable law or agreed to in writing, software distributed under the
  License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
@@ -15,18 +15,24 @@
 
 package cora.reduction;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import charlie.exceptions.IndexingException;
 import charlie.util.Pair;
 import charlie.terms.Term;
 import charlie.terms.Variable;
@@ -37,28 +43,41 @@ import charlie.trs.TRS;
 import charlie.trs.TRS.RuleScheme;
 import cora.config.Settings;
 
-/** A Reducer is a straightforward class to reduce terms for a given TRS. */
+/**
+ * A Reducer is a straightforward class to reduce terms for a given TRS.
+ */
 public class Reducer {
   private static Random random = new Random();
 
   private ArrayList<ReduceObject> _components;
-  private TreeMap<FunctionSymbol,Integer> _arity;
+  private TreeMap<FunctionSymbol, Integer> _arity;
 
   public Reducer(TRS trs) {
     _components = new ArrayList<ReduceObject>();
-    _arity = new TreeMap<FunctionSymbol,Integer>();
+    _arity = new TreeMap<FunctionSymbol, Integer>();
     for (int i = 0; i < trs.querySchemeCount(); i++) {
       switch (trs.queryScheme(i)) {
-        case RuleScheme.Mem: _components.add(new MemReducer()); break;
-        case RuleScheme.Eta: _components.add(new EtaReducer()); break;
-        case RuleScheme.Beta: _components.add(new BetaReducer()); break;
-        case RuleScheme.Calc: _components.add(new CalcReducer()); break;
+        case RuleScheme.Mem:
+          _components.add(new MemReducer());
+          break;
+        case RuleScheme.Eta:
+          _components.add(new EtaReducer());
+          break;
+        case RuleScheme.Beta:
+          _components.add(new BetaReducer());
+          break;
+        case RuleScheme.Calc:
+          _components.add(new CalcReducer());
+          break;
       }
     }
     for (int i = 0; i < trs.queryRuleCount(); i++) {
       Rule rule = trs.queryRule(i);
       _components.add(new RuleReducer(rule));
-      if (!rule.queryLeftSide().isFunctionalTerm()) { _arity = null; break; }
+      if (!rule.queryLeftSide().isFunctionalTerm()) {
+        _arity = null;
+        break;
+      }
       FunctionSymbol f = rule.queryLeftSide().queryRoot();
       int k = rule.queryLeftSide().numberArguments();
       if (!_arity.containsKey(f) || _arity.get(f) > k) _arity.put(f, k);
@@ -70,7 +89,7 @@ public class Reducer {
    * such position exists.
    */
   public Position leftmostInnermostRedexPosition(Term s) {
-    Pair<Term,Position> p = s.findSubterm((sub,pos) -> {
+    Pair<Term, Position> p = s.findSubterm((sub, pos) -> {
       for (int j = 0; j < _components.size(); j++) {
         if (_components.get(j).applicable(sub)) return true;
       }
@@ -80,7 +99,9 @@ public class Reducer {
     return p.snd();
   }
 
-  /** This returns true if FV(t) contains a binder variable. */
+  /**
+   * This returns true if FV(t) contains a binder variable.
+   */
   private boolean hasBinder(Term t) {
     for (Variable x : t.vars()) {
       if (x.isBinderVariable()) return true;
@@ -92,9 +113,9 @@ public class Reducer {
    * This function checks if the given term may be reduced at the root using call-by-value
    * reduction.  This is the case if:
    * - this term does not freely contain any binder variables (in CBV reduction we may never
-   *   reduce between a term and its binder)
+   * reduce between a term and its binder)
    * - all its strict subterms either are variables, are abstractions, freely contain a binder
-   *   variable, or have a form f(s1,...,sn) where f is a constructor or n < arity(f)
+   * variable, or have a form f(s1,...,sn) where f is a constructor or n < arity(f)
    */
   private boolean cbvReductionOK(Term t) {
     if (hasBinder(t)) return false;
@@ -112,12 +133,50 @@ public class Reducer {
       FunctionSymbol root = sub.queryRoot();
       if (root.isTheorySymbol()) {
         if (!root.queryType().isArrowType()) return false;
-      }
-      else if (_arity.containsKey(root)) {
+      } else if (_arity.containsKey(root)) {
         if (sub.numberArguments() >= _arity.get(root)) return false;
       }
     }
     return true;
+  }
+
+  private boolean isPrefix(List<String> a, List<String> b) {
+    if (a.size() > b.size()) {
+      return false;
+    }
+    for (int i = 0; i < a.size(); i++) {
+      if (!a.get(i).equals(b.get(i))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private List<Position> getArgsPositions(Term t) {
+    List<Pair<Term, Position>> subterms = t.querySubterms().reversed();
+    List<Position> children = new ArrayList<>();
+
+    List<String> parentPos = List.of(subterms.getFirst().toString().split("\\."));
+    parentPos = parentPos.subList(0, parentPos.size() - 1);
+    for (int i = 1; i < subterms.size(); i++) {
+      List<String> childPos = List.of(subterms.get(i).snd().toString().split("\\."));
+      childPos = childPos.subList(0, childPos.size() - 1);
+      if (childPos.size() == parentPos.size() + 1 && isPrefix(parentPos, childPos)) {
+        children.add(subterms.get(i).snd());
+      }
+    }
+
+    return children;
+  }
+
+  private List<Position> findInTerm(Term t, String name) {
+    List<Position> positions = new ArrayList<>();
+    for (Pair<Term, Position> subterm : t.querySubterms()) {
+      if (subterm.fst().queryRoot().toString().equals(name)) {
+        positions.add(subterm.snd());
+      }
+    }
+    return positions;
   }
 
   /**
@@ -129,7 +188,7 @@ public class Reducer {
     // shuffle the list of all rules and rule schemes to get some randomness
     Collections.shuffle(_components);
     // handle the strategy by deciding on the (order of the) list of positions
-    List<Pair<Term,Position>> subterms = s.querySubterms();
+    List<Pair<Term, Position>> subterms = s.querySubterms();
     switch (Settings.queryRewritingStrategy()) {
       case Settings.Strategy.Full:
         // for full rewriting, any redex is valid, so we just consider a random order
@@ -175,7 +234,6 @@ public class Reducer {
       }
       if (!matchingSubterms.isEmpty()) {
         int reduction = random.nextInt(0, matchingSubterms.size());
-        //System.out.println(reduction);
         return s.replaceSubterm(
           matchingSubterms.get(reduction).fst(),
           matchingSubterms.get(reduction).snd()
@@ -183,25 +241,61 @@ public class Reducer {
       }
       return null;
     } else if (Settings.queryReductionMode() == Settings.ReductionMode.Parallel) {
-      try (ExecutorService executor = Executors.newFixedThreadPool(10)) {
-        List<Future<Pair<Position, Term>>> results = new ArrayList<>();
-        for (int i = 0; i < subterms.size(); i++) {
-          Term sub = subterms.get(i).fst();
-          Position pos = subterms.get(i).snd();
-          for (int j = 0; j < _components.size(); j++) {
-            int finalJ = j;
-            results.add(executor.submit(() ->
-              new Pair<>(pos, _components.get(finalJ).apply(sub))));
+      boolean isReduced = false;
+
+      if (!s.queryRoot().toString().equals("GET") && !s.queryRoot().toString().equals("SET")) {
+        for (Position pos : Stream.concat(findInTerm(s, "GET").stream(),
+          findInTerm(s, "SET").stream()).toList()) {
+          Term sub = s.querySubterm(pos);
+          Term result = null;
+          for (int j = 0; j < _components.size() && result == null; j++) {
+            result = _components.get(j).apply(sub);
+          }
+          if (result != null) {
+            s = s.replaceSubterm(pos, result);
+            isReduced = true;
           }
         }
+      }
+
+      try (ExecutorService executor = Executors.newCachedThreadPool()) {
+        List<Future<Pair<Position, Term>>> results = new ArrayList<>();
+        for (Pair<Term, Position> pair : subterms) {
+          Term sub = pair.fst();
+          Position pos = pair.snd();
+          results.add(executor.submit(() -> {
+            Term result = null;
+            for (int j = 0; j < _components.size() && result == null; j++) {
+              result = _components.get(j).apply(sub);
+            }
+            return new Pair<>(pos, result);
+          }));
+        }
+
         for (Future<Pair<Position, Term>> future : results) {
           Pair<Position, Term> p = future.get();
           if (p.snd() != null) {
-            // We need simultaneous replacement on n positions
-            s = s.replaceSubterm(p.fst(),p.snd());
+            if (s.queryPositions(false).contains(p.fst())) {
+              s = s.replaceSubterm(p.fst(), p.snd());
+            }
+            isReduced = true;
           }
         }
-        return s;
+
+        executor.shutdown();
+        try {
+          if (!executor.awaitTermination(800, TimeUnit.MICROSECONDS)) {
+            executor.shutdownNow();
+          }
+        } catch (InterruptedException e) {
+          executor.shutdownNow();
+        }
+
+        if (isReduced) {
+          return s;
+        } else {
+          return null;
+        }
       } catch (ExecutionException | InterruptedException e) {
         throw new RuntimeException(e);
       }

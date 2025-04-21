@@ -154,6 +154,7 @@ class TermTyper {
         else if (hasInputSort(TypeFactory.boolSort, expected)) yield TheoryFactory.xorSymbol;
         else yield TheoryFactory.intDistinctSymbol;
       }
+      case "GET" -> TheoryFactory.getSymbol;
       default -> null;
     };
     if (ret == null) { // this shouldn't happen: it's been created by the CoraParser
@@ -446,6 +447,9 @@ class TermTyper {
    */
   private Term makeApplication(Token token, ParserTerm apphead, ImmutableList<ParserTerm> args,
                                Type expected, boolean typeShouldBeDerivable) {
+    if (apphead.token().getText().equals("GET")) {
+      return makeGetApplication(token, args, expected);
+    }
     switch (apphead) {
       case CalcSymbol(Token t, String name):
         // minus can be used either with 1 or 2 arguments as syntactic sugar
@@ -519,6 +523,26 @@ class TermTyper {
     // create a fake term of the right type
     Term start = TermFactory.createConstant(head, type);
     return TermFactory.createApp(start, parts);
+  }
+
+  private Term makeGetApplication(Token token, ImmutableList<ParserTerm> args, Type expected) {
+    if (args.size() == 0) return makeCalculationSymbol(token, "GET", expected);
+    ArrayList<Term> targs = new ArrayList<>();
+    for (int i = 0; i < args.size(); i++) {
+      targs.add(makeTerm(args.get(i), TypeFactory.intSort, true));
+    }
+    if (args.size() == 1) {
+      Term child = targs.get(0);
+      return confirmType(token, TheoryFactory.getSymbol.apply(child), expected);
+    }
+    storeError("Arity error: GET can be used with only 1 argument, but here it occurs " +
+      "with " + args.size() + ".", token);
+    Type type = expected == null ? TypeFactory.intSort : expected;
+    for (int i = targs.size()-1; i >= 0; i--) {
+      type = TypeFactory.createArrow(targs.get(i).queryType(), type);
+    }
+    Term fakehead = TermFactory.createConstant("GET", type);
+    return TermFactory.createApp(fakehead,targs);
   }
 
   /**
