@@ -1,0 +1,14 @@
+#include ../mem_ds/array.lctrs
+
+/* Binary Search */
+binsearch :: Int -> Int -> Int
+binsearch1 :: Int -> Int -> Int -> Int -> Int
+binsearch2 :: Int -> Int -> Int -> Int -> Int -> Int
+binsearch3 :: Int -> Int -> Int -> Int -> Int -> Int -> Int
+binsearch(addr, x) -> binsearch1(addr, x, 0, getArrSize(addr) - 1)
+binsearch1(addr, x, l, r) -> binsearch2(addr, x, l, r, (l + r) / 2) | l <= r
+binsearch1(addr, x, l, r) -> -1 | l > r
+binsearch2(addr, x, l, r, mid) -> binsearch3(addr, x, l, r, mid, getArr(addr, mid))
+binsearch3(addr, x, l, r, mid, midVal) -> binsearch1(addr, x, l, mid - 1) | x < midVal
+binsearch3(addr, x, l, r, mid, midVal) -> binsearch1(addr, x, mid + 1, r) | x > midVal
+binsearch3(addr, x, l, r, mid, midVal) -> mid | x = midVal

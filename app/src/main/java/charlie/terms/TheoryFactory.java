@@ -131,7 +131,7 @@ public class TheoryFactory {
   public static final CalculationSymbol modSymbol = new CalculationConstant("%",
     binaryIntOperatorType, Kind.MOD, Associativity.ASSOC_NONE, CalculationSymbol.INFIX_DIVMOD);
 
-  public static final CalculationSymbol getSymbol = new CalculationConstant("GET",
+  public static final CalculationSymbol getSymbol = new CalculationConstant("GET ",
     TypeFactory.createArrow(TypeFactory.intSort, TypeFactory.intSort), Kind.GET,
     Associativity.NOT_INFIX, CalculationSymbol.INFIX_NONE);
 

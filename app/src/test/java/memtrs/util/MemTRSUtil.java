@@ -23,7 +23,8 @@ public class MemTRSUtil {
 
   public static Settings.Strategy STRATEGY = Settings.Strategy.CallByValue;
 
-  private static Random random = new Random(1337);
+  public static Random random = new Random(1337);
+  //private static Random random = new Random();
 
   public static Term reduceToNF(Term start, TRS trs, Settings.Strategy strategy) {
     Settings.Strategy oldStrategy = Settings.queryRewritingStrategy();
@@ -45,6 +46,15 @@ public class MemTRSUtil {
     Term t = reduceToNF(intTerm, trs, STRATEGY);
     try {
       return Integer.parseInt(t.toString());
+    } catch (NumberFormatException e) {
+      return null;
+    }
+  }
+
+  public static Boolean termToBool(Term boolTerm, TRS trs) {
+    Term t = reduceToNF(boolTerm, trs, STRATEGY);
+    try {
+      return Boolean.parseBoolean(t.toString());
     } catch (NumberFormatException e) {
       return null;
     }
@@ -108,6 +118,10 @@ public class MemTRSUtil {
     }
 
     return arr;
+  }
+
+  public static int[] genRandomUniqueArray(int size, int min, int max) {
+    return random.ints(min, max).distinct().limit(size).toArray();
   }
 
   public static Matrix termToMatrix(Term matrixTerm, TRS trs) {

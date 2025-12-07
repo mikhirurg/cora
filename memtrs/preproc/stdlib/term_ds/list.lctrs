@@ -21,6 +21,26 @@ getl :: Int -> list -> Int
 getl(n, cons(m, l)) -> m | n = 0
 getl(n, cons(m, l)) -> getl(n-1, l) | n > 0
 
+/* cons(getl(n, nil), l) -> l */
+
+/* Swap elements in the list */
+swapl :: Int -> Int -> list -> list
+swapl1 :: Int -> Int -> Int -> Int -> list -> list
+swapl(x, y, l) -> swapl1(x, y, getl(x, l), getl(y, l), l)
+swapl1(x, y, v1, v2, l) -> setl(y, v1, setl(x, v2, l))
+
+/* Concat two lists */
+concatl :: list -> list -> list
+concatl(nil, l) -> l
+concatl(l, nil) -> l
+concatl(cons(v, l1), l2) -> cons(v, concatl(l1, l2))
+
+/* Sublist */
+sublist :: list -> Int -> Int -> list
+sublist(lst, l, r) -> nil | l >= r
+sublist(cons(x, lst), l, r) -> sublist(lst, l - 1, r - 1) | l < r /\ l > 0
+sublist(cons(x, lst), l, r) -> cons(x, sublist(lst, l, r - 1)) | l < r /\ l = 0 /\ r > 0
+
 /* genList */
 genList :: Int -> list
 genList(n) -> nil | n = 0

@@ -102,9 +102,16 @@ class SMTLibResponseHandler {
     if (varname.charAt(0) == 'b') kind = 1;
     else if (varname.charAt(0) == 'i') kind = 2;
     else if (varname.charAt(0) == 's') kind = 3;
+    else if (varname.startsWith("MEM")) kind = 4;
     else return;
     int index;
-    try { index = Integer.parseInt(varname.substring(1)); }
+    try {
+      if (kind != 4) {
+        index = Integer.parseInt(varname.substring(1));
+      } else {
+        index = Integer.parseInt(varname.substring(varname.indexOf("MEM") + 3));
+      }
+    }
     catch (NumberFormatException e) { return; }
 
     if (kind == 1) {
@@ -123,9 +130,10 @@ class SMTLibResponseHandler {
           val.setInt(index, -k);
         }
       }
-    }
-    else {
+    } else if (kind == 3) {
       if (result instanceof SExpression.StringConstant(String c)) val.setString(index, c);
+    } else {
+      if (result instanceof SExpression.Numeral(int i)) val.setMem(index, i);
     }
   }
 }

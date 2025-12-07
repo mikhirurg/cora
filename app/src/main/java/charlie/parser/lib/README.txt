@@ -24,7 +24,7 @@ following public classes for lexing:
   Moreover, it is intended that the user can add additional features to a lexer essentially through
   the Decorator pattern: a number of extending classes is defined, which take a Lexer as argument
   and themselves implement the interface.  To gereate a token, they will use the underlying lexer,
-  but may alter or discard the resulting token.  For example, they may omit tokens until they get
+  but may alter or discard the resulting token.  For example, they may omit tokens until they select
   one that is not whitespace, or combine strings together.  The LexerFactory can be used to create
   a number of such combinations, and users can also add their own features.
   

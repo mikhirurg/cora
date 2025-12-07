@@ -18,6 +18,8 @@ package charlie.solvesmt;
 import charlie.smt.Conjunction;
 import charlie.smt.Constraint;
 import charlie.smt.SmtProblem;
+import cora.config.Settings;
+import cora.reduction.MemReducer;
 
 import java.util.ArrayList;
 
@@ -27,8 +29,8 @@ import java.util.ArrayList;
  * <p>The main method to be called is {@link #buildSmtlibString }. </p>
  */
 class SMTLibString {
-  public enum Version { V25   , V26   }
-  public enum Logic   { QFLIA , QFNIA , QFSNIA }
+  public enum Version { V25   , V26, V27   }
+  public enum Logic   { QFALIA , QFANIA , QFASNIA }
 
   private Version _version;
   private Logic _logic;
@@ -43,14 +45,15 @@ class SMTLibString {
     return switch (version) {
       case V25 -> "2.5";
       case V26 -> "2.6";
+      case V27 -> "2.7";
     };
   }
 
   public static String logicToString(Logic logic) {
     return switch (logic) {
-      case QFLIA -> "QF_LIA";
-      case QFNIA -> "QF_NIA";
-      case QFSNIA -> "QF_SNIA";
+      case QFALIA -> "QF_ALIA";
+      case QFANIA -> "QF_ANIA";
+      case QFASNIA -> "QF_ASNIA";
     };
   }
 
@@ -60,8 +63,8 @@ class SMTLibString {
    * arithmetic would suffice.
    */
   public static Logic getLogic(SmtProblem problem) {
-    if (problem.numberStringVariables() > 0) return Logic.QFSNIA;
-    else return Logic.QFNIA;
+    if (problem.numberStringVariables() > 0) return Logic.QFASNIA;
+    else return Logic.QFANIA;
   }
 
   private String setVersionString() {
@@ -83,6 +86,26 @@ class SMTLibString {
     // Create the SMTLIB file header.
     ret.append(this.setVersionString()).append(System.lineSeparator());
     ret.append(this.setLogicString(logic)).append(System.lineSeparator());
+
+    ret.append("(set-option :smt.arith.random_initial_value true)").append(System.lineSeparator());
+    for (int i = 0; i < Settings.getMemMaxSize(); i++) {
+      ret.append("(declare-fun MEM").append(i).append("() Int)").append(System.lineSeparator());
+    }
+    ret.append("(declare-const MEM (Array Int Int))").append(System.lineSeparator());
+
+    for (int i = 0; i < Settings.getMemMaxSize(); i++) {
+      ret.append("(assert (= (select MEM ").append(i).append(") ")
+        .append("MEM").append(i).append("))")
+        .append(System.lineSeparator());
+    }
+
+    for (int i = 0; i < Settings.getMemMaxSize(); i++) {
+      ret.append("(assert (exists ((")
+        .append("MEM_V").append(i).append(" Int)) ")
+        .append("(= MEM").append(i).append(" ")
+        .append("MEM_V").append(i).append(")))")
+        .append(System.lineSeparator());
+    }
 
     // Next, we collect all booleans and integer definitions.
     for (int i = 1; i <= boolCounter; i++) {

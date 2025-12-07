@@ -21,18 +21,30 @@ createArray4(arrAddr, addr, size, true) -> createArray3(arrAddr, addr, size)
 
 /* ACCESS Array element */
 /* addr -> index -> value */
+
+/*
 getArr :: Int -> Int -> Int
 getArr1 :: Int -> Int -> Int -> Int
 getArr(addr, i) -> getArr1(addr, i, GET(addr))
 getArr1(addr, i, size) -> GET(addr + i + 1) | i < size
+*/
+
+getArr :: Int -> Int -> Int
+getArr(addr, i) -> GET(addr + i + 1) | i < GET(addr)
+
 
 /* SET Array element */
 /* addr -> index -> value -> is successful? */
+/*
 setArr :: Int -> Int -> Int -> Bool
 setArr1 :: Int -> Int -> Int -> Int -> Bool
 setArr(addr, i, value) -> setArr1(addr, i, value, GET(addr))
 setArr1(addr, i, value, size) -> SET(addr + i + 1, value) | i < size
 setArr1(addr, i, value, size) -> false | i >= size
+*/
+setArr :: Int -> Int -> Int -> Bool
+setArr(addr, i, value) -> SET(addr + i + 1, value) | i < GET(addr)
+setArr(addr, i, value) -> false | i >= GET(addr)
 
 /* Get Array size */
 getArrSize :: Int -> Int
@@ -49,6 +61,7 @@ fillArray2(addr, val, i, size, true) -> fillArray1(addr, val, i + 1, size)
 
 /* Swap Array elements */
 /* addr -> i1 -> i2 -> Bool */
+/*
 swapArr :: Int -> Int -> Int -> Bool
 swapArr1 :: Int -> Int -> Int -> Int -> Bool
 swapArr2 :: Int -> Int -> Int -> Int -> Int -> Bool
@@ -60,6 +73,16 @@ swapArr1(addr, i1, i2, size) ->
 swapArr2(addr, i1, i2, val1, val2) -> swapArr3(SET(addr + i2 + 1, val1), SET(addr + i1 + 1, val2))
 swapArr3(status1, status2) -> true | status1 /\ status2
 swapArr3(status1, status2) -> false | not(status1 /\ status2)
+*/
+swapArr :: Int -> Int -> Int -> Bool
+swapArr1 :: Int -> Int -> Int -> Int -> Int -> Bool
+swapArr2 :: Bool -> Bool -> Bool
+swapArr(addr, i1, i2) -> false | (i1 >= GET(addr)) \/ (i2 >= GET(addr))
+swapArr(addr, i1, i2) ->
+    swapArr1(addr, i1, i2, GET(addr + i1 + 1), GET(addr + i2 + 1)) | (i1 < GET(addr)) /\ (i2 < GET(addr))
+swapArr1(addr, i1, i2, val1, val2) -> swapArr2(SET(addr + i2 + 1, val1), SET(addr + i1 + 1, val2))
+swapArr2(status1, status2) -> true | status1 /\ status2
+swapArr2(status1, status2) -> false | not(status1 /\ status2)
 
 /* Array to List */
 arrayToList :: Int -> list

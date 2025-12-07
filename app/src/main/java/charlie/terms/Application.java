@@ -288,9 +288,9 @@ class Application extends TermInherit {
     ret.remove(ret.size()-1); // remove the empty position
     for (int i = 0; i < _args.size(); i++) {
       List<Pair<Term,Position>> subposses = _args.get(i).querySubterms();
-      for (int j = 0; j < subposses.size(); j++) {
-        ret.add(new Pair<Term,Position>(subposses.get(j).fst(),
-                                        new ArgumentPos(i+1, subposses.get(j).snd())));
+      for (Pair<Term, Position> subposs : subposses) {
+        ret.add(new Pair<Term, Position>(subposs.fst(),
+          new ArgumentPos(i + 1, subposs.snd())));
       }
     }
     ret.add(new Pair<Term,Position>(this, Position.empty));
@@ -375,11 +375,20 @@ class Application extends TermInherit {
    */
   public String match(Term other, Substitution gamma) {
     if (other == null) throw new NullPointerException("Argument term in Application::match");
+    StringBuilder builder = new StringBuilder();
     if (!other.isApplication()) {
-      return other.toString() + " does not instantiate " + toString() + " (not an application).";
+        //builder.append(other.toString())
+        //.append(" does not instantiate ")
+        //.append(toString())
+        //.append(" (not an application).");
+      return builder.toString();
     }   
     if (other.numberArguments() < _args.size()) {
-      return other.toString() + " does not instantiate " + toString() + " (too few arguments).";
+        //builder.append(other.toString())
+        //.append(" does not instantiate ")
+        //.append(toString())
+        //.append(" (too few arguments).");
+      return builder.toString();
     }   
     int i = other.numberArguments();
     int j = numberArguments();

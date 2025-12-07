@@ -85,7 +85,7 @@ public class SmtFactory {
 
   public static IntegerExpression createGet(IntegerExpression arg) {
     if (arg == null) throw new NullStorageException("Get", "argument");
-    return new Get(arg);
+    return new Select(arg);
   }
 
   /** Creates a string variable with an index that has not yet been used. */

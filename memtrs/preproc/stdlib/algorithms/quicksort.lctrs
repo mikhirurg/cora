@@ -18,10 +18,24 @@ qSortPartition1(addr, l, r, i) ->
     qSortPartition4(addr, l, r, i, swapArr(addr, i, r - 1)) | l >= r - 1
 qSortPartition4(addr, l, r, i, true) -> i
 
+partition :: Int -> Int -> Int -> Int
+partition1 :: Int -> Int -> Int -> Int -> Int -> Int -> Int
+partition2 :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int
+partition3 :: Int -> Int -> Int -> Int -> Int -> Int -> Bool -> Int
+partition4 :: Int -> Bool -> Int
+partition(addr, l, r) -> partition1(addr, l, r, getArr(addr, r), l, l)
+partition1(addr, l, r, pivot, i, j) -> partition2(addr, l, r, pivot, i, j, getArr(addr, j)) | j < r
+partition2(addr, l, r, pivot, i, j, jVal) ->
+    partition3(addr, l, r, pivot, i, j, swapArr(addr, i, j)) | jVal <= pivot
+partition2(addr, l, r, pivot, i, j, jVal) -> partition1(addr, l, r, pivot, i, j + 1) | jVal > pivot
+partition3(addr, l, r, pivot, i, j, true) -> partition1(addr, l, r, pivot, i + 1, j + 1)
+partition1(addr, l, r, pivot, i, j) -> partition4(i, swapArr(addr, i, r)) | j >= r
+partition4(i, true) -> i
+
 qSort :: Int -> Int -> Int -> Bool
 qSort1 :: Int -> Int -> Int -> Int -> Bool
 qSort2 :: Bool -> Bool -> Bool
-qSort(addr, l, r) -> true | r - l <= 1
-qSort(addr, l, r) -> qSort1(addr, l, r, qSortPartition(addr, l, r)) | r - l > 1
-qSort1(addr, l, r, q) -> qSort2(qSort(addr, l, q), qSort(addr, q + 1, r))
+qSort(addr, l, r) -> true | r - l <= 0
+qSort(addr, l, r) -> qSort1(addr, l, r, partition(addr, l, r)) | r - l > 0
+qSort1(addr, l, r, q) -> qSort2(qSort(addr, l, q - 1), qSort(addr, q + 1, r))
 qSort2(left, right) -> left /\ right

@@ -135,17 +135,32 @@ class Var extends LeafTermInherit implements Variable, MetaVariable {
     if (gamma == null) throw new NullPointerException("Substitution in Var::match");
 
     Term previous = gamma.get(this);
+
+    StringBuilder builder = new StringBuilder();
     
     if (previous == null) {
       if (!other.queryType().equals(queryType())) {
-        return "Variable " + _name + " has a different type from " + other.toString() + ".";
+        builder.append("Variable ")
+          .append(_name)
+          .append(" has a different type from ")
+          .append(other.toString())
+          .append(".");
+        return builder.toString();
       }
       gamma.extend(this, other);
       return null;
     }   
     else if (previous.equals(other)) return null;
-    else return "Variable " + _name + " mapped both to " + previous.toString() + " and to " +
-      other.toString() + ".";
+    else {
+      builder.append("Variable ")
+        .append(_name)
+        .append(" mapped both to ")
+        .append(previous.toString())
+        .append(" and to ")
+        .append(other.toString())
+        .append(".");
+      return builder.toString();
+    }
   }
 
   /** Two variables are equal if and only if they are the same object. */

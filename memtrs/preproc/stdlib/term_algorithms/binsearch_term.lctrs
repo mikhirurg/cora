@@ -1,0 +1,14 @@
+#include ../term_ds/list.lctrs
+
+/* Binary Search */
+binsearch_term :: list -> Int -> Int
+binsearch_term1 :: list -> Int -> Int -> Int -> Int
+binsearch_term2 :: list -> Int -> Int -> Int -> Int -> Int
+binsearch_term3 :: list -> Int -> Int -> Int -> Int -> Int -> Int
+binsearch_term(lst, x) -> binsearch_term1(lst, x, 0, listLen(lst) - 1)
+binsearch_term1(lst, x, l, r) -> binsearch_term2(lst, x, l, r, (l + r) / 2) | l <= r
+binsearch_term1(lst, x, l, r) -> -1 | l > r
+binsearch_term2(lst, x, l, r, mid) -> binsearch_term3(lst, x, l, r, mid, getl(mid, lst))
+binsearch_term3(lst, x, l, r, mid, midVal) -> binsearch_term1(lst, x, l, mid - 1) | x < midVal
+binsearch_term3(lst, x, l, r, mid, midVal) -> binsearch_term1(lst, x, mid + 1, r) | x > midVal
+binsearch_term3(lst, x, l, r, mid, midVal) -> mid | x = midVal

@@ -449,6 +449,7 @@ class TermTyper {
                                Type expected, boolean typeShouldBeDerivable) {
     if (apphead.token().getText().equals("GET")) {
       return makeGetApplication(token, args, expected);
+      //return makeStandardApplication(token, apphead, args, expected, typeShouldBeDerivable);
     }
     switch (apphead) {
       case CalcSymbol(Token t, String name):

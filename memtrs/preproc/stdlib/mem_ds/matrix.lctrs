@@ -39,6 +39,7 @@ setMatrix(addr, x, y, val) ->
     setMatrix1(addr, getMatrixWidth(addr), getMatrixHeight(addr), x, y, val)
 setMatrix1(addr, width, height, x, y, val) ->
     setArr(getArr(addr, y), x, val) | 0 <= x /\ x < width /\ 0 <= y /\ y < height
+setMatrix1(addr, width, height, x, y, val) -> false | 0 > x \/ x >= width \/ 0 > y \/ y >= height
 
 /* Fill Matrix */
 fillMatrix :: Int -> Int -> Bool

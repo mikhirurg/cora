@@ -44,6 +44,8 @@ abstract class TermInherit implements Term {
   private ReplaceableList _freeReplaceables;
   private ReplaceableList _boundVariables;
 
+  private final TermPrinter termPrinter = new TermPrinter(Set.of());
+
   /**
    * Sets the set of all meta-variables and free variables occurring in this term to vs, and the
    * set of bound variables to empty.
@@ -332,7 +334,7 @@ abstract class TermInherit implements Term {
 
   /** This method returns a string representation of the current term. */
   public final String toString() {
-    return (new TermPrinter(Set.of())).print(this);
+    return termPrinter.print(this);
   }
 
   // the following functions are all default implementations of interface functions, to be

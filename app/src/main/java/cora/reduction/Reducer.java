@@ -20,19 +20,15 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import charlie.exceptions.IndexingException;
 import charlie.util.Pair;
 import charlie.terms.Term;
 import charlie.terms.Variable;
@@ -47,14 +43,17 @@ import cora.config.Settings;
  * A Reducer is a straightforward class to reduce terms for a given TRS.
  */
 public class Reducer {
-  private static Random random = new Random();
+  private static final Random random = new Random();
 
-  private ArrayList<ReduceObject> _components;
+  private final ArrayList<ReduceObject> _components;
   private TreeMap<FunctionSymbol, Integer> _arity;
+  private final HashSet<FunctionSymbol> _arityKeySet;
+
 
   public Reducer(TRS trs) {
-    _components = new ArrayList<ReduceObject>();
-    _arity = new TreeMap<FunctionSymbol, Integer>();
+    _components = new ArrayList<>();
+    _arity = new TreeMap<>();
+    _arityKeySet = new HashSet<>();
     for (int i = 0; i < trs.querySchemeCount(); i++) {
       switch (trs.queryScheme(i)) {
         case RuleScheme.Mem:
@@ -80,7 +79,10 @@ public class Reducer {
       }
       FunctionSymbol f = rule.queryLeftSide().queryRoot();
       int k = rule.queryLeftSide().numberArguments();
-      if (!_arity.containsKey(f) || _arity.get(f) > k) _arity.put(f, k);
+      if (!_arity.containsKey(f) || _arity.get(f) > k) {
+        _arity.put(f, k);
+        _arityKeySet.add(f);
+      }
     }
   }
 
@@ -126,6 +128,11 @@ public class Reducer {
 
     while (!parts.isEmpty()) {
       Term sub = parts.pop();
+
+      if (sub.queryRoot().queryName().equals("GET ")) {
+        return false;
+      }
+
       if (sub.isVariable() || sub.isValue()) continue;
       for (int i = 1; i <= sub.numberArguments(); i++) parts.add(sub.queryArgument(i));
       if (sub.isAbstraction() || hasBinder(sub)) continue;
@@ -133,7 +140,7 @@ public class Reducer {
       FunctionSymbol root = sub.queryRoot();
       if (root.isTheorySymbol()) {
         if (!root.queryType().isArrowType()) return false;
-      } else if (_arity.containsKey(root)) {
+      } else if (_arityKeySet.contains(root)) {
         if (sub.numberArguments() >= _arity.get(root)) return false;
       }
     }
@@ -188,16 +195,17 @@ public class Reducer {
     // shuffle the list of all rules and rule schemes to get some randomness
     Collections.shuffle(_components);
     // handle the strategy by deciding on the (order of the) list of positions
-    List<Pair<Term, Position>> subterms = s.querySubterms();
+    Stream<Pair<Term, Position>> subterms = s.querySubterms().stream();
     switch (Settings.queryRewritingStrategy()) {
       case Settings.Strategy.Full:
         // for full rewriting, any redex is valid, so we just consider a random order
-        Collections.shuffle(subterms);
+        //Collections.shuffle(subterms);
+        //subterms
         break;
       case Settings.Strategy.CallByValue:
         // for call-by-value rewriting, the strict subterms of the redex must be term values
         subterms =
-          subterms.stream().filter(p -> cbvReductionOK(p.fst())).collect(Collectors.toList());
+          subterms.filter(p -> cbvReductionOK(p.fst()));
         break;
       case Settings.Strategy.Innermost:
         // we do nothing: the list is already ordered in (leftmost) innermost order
@@ -206,9 +214,9 @@ public class Reducer {
     if (Settings.queryReductionMode() == Settings.ReductionMode.FirstMatch) {
       // go over all the subterms and all the rules, and find the first matching one!
 
-      for (int i = 0; i < subterms.size(); i++) {
-        Term sub = subterms.get(i).fst();
-        Position pos = subterms.get(i).snd();
+      for (Pair<Term, Position> subterm : subterms.toList()) {
+        Term sub = subterm.fst();
+        Position pos = subterm.snd();
         Term result = null;
         for (int j = 0; j < _components.size() && result == null; j++) {
           result = _components.get(j).apply(sub);
@@ -221,9 +229,9 @@ public class Reducer {
 
       List<Pair<Position, Term>> matchingSubterms = new ArrayList<>();
 
-      for (int i = 0; i < subterms.size(); i++) {
-        Term sub = subterms.get(i).fst();
-        Position pos = subterms.get(i).snd();
+      for (Pair<Term, Position> subterm : subterms.toList()) {
+        Term sub = subterm.fst();
+        Position pos = subterm.snd();
         Term result = null;
         for (int j = 0; j < _components.size() && result == null; j++) {
           result = _components.get(j).apply(sub);
@@ -243,34 +251,20 @@ public class Reducer {
     } else if (Settings.queryReductionMode() == Settings.ReductionMode.Parallel) {
       boolean isReduced = false;
 
-      if (!s.queryRoot().toString().equals("GET") && !s.queryRoot().toString().equals("SET")) {
-        for (Position pos : Stream.concat(findInTerm(s, "GET").stream(),
-          findInTerm(s, "SET").stream()).toList()) {
-          Term sub = s.querySubterm(pos);
-          Term result = null;
-          for (int j = 0; j < _components.size() && result == null; j++) {
-            result = _components.get(j).apply(sub);
-          }
-          if (result != null) {
-            s = s.replaceSubterm(pos, result);
-            isReduced = true;
-          }
-        }
-      }
-
-      try (ExecutorService executor = Executors.newCachedThreadPool()) {
+      try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
         List<Future<Pair<Position, Term>>> results = new ArrayList<>();
-        for (Pair<Term, Position> pair : subterms) {
-          Term sub = pair.fst();
-          Position pos = pair.snd();
-          results.add(executor.submit(() -> {
-            Term result = null;
-            for (int j = 0; j < _components.size() && result == null; j++) {
-              result = _components.get(j).apply(sub);
-            }
-            return new Pair<>(pos, result);
-          }));
-        }
+        subterms.forEach(subterm -> {
+            Term sub = subterm.fst();
+            Position pos = subterm.snd();
+            results.add(executor.submit(() -> {
+              Term result = null;
+              for (int j = 0; j < _components.size() && result == null; j++) {
+                result = _components.get(j).apply(sub);
+              }
+              return new Pair<>(pos, result);
+            }));
+          }
+        );
 
         for (Future<Pair<Position, Term>> future : results) {
           Pair<Position, Term> p = future.get();

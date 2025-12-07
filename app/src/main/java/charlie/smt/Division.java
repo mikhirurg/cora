@@ -105,7 +105,7 @@ public final class Division extends IntegerExpression {
     return switch (other) {
       case IValue v -> 1;
       case IVar x -> 1;
-      case Get g -> 1;
+      case Select g -> 1;
       case CMult cm -> compareTo(cm.queryChild()) <= 0 ? -1 : 1;
       case Addition a -> 1;
       case Multiplication m -> 1;

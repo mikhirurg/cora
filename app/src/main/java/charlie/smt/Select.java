@@ -2,10 +2,10 @@ package charlie.smt;
 
 import cora.reduction.MemReducer;
 
-public final class Get extends IntegerExpression {
+public final class Select extends IntegerExpression {
   private final IntegerExpression _addr;
 
-  Get(IntegerExpression addr) {
+  Select(IntegerExpression addr) {
     _addr = addr;
     checkSimplified();
   }
@@ -15,12 +15,20 @@ public final class Get extends IntegerExpression {
   }
 
   public int evaluate(Valuation val) {
-    return MemReducer.GET(_addr.evaluate(val));
+    //return MemReducer.GET(_addr.evaluate(val));
+    Integer result = null;
+    if (val != null) {
+      result = val.queryArrayAssignment(_addr.evaluate(val));
+    }
+    if (result == null) {
+      result = MemReducer.GET(_addr.evaluate(val));
+    }
+    return result;
   }
 
   @Override
   public void addToSmtString(StringBuilder builder) {
-    builder.append("(MEM ");
+    builder.append("(select MEM ");
     _addr.addToSmtString(builder);
     builder.append(")");
   }
@@ -29,7 +37,7 @@ public final class Get extends IntegerExpression {
   public int compareTo(IntegerExpression other) {
     return switch (other) {
       case IValue _ -> 1;
-      case Get get -> _addr.compareTo(get.queryAddr());
+      case Select select -> _addr.compareTo(select.queryAddr());
       default -> -1;
     };
   }
@@ -38,7 +46,7 @@ public final class Get extends IntegerExpression {
   public IntegerExpression simplify() {
     if (_simplified) return this;
     IntegerExpression a = _addr.simplify();
-    return new Get(a);
+    return new Select(a);
   }
 
   private void checkSimplified() {

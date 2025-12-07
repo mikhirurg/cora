@@ -50,11 +50,11 @@ public class IExpPrinter {
       case Multiplication m: printMultiplication(m, builder); break;
       case CMult c: printCMult(c, builder); break;
       case Addition a: printAddition(a, builder); break;
-      case Get g: printGet(g, builder); break;
+      case Select g: printGet(g, builder); break;
     }
   }
 
-  private void printGet(Get g, StringBuilder builder) {
+  private void printGet(Select g, StringBuilder builder) {
     builder.append("MEM[");
     print(g.queryAddr());
     builder.append("]");

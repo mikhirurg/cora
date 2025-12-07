@@ -25,12 +25,15 @@ import java.util.Set;
  * settings that are not set), and can be queried from any class outside of the cora library.
  */
 public class Settings {
+
   public enum Strategy { Full , Innermost , CallByValue };
   public enum ReductionMode { FirstMatch, Random, Parallel }
 
+  private static int MEM_MAX_SIZE = 2000;
+
   private static Set<String> _disabled = Set.of();
   private static Strategy _strategy = Strategy.CallByValue;
-  private static ReductionMode _reductionMode = ReductionMode.FirstMatch;
+  private static ReductionMode _reductionMode = ReductionMode.Parallel;
 
   /** The SMT solver that any SMT-encoding submodule should use. */
   public static SmtSolver smtSolver = new ProcessSmtSolver(ProcessSmtSolver.PhysicalSolver.Z3);
@@ -66,5 +69,13 @@ public class Settings {
 
   public static void setReductionMode(ReductionMode reductionMode) {
     _reductionMode = reductionMode;
+  }
+
+  public static int getMemMaxSize() {
+    return MEM_MAX_SIZE;
+  }
+
+  public static void setMemMaxSize(int memMaxSize) {
+    MEM_MAX_SIZE = memMaxSize;
   }
 }

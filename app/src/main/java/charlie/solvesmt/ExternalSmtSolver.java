@@ -49,7 +49,7 @@ public class ExternalSmtSolver implements SmtSolver {
   private void createSmtFile(int numbool, int numint, int numstring,
                              Constraint constraint, SMTLibString.Logic logic) throws IOException {
     BufferedWriter writer = new BufferedWriter(new FileWriter("problem.smt2"));
-    SMTLibString file = new SMTLibString(SMTLibString.Version.V26);
+    SMTLibString file = new SMTLibString(SMTLibString.Version.V27);
     String stringOfFile = file.buildSmtlibString(numbool, numint, numstring, logic, constraint);
     writer.write(stringOfFile);
     writer.close();

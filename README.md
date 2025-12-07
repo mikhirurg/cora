@@ -120,8 +120,8 @@ We provided a docker file in the root of this artifact.
 In order to run ``cora`` from the docker image, please proceed as follows.
 
 - First make sure docker is properly installed on your system.
-  - You can get installation instructions for your system at
-  [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/).
+  - You can select installation instructions for your system at
+  [https://docs.docker.com/select-docker/](https://docs.docker.com/select-docker/).
 - The next step is to build the docker image. Proceed as follows:
 ```bash
   docker build --no-cache -t cora .

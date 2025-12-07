@@ -32,9 +32,10 @@ import charlie.smt.*;
 import charlie.util.ProcessCaller;
 import static charlie.solvesmt.SMTLibString.Version.V26;
 import static charlie.solvesmt.ProcessSmtSolver.PhysicalSolver.Z3;
+import static charlie.solvesmt.SMTLibString.Version.V27;
 
 public class ProcessSmtSolver implements SmtSolver {
-  public static int TIMEOUT = 10;
+  public static int TIMEOUT = 30;
 
   public enum PhysicalSolver {
     // Possible solvers supported by the process caller.
@@ -112,7 +113,7 @@ public class ProcessSmtSolver implements SmtSolver {
    */
   @Override
   public Answer checkSatisfiability(SmtProblem problem) {
-    SMTLibString file = new SMTLibString(V26);
+    SMTLibString file = new SMTLibString(V27);
     String stringOfSmtProblem = file.buildSmtlibString(problem);
     String smtResultString;
     try {
@@ -161,7 +162,7 @@ public class ProcessSmtSolver implements SmtSolver {
   @Override
   public boolean checkValidity(SmtProblem problem) {
 
-    SMTLibString file = new SMTLibString(V26);
+    SMTLibString file = new SMTLibString(V27);
     Constraint negated = SmtFactory.createNegation(problem.queryCombinedConstraint());
 
     String stringOfSmtProblem =

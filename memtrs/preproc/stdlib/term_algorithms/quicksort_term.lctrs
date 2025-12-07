@@ -1,0 +1,27 @@
+#include ../term_ds/list.lctrs
+
+/* Quick Sort */
+qSortPartition_term :: list -> Int -> Int -> list
+qSortPartition1_term :: list -> Int -> Int -> Int -> list
+qSortPartition2_term :: list -> Int -> Int -> Int -> Int -> Int -> list
+qSortPartition3_term :: list -> Int -> Int -> Int -> list
+qSortPartition4_term :: list -> Int -> Int -> Int -> list
+qSortPartition_term(lst, l, r) -> qSortPartition1_term(lst, l, r, l)
+qSortPartition1_term(lst, l, r, i) ->
+    qSortPartition2_term(lst, l, r, i, getl(l, lst), getl(r - 1, lst)) | l < r - 1
+qSortPartition2_term(lst, l, r, i, val1, val2) ->
+    qSortPartition3_term(swapl(i, l, lst), l, r, i) | val1 <= val2
+qSortPartition3_term(lst, l, r, i) -> qSortPartition1_term(lst, l + 1, r, i + 1)
+qSortPartition2_term(lst, l, r, i, val1, val2) ->
+    qSortPartition1_term(lst, l + 1, r, i) | val1 > val2
+qSortPartition1_term(lst, l, r, i) ->
+    qSortPartition4_term(swapl(i, r - 1, lst), l, r, i) | l >= r - 1
+qSortPartition4_term(lst, l, r, i) -> cons(i, lst)
+
+qSort_term :: list -> Int -> Int -> list
+qSort1_term :: list -> Int -> Int -> list -> list
+qSort_term(lst, l, r) -> lst | r - l <= 0
+qSort_term(lst, l, r) -> qSort1_term(lst, l, r, qSortPartition_term(lst, l, r)) | r - l > 0
+qSort1_term(lst1, l, r, cons(q, lst2)) ->
+    concatl(qSort_term(sublist(lst2, 0, q), 0, q),
+            qSort_term(sublist(lst2, q, r), 1, r - q))

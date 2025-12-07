@@ -1,9 +1,53 @@
+/* #include preproc/stdlib/term_algorithms/quicksort_term.lctrs */
 #include preproc/stdlib/kernel.lctrs
 
+start :: Int -> Int -> Int
+s :: Bool -> Bool -> Int
+t :: Bool -> Bool -> Int
+start(x, y) -> s(SET(0, x), SET(1, y))
+s(true, true) -> t(pow(0, 2), pow(1, 2))
+t(true, true) -> GET(0) + GET(1)
+
+pow :: Int -> Int -> Bool
+pow1 :: Int -> Int -> Int -> Bool
+pow2 :: Int -> Int -> Bool -> Int -> Bool
+pow3 :: Int -> Int -> Bool -> Int -> Bool
+pow(a, x) -> pow1(a, GET(a), x)
+pow1(a, v, x) -> pow2(a, v, SET(a, 1), x)
+pow2(a, v, true, x) -> pow3(a, v, SET(a, v * GET(a)), x - 1) | x > 0
+pow2(a, v, true, x) -> true | x <= 0
+pow3(a, v, true, x) -> pow2(a, v, true, x)
+
+/*
 test :: Int -> Int
 test1 :: Int -> Bool -> Int
-test2 :: Int -> Bool -> Int
+test2 :: Int -> Bool -> Bool -> Int
 test(n) -> test1(n, SET(0, 0))
-test1(n, true) -> test2(n, true)
-test2(n, true) -> test2(n + 1, SET(0, n * n)) | GET(0) < 100
-test2(n, true) -> n | GET(0) >= 100
+test1(n, true) -> test2(n, true, true)
+test2(n, true, true) -> test2(n + 1, SET(0, n * n), SET(1, n * n)) | GET(0) < 100 \/ GET(0) >= 100
+*/
+
+/*test2(n, true, true) -> n | GET(0) >= 100*/
+
+/*
+test :: Int -> Bool -> Int
+test(i, true) -> i
+
+test2 :: Bool -> Int -> Int
+test2(true, i) -> i
+*/
+
+/* cons(3, cons(2, cons(1, cons(4, nil))))
+randList1 :: list
+randList1 -> cons(-43, cons(85, cons(-55, cons(56, cons(-96, cons(88, cons(23, cons(8, cons(-51, cons(-72, cons(62, cons(38, cons(-45, cons(-76, cons(-19, cons(-47, cons(81, cons(66, cons(-49, cons(-84, cons(37, cons(-65, cons(41, cons(-41, cons(48, cons(-95, cons(75, cons(-32, cons(-50, cons(94, cons(37, cons(18, cons(43, cons(24, cons(17, cons(-17, cons(89, cons(-17, cons(30, cons(-9, cons(-97, cons(-53, cons(37, cons(-91, cons(67, cons(13, cons(12, cons(98, cons(63, cons(65, cons(-81, cons(-47, cons(-95, cons(11, cons(71, cons(-26, cons(-67, cons(-70, cons(-69, cons(4, cons(70, cons(21, cons(-86, cons(-95, cons(41, cons(25, cons(-85, cons(24, cons(-14, cons(92, cons(68, cons(19, cons(56, cons(97, cons(38, cons(98, cons(-37, cons(-48, cons(-86, cons(-84, cons(70, cons(1, cons(45, cons(17, cons(39, cons(93, cons(14, cons(-13, cons(52, cons(66, cons(8, cons(-9, cons(79, cons(-39, cons(-86, cons(11, cons(-62, cons(-67, cons(60, cons(-67, nil))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+
+randList2 :: list
+randList2 -> cons(-22, cons(54, cons(-97, cons(70, cons(13, cons(-98, cons(-57, cons(-48, cons(-6,
+cons(-82, nil))))))))))
+
+randList3 :: list
+randList3 -> cons(-65, cons(-29, cons(-27, cons(97, cons(76, nil)))))
+
+start_test :: list
+start_test -> qSort_term(randList1, 0, listLen(randList1)) */
+/* start_test -> sublist(randList3, 5, 5) */

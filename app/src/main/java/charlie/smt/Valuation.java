@@ -28,14 +28,14 @@ public class Valuation {
   private TreeSet<Integer> _trueBVars;
   private TreeMap<Integer,Integer> _iVarValues;
   private TreeMap<Integer,String> _sVarValues;
-  private TreeMap<Integer, Map<Integer, Integer>> _aVarValues;
+  private TreeMap<Integer, Integer> _MemValues;
 
   /** Creates a new valuation with all booleans set to false, and no integer/string values set. */
   public Valuation() {
     _trueBVars = new TreeSet<Integer>();
     _iVarValues = new TreeMap<Integer,Integer>();
     _sVarValues = new TreeMap<Integer,String>();
-    _aVarValues = new TreeMap<Integer, Map<Integer, Integer>>();
+    _MemValues = new TreeMap<Integer, Integer>();
   }
 
   /** Returns the valuation for the boolean variable with the given index */
@@ -55,11 +55,11 @@ public class Valuation {
     else return "";
   }
 
-  public Map<Integer, Integer> queryArrayAssignment(int index) {
-    if (_aVarValues.containsKey(index)) {
-      return _aVarValues.get(index);
+  public Integer queryArrayAssignment(int index) {
+    if (_MemValues.containsKey(index)) {
+      return _MemValues.get(index);
     } else {
-      return Map.of();
+      return 4242;
     }
   }
 
@@ -94,8 +94,8 @@ public class Valuation {
     _sVarValues.put(index, value);
   }
 
-  public void setArray(int index, Map<Integer, Integer> value) {
-    _aVarValues.put(index, value);
+  public void setMem(int index, Integer value) {
+    _MemValues.put(index, value);
   }
 
   /** Give a human-readable representation of the valuation, for use in debugging. */
@@ -111,9 +111,9 @@ public class Valuation {
     for (Integer i : _sVarValues.keySet()) {
       ret.append("  s" + i.toString() + " : " + _sVarValues.get(i).toString() + "\n");
     }
-    if (_aVarValues.size() > 0) ret.append("Array variables:");
-    for (Integer i : _aVarValues.keySet()) {
-      ret.append(" a" + i.toString() + " : " + _aVarValues.get(i).toString() + "\n");
+    if (_MemValues.size() > 0) ret.append("Array variables:");
+    for (Integer i : _MemValues.keySet()) {
+      ret.append(" a" + i.toString() + " : " + _MemValues.get(i).toString() + "\n");
     }
     return ret.toString();
   }
