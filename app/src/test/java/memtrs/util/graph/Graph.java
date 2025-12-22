@@ -1,8 +1,10 @@
 package memtrs.util.graph;
 
+import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.stream.file.FileSink;
 import org.graphstream.stream.file.FileSinkImages;
+import org.graphstream.stream.file.images.CustomResolution;
 import org.graphstream.stream.file.images.FileSinkImagesFactory;
 
 import java.io.IOException;
@@ -90,6 +92,9 @@ public class Graph {
         true
       );
     }
+    for (Node node : graph) {
+      node.setAttribute("ui.label", node.getId());
+    }
 
     return graph;
   }
@@ -98,11 +103,19 @@ public class Graph {
     FileSinkImages pic = FileSinkImages.createDefault();
     pic.setLayoutPolicy(FileSinkImages.LayoutPolicy.COMPUTED_FULLY_AT_NEW_IMAGE);
     pic.setQuality(FileSinkImages.Quality.HIGH);
+    int nodeDistance = 250;
+    pic.setResolution(new CustomResolution((int) Math.sqrt(vertices.size()) * nodeDistance,
+      (int) Math.sqrt(vertices.size()) * nodeDistance));
 
     org.graphstream.graph.Graph graph = convertToGSGraph();
-    graph.setAttribute("ui.stylesheet", "node { size: 30px; fill-color: blue, aquamarine; " +
+    graph.setAttribute("ui.stylesheet", "node { size: 40px; fill-color: blue, aquamarine; " +
       "fill-mode: " +
-      "gradient-diagonal1; } edge { size: 1.2px; arrow-size: 10px, 8px; stroke-width: 10px; }");
+      "gradient-diagonal1; text-mode: normal; text-color: black; text-alignment: center; " +
+      "text-style: bold; text-size: 14; } edge {" +
+      " " +
+      "size: 1.2px; arrow-size: 10px, 8px; " +
+      "stroke-width: 10px; " +
+      "}");
     pic.writeAll(graph, path.toString());
   }
 }

@@ -31,7 +31,7 @@ public class BFSTest {
     Graph graph = Graph.generateRandomGraph(nodes, edges);
 
     try {
-      graph.saveToImage(Path.of("n" + nodes + "_e" + edges + "_out.png"));
+      graph.saveToImage(Path.of("graph_images/n" + nodes + "_e" + edges + "_out.png"));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -64,6 +64,6 @@ public class BFSTest {
   }
 
   public static void main(String[] args) throws InterruptedException, InvocationTargetException {
-    mcBfsTest(20, 100);
+    mcBfsTest(100, 100);
   }
 }
