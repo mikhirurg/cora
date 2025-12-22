@@ -12,6 +12,10 @@ dependencies {
     // Development dependencies
     implementation("org.jetbrains:annotations:24.0.0")
     implementation("com.google.guava:guava:33.2.1-jre")
+    // https://mvnrepository.com/artifact/org.graphstream/gs-core
+    implementation("org.graphstream:gs-core:2.0")
+    // https://mvnrepository.com/artifact/org.graphstream/gs-ui-swing
+    implementation("org.graphstream:gs-ui-swing:2.0")
 
     // Testing dependencies
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")

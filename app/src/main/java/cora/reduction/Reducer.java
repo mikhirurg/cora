@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.Stack;
 import java.util.TreeMap;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
@@ -44,6 +45,7 @@ import cora.config.Settings;
  */
 public class Reducer {
   private static final Random random = new Random();
+  public static int totalParallelSteps = 0;
 
   private final ArrayList<ReduceObject> _components;
   private TreeMap<FunctionSymbol, Integer> _arity;
@@ -199,8 +201,7 @@ public class Reducer {
     switch (Settings.queryRewritingStrategy()) {
       case Settings.Strategy.Full:
         // for full rewriting, any redex is valid, so we just consider a random order
-        //Collections.shuffle(subterms);
-        //subterms
+        subterms = subterms.unordered();
         break;
       case Settings.Strategy.CallByValue:
         // for call-by-value rewriting, the strict subterms of the redex must be term values
@@ -229,7 +230,7 @@ public class Reducer {
 
       List<Pair<Position, Term>> matchingSubterms = new ArrayList<>();
 
-      for (Pair<Term, Position> subterm : subterms.toList()) {
+      for (Pair<Term, Position> subterm : subterms.unordered().toList()) {
         Term sub = subterm.fst();
         Position pos = subterm.snd();
         Term result = null;
@@ -286,6 +287,8 @@ public class Reducer {
         }
 
         if (isReduced) {
+          totalParallelSteps++;
+          //System.out.println(s);
           return s;
         } else {
           return null;

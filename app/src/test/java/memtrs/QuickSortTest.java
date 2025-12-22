@@ -4,6 +4,7 @@ import charlie.terms.Term;
 import charlie.terms.TheoryFactory;
 import charlie.trs.TRS;
 import cora.reduction.MemReducer;
+import cora.reduction.Reducer;
 import memtrs.util.MemTRSUtil;
 import org.junit.jupiter.api.Test;
 
@@ -161,6 +162,54 @@ public class QuickSortTest {
     assertArrayEquals(arr, arr2);
   }
 
+  public static void qSortTotalParallelStepsMem() {
+    TRS trs = MemTRSUtil.constructTRS(
+      "#include " + MEMTRS_STDLIB_PATH + "algorithms/quicksort.lctrs\n\n" +
+        """
+          test :: Int -> Bool
+          
+          test(addr) -> qSort(addr, 0, getArrSize(addr) - 1)
+          """
+    );
+    for (int i : new int[]{1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024}) {
+      //for (int i = 1; i < 2000; i += 10) {
+      for (int j = 0; j < 3; j++) {
+
+        Reducer.totalParallelSteps = 0;
+
+        MemReducer.resetMemory();
+
+        int size = i;
+
+        int[] arr = MemTRSUtil.genRandomArray(size, Integer.MIN_VALUE / 2, Integer.MAX_VALUE / 2);
+        System.out.println(Arrays.toString(arr));
+
+        MemReducer.SET(0, size + 2);
+        MemReducer.SET(1, size);
+        for (int k = 2; k < size + 2; k++) {
+          MemReducer.SET(k, arr[k - 2]);
+        }
+
+        Term term = trs.lookupSymbol("test").apply(TheoryFactory.createValue(1));
+        Arrays.sort(arr);
+
+        long start = System.currentTimeMillis();
+        Boolean b = MemTRSUtil.termToBool(term, trs);
+        long end = System.currentTimeMillis();
+        System.out.println("n: " + i + ", i: " + (j + 1) + ", delta: " + (end - start) + ", " +
+          "parallel rewrite steps: " + Reducer.totalParallelSteps);
+
+        int[] arr2 = new int[size];
+        for (int k = 2; k < size + 2; k++) {
+          arr2[k - 2] = MemReducer.GET(k);
+        }
+
+        assertEquals(true, b);
+        assertArrayEquals(arr, arr2);
+      }
+    }
+  }
+
   public static void qSortTimeBenchmarkList() {
     TRS trs = MemTRSUtil.constructTRS(
       """
@@ -239,13 +288,59 @@ public class QuickSortTest {
     assertArrayEquals(arr, arr2);
   }
 
+  public static void qSortTotalParallelStepsList() {
+    TRS trs = MemTRSUtil.constructTRS(
+      """
+        nil :: list
+        cons :: Int -> list -> list
+        
+        quicksort :: list -> list
+        quicksort(lst) -> qs(lst, nil)
+        
+        qs :: list -> list -> list
+        qs(nil, rest) -> rest
+        qs(cons(x, xs), rest) -> helper(x, xs, nil, nil, rest)
+        
+        helper :: Int -> list -> list -> list -> list -> list
+        helper(pivot, cons(x, xs), ys, zs, rest) -> helper(pivot, xs, cons(x, ys), zs, rest) | x < pivot
+        helper(pivot, cons(x, xs), ys, zs, rest) -> helper(pivot, xs, ys, cons(x, zs), rest) | x >= pivot
+        helper(pivot, nil, ys, zs, rest) -> qs(ys, cons(pivot, qs(zs, rest)))
+        """
+    );
+
+    for (int i : new int[]{1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024}) {
+      for (int j = 0; j < 3; j++) {
+
+        Reducer.totalParallelSteps = 0;
+
+        int[] arr = MemTRSUtil.genRandomArray(i, Integer.MIN_VALUE / 2, Integer.MAX_VALUE / 2);
+        System.out.println(Arrays.toString(arr));
+
+        Term term = trs.lookupSymbol("quicksort").apply(MemTRSUtil.arrayToListTerm(arr, trs));
+        Arrays.sort(arr);
+
+        long startTime = System.currentTimeMillis();
+
+        int[] arr2 = MemTRSUtil.termToArray(term, trs);
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("n: " + i + ", i: " + (j + 1) +
+          ", time delta: " + (endTime - startTime) +
+          ", parallel rewrite steps: " + Reducer.totalParallelSteps);
+        assertArrayEquals(arr, arr2);
+      }
+    }
+  }
+
   public static void main(String[] args) throws FileNotFoundException {
     // System.setOut(new PrintStream(new FileOutputStream("qsort_mem_experiments.txt")));
     // qSortBenchmark();
     // qSortBenchmark2();
     //qSortJFRBenchmarkMem(Integer.parseInt(args[0]));
     //qSortJFRBenchmarkList(Integer.parseInt(args[0]));
-    qSortTimeBenchmarkMem();
+    //qSortTimeBenchmarkMem();
     //qSortTimeBenchmarkList();
+    //qSortTotalParallelStepsMem();
+    qSortTotalParallelStepsList();
   }
 }
