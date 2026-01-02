@@ -1,0 +1,58 @@
+#include ../kernel.lctrs
+
+/* ===================== IN-MEM DS: QUEUE (Thread-Safe) ====================== */
+
+/* Create Queue */
+/* Arguments: Capacity */
+/* MEM LAYOUT: |<capacity>|<monitor>|<currSize>|...data...| */
+createQueue :: Int -> Int
+createQueue1 :: Int -> Int -> Int
+createQueue2 :: Int -> Int -> Bool -> Int
+createQueue3 :: Int -> Int -> Int -> Int
+createQueue4 :: Int -> Int -> Int -> Bool -> Int
+createQueue(cap) -> createQueue1(alloc(cap + 3), cap)
+createQueue1(addr, cap) -> createQueue2(addr, cap, SET(addr, cap))
+createQueue2(addr, cap, true) -> createQueue3(addr, addr + 1, cap + 2)
+createQueue3(queueAddr, addr, limit) ->
+    createQueue4(queueAddr, addr + 1, limit - 1, SET(addr, 0)) | limit > 0
+createQueue3(queueAddr, addr, limit) -> queueAddr | limit <= 0
+createQueue4(queueAddr, addr, limit, true) ->
+    createQueue3(queueAddr, addr, limit)
+
+/* Push element to the queue */
+push :: Int -> Int -> Bool
+push1 :: Int -> Int -> Bool -> Bool
+push2 :: Int -> Bool -> Bool
+push3 :: Int -> Bool -> Bool
+push(addr, element) ->
+    push1(addr, element, SET(addr + 1, 1)) | GET(addr + 1) = 0 /\ SET(addr + 1, 1)
+/* spin lock */
+push(addr, element) -> push(addr, element) | GET(addr + 1) = 1
+/* we insert a new element if there is space in the queue */
+push1(addr, element, true) -> push2(addr, SET(addr + 3 + GET(addr + 2), element))
+    | GET(addr + 2) < GET(addr)
+/* we can't insert the elem, so return null */
+push1(addr, element, true) -> false | GET(addr + 2) >= GET(addr)
+/* we increase the current size of the queue */
+push2(addr, true) -> push3(addr, SET(addr + 2, GET(addr + 2) + 1))
+/* release the lock */
+push3(addr, true) -> SET(addr + 1, 0)
+
+/* Pop element from the queue */
+pop :: Int -> Int
+pop1 :: Int -> Bool -> Int
+pop2 :: Int -> Int -> Int
+pop3 :: Int -> Int -> Bool -> Int
+pop4 :: Int -> Int -> Bool -> Int
+pop(addr) -> pop1(addr, SET(addr + 1, 1)) | GET(addr + 1) = 0 /\ SET(addr + 1, 1)
+/* spin lock */
+pop(addr) -> pop(addr) | GET(addr + 1) = 1
+/* we pop the element if there is at least one element in the queue */
+pop1(addr, true) -> pop2(addr, GET(addr + 2 + GET(addr + 2))) | GET(addr + 2) > 0
+/* we can't pop the element, so we return -1 */
+pop1(addr, true) -> pop3(addr, -1, true) | GET(addr + 2) <= 0
+/* decrease the size of the queue */
+pop2(addr, element) -> pop3(addr, element, SET(addr + 2, GET(addr + 2) - 1))
+/* release the lock */
+pop3(addr, element, true) -> pop4(addr, element, SET(addr + 1, 0))
+pop4(addr, element, true) -> element

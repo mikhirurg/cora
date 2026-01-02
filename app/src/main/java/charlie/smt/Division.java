@@ -93,6 +93,11 @@ public final class Division extends IntegerExpression {
     }
   }
 
+  @Override
+  public boolean containsMemoryUpdateOperation() {
+    return _numerator.containsMemoryUpdateOperation() && _denominator.containsMemoryUpdateOperation();
+  }
+
   public void addToSmtString(StringBuilder builder) {
     builder.append("(div ");
     _numerator.addToSmtString(builder);

@@ -128,5 +128,7 @@ public sealed abstract class IntegerExpression implements Comparable<IntegerExpr
   public final boolean equals(Object other) {
     return (other instanceof IntegerExpression) && compareTo((IntegerExpression)other) == 0;
   }
+
+  public abstract boolean containsMemoryUpdateOperation();
 }
 

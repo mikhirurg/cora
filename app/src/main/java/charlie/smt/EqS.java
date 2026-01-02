@@ -46,6 +46,11 @@ public final class EqS extends Constraint {
     return this;
   }
 
+  @Override
+  public boolean containsMemoryUpdateOperation() {
+    return false;
+  }
+
   /** Returns the negation of the current constraint (an inequality) */
   public UneqS negate() {
     return new UneqS(_left, _right);

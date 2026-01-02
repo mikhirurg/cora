@@ -40,7 +40,7 @@ public class QuickSortTest {
     Term term = trs.lookupSymbol("test").apply(MemTRSUtil.arrayToListTerm(arr, trs));
     Arrays.sort(arr);
 
-    int[] arr2 = MemTRSUtil.termToArray(term, trs);
+    int[] arr2 = MemTRSUtil.listTermToArray(term, trs);
 
     assertArrayEquals(arr, arr2);
   }
@@ -74,7 +74,7 @@ public class QuickSortTest {
         Arrays.sort(arr);
 
         long start = System.currentTimeMillis();
-        int[] arr2 = MemTRSUtil.termToArray(term, trs);
+        int[] arr2 = MemTRSUtil.listTermToArray(term, trs);
         long end = System.currentTimeMillis();
         System.out.println("n: " + i + ", i: " + (j + 1) + ", delta: " + (end - start));
 
@@ -245,7 +245,7 @@ public class QuickSortTest {
         long startTime = System.currentTimeMillis();
         long startMem = runtime.totalMemory() - runtime.freeMemory();
 
-        int[] arr2 = MemTRSUtil.termToArray(term, trs);
+        int[] arr2 = MemTRSUtil.listTermToArray(term, trs);
 
         long endMem = runtime.totalMemory() - runtime.freeMemory();
         long endTime = System.currentTimeMillis();
@@ -283,7 +283,7 @@ public class QuickSortTest {
     Term term = trs.lookupSymbol("quicksort").apply(MemTRSUtil.arrayToListTerm(arr, trs));
     Arrays.sort(arr);
 
-    int[] arr2 = MemTRSUtil.termToArray(term, trs);
+    int[] arr2 = MemTRSUtil.listTermToArray(term, trs);
 
     assertArrayEquals(arr, arr2);
   }
@@ -321,7 +321,7 @@ public class QuickSortTest {
 
         long startTime = System.currentTimeMillis();
 
-        int[] arr2 = MemTRSUtil.termToArray(term, trs);
+        int[] arr2 = MemTRSUtil.listTermToArray(term, trs);
 
         long endTime = System.currentTimeMillis();
         System.out.println("n: " + i + ", i: " + (j + 1) +

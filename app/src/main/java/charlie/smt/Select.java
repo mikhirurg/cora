@@ -49,6 +49,11 @@ public final class Select extends IntegerExpression {
     return new Select(a);
   }
 
+  @Override
+  public boolean containsMemoryUpdateOperation() {
+    return false;
+  }
+
   private void checkSimplified() {
     if (_addr instanceof IValue) return;
     _simplified = true;

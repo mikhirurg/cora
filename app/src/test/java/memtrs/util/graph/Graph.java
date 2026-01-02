@@ -9,6 +9,7 @@ import org.graphstream.stream.file.images.FileSinkImagesFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -31,7 +32,7 @@ public class Graph {
     this.edges = new HashSet<>();
   }
 
-  private static final Random random = new Random();
+  private static final Random random = new Random(1337);
 
   public static Graph generateRandomGraph(int nodes, int edges) {
     if (edges > nodes * nodes) {
@@ -42,15 +43,22 @@ public class Graph {
     for (int i = 0; i < nodes; i++) {
       graph.addVertice(new Vertex(i));
     }
-    int i = 0;
-    while (i < edges) {
-      Vertex u = new Vertex(random.nextInt(nodes));
-      Vertex v = new Vertex(random.nextInt(nodes));
-      if (!graph.getEdges().contains(new Edge(u, v))) {
-        graph.addEdge(u, v);
-        i++;
-      }
+
+    List<Edge> allEdgesList =
+      new java.util.ArrayList<>(graph.getVertices()
+        .stream()
+        .flatMap(u ->
+          graph.getVertices()
+            .stream()
+            .map(v -> new Edge(u, v))).toList());
+
+    Collections.shuffle(allEdgesList, random);
+    for (Edge edge : allEdgesList.subList(0, edges)) {
+      Vertex u = edge.from();
+      Vertex v = edge.to();
+      graph.addEdge(u, v);
     }
+
     return graph;
   }
 

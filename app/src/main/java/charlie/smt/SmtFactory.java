@@ -88,6 +88,12 @@ public class SmtFactory {
     return new Select(arg);
   }
 
+  public static Constraint createSet(IntegerExpression arg1, IntegerExpression arg2) {
+    if (arg1 == null) throw new NullStorageException("Set", "left argument");
+    if (arg2 == null) throw new NullStorageException("Set", "right argument");
+    return new Store(arg1, arg2);
+  }
+
   /** Creates a string variable with an index that has not yet been used. */
   public static SVar createStringVariable(SmtProblem problem) {
     return problem.createStringVariable();

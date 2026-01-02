@@ -76,6 +76,7 @@ public class ConstraintPrinter {
       case Iff i: printIff(i, builder); break;
       case EqS e: printEqS(e, builder); break;
       case UneqS u: printUneqS(u, builder); break;
+      case Store s: printSet(s, builder);
     }
   }
 
@@ -236,6 +237,13 @@ public class ConstraintPrinter {
     _stringPrinter.print(u.queryLeft(), builder);
     builder.append(" # ");
     _stringPrinter.print(u.queryRight(), builder);
+  }
+
+  private void printSet(Store s, StringBuilder builder) {
+    builder.append("MEM[");
+    _expPrinter.print(s.queryAddr());
+    builder.append("] = ");
+    _expPrinter.print(s.queryVal());
   }
 }
 

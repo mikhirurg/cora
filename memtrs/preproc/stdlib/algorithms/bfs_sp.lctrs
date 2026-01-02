@@ -15,7 +15,7 @@ mc_bfs1_sp(graph, start, addr) ->
     mc_bfs2_sp(graph, cons(start, nil), addr, fillArray(addr, -1), setArr(addr, start, 0))
 mc_bfs2_sp(graph, stk, addr, true, true) -> mc_bfs_parallel_sp(graph, stk, addr, nil)
 mc_bfs_parallel_sp(graph, cons(x1, stk), addr, l) ->
-    mc_bfs_parallel_sp(graph, stk, addr, cons(mc_bfs3_sp(graph, addr, x1, stk), l))
+    mc_bfs_parallel_sp(graph, stk, addr, cons(mc_bfs3_sp(graph, addr, x1, nil), l))
 mc_bfs_parallel_sp(graph, nil, addr, l) -> addr
 mc_bfs3_sp(graph, addr, x, stk) ->
     mc_bfs4_sp(graph, addr, x, stk, getg(x, graph))

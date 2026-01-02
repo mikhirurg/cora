@@ -131,6 +131,12 @@ public final class Multiplication extends IntegerExpression {
     return (new Multiplication(todo)).multiply(constant);
   }
 
+  @Override
+  public boolean containsMemoryUpdateOperation() {
+    return _children.stream().map(IntegerExpression::containsMemoryUpdateOperation)
+      .reduce(Boolean::logicalOr).orElse(false);
+  }
+
   public void addToSmtString(StringBuilder builder) {
     builder.append("(*");
     for (int i = 0; i < _children.size(); i++) {

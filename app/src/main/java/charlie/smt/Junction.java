@@ -109,7 +109,14 @@ abstract sealed class Junction extends Constraint permits Conjunction, Disjuncti
       case Iff _ -> -1; 
       case EqS _ -> -1; 
       case UneqS _ -> -1;
+      case Store _ -> -1;
     };
+  }
+
+  @Override
+  public boolean containsMemoryUpdateOperation() {
+    return _children.stream().map(Constraint::containsMemoryUpdateOperation)
+      .reduce(Boolean::logicalOr).orElse(false);
   }
 }
 

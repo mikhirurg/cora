@@ -207,6 +207,11 @@ public class TermSmtTranslator {
         assertArgumentCount(t, 1);
         yield new Exp.I(SmtFactory.createGet(translateIntegerExpression(t.queryArgument(1))));
       }
+      case CalculationSymbol.Kind.SET -> {
+        assertArgumentCount(t, 2);
+        yield new Exp.B(SmtFactory.createSet(translateIntegerExpression(t.queryArgument(1)),
+                                              translateIntegerExpression(t.queryArgument(2))));
+      }
       case CalculationSymbol.Kind.GREATER -> {
         assertArgumentCount(t, 2);
         yield new Exp.B(SmtFactory.createGreater(translateIntegerExpression(t.queryArgument(1)),

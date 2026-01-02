@@ -65,6 +65,17 @@ public class TermAnalyser {
       "not a supported theory sort.");
   }
 
+  public static boolean containsMemoryOperations(Term t) {
+    TermSmtTranslator translator = new TermSmtTranslator();
+    if (t.queryType().equals(TypeFactory.intSort)) {
+      return translator.translateIntegerExpression(t).containsMemoryUpdateOperation();
+    }
+    if (t.queryType().equals(TypeFactory.boolSort)) {
+      return translator.translateConstraint(t).containsMemoryUpdateOperation();
+    }
+    return false;
+  }
+
   /**
    * Given a term that is a calculation symbol applied to a number of values, this returns the
    * value it reduces to.  If the term has any other form, null is returned.

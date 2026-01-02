@@ -90,6 +90,11 @@ public final class Modulo extends IntegerExpression {
     }
   }
 
+  @Override
+  public boolean containsMemoryUpdateOperation() {
+    return _numerator.containsMemoryUpdateOperation() && _denominator.containsMemoryUpdateOperation();
+  }
+
   public void addToSmtString(StringBuilder builder) {
     builder.append("(mod ");
     _numerator.addToSmtString(builder);

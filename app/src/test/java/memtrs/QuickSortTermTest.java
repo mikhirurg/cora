@@ -27,7 +27,7 @@ public class QuickSortTermTest {
     Term term = trs.lookupSymbol("test").apply(MemTRSUtil.arrayToListTerm(arr, trs));
     Arrays.sort(arr);
 
-    int[] arr2 = MemTRSUtil.termToArray(term, trs);
+    int[] arr2 = MemTRSUtil.listTermToArray(term, trs);
 
     assertArrayEquals(arr, arr2);
   }
@@ -51,7 +51,7 @@ public class QuickSortTermTest {
         Arrays.sort(arr);
 
         long start = System.currentTimeMillis();
-        int[] arr2 = MemTRSUtil.termToArray(term, trs);
+        int[] arr2 = MemTRSUtil.listTermToArray(term, trs);
         long end = System.currentTimeMillis();
         System.out.println("n: " + i + ", i: " + (j + 1) + ", delta: " + (end - start));
 

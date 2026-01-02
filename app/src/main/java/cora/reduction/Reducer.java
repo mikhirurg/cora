@@ -15,6 +15,7 @@
 
 package cora.reduction;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
@@ -131,7 +132,11 @@ public class Reducer {
     while (!parts.isEmpty()) {
       Term sub = parts.pop();
 
-      if (sub.queryRoot().queryName().equals("GET ")) {
+      if (sub.queryRoot().queryName().equals("GET")) {
+        return false;
+      }
+
+      if (sub.queryRoot().queryName().equals("SET")) {
         return false;
       }
 
@@ -194,6 +199,7 @@ public class Reducer {
    * If multiple rules or schemes can be used, an arbitrary one is chosen.
    */
   public Term reduce(Term s) {
+    //System.out.println(s);
     // shuffle the list of all rules and rule schemes to get some randomness
     Collections.shuffle(_components);
     // handle the strategy by deciding on the (order of the) list of positions
@@ -289,6 +295,7 @@ public class Reducer {
         if (isReduced) {
           totalParallelSteps++;
           //System.out.println(s);
+          //System.out.println(MemReducer.MEMORY.toString());
           return s;
         } else {
           return null;

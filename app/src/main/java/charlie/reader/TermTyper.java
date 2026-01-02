@@ -155,6 +155,7 @@ class TermTyper {
         else yield TheoryFactory.intDistinctSymbol;
       }
       case "GET" -> TheoryFactory.getSymbol;
+      case "SET" -> TheoryFactory.setSymbol;
       default -> null;
     };
     if (ret == null) { // this shouldn't happen: it's been created by the CoraParser
@@ -451,6 +452,9 @@ class TermTyper {
       return makeGetApplication(token, args, expected);
       //return makeStandardApplication(token, apphead, args, expected, typeShouldBeDerivable);
     }
+    if (apphead.token().getText().equals("SET")) {
+      return makeSetApplication(token, args, expected);
+    }
     switch (apphead) {
       case CalcSymbol(Token t, String name):
         // minus can be used either with 1 or 2 arguments as syntactic sugar
@@ -543,6 +547,27 @@ class TermTyper {
       type = TypeFactory.createArrow(targs.get(i).queryType(), type);
     }
     Term fakehead = TermFactory.createConstant("GET", type);
+    return TermFactory.createApp(fakehead,targs);
+  }
+
+  private Term makeSetApplication(Token token, ImmutableList<ParserTerm> args, Type expected) {
+    if (args.size() == 0) return makeCalculationSymbol(token, "SET", expected);
+    ArrayList<Term> targs = new ArrayList<>();
+    for (int i = 0; i < args.size(); i++) {
+      targs.add(makeTerm(args.get(i), TypeFactory.intSort, true));
+    }
+    if (args.size() == 2) {
+      Term child1 = targs.get(0);
+      Term child2 = targs.get(1);
+      return confirmType(token, TheoryFactory.setSymbol.apply(child1).apply(child2), expected);
+    }
+    storeError("Arity error: SET can be used with only 2 arguments, but here it occurs " +
+      "with " + args.size() + ".", token);
+    Type type = expected == null ? TypeFactory.boolSort : expected;
+    for (int i = targs.size()-1; i >= 0; i--) {
+      type = TypeFactory.createArrow(targs.get(i).queryType(), type);
+    }
+    Term fakehead = TermFactory.createConstant("SET", type);
     return TermFactory.createApp(fakehead,targs);
   }
 

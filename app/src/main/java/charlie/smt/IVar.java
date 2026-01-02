@@ -52,6 +52,11 @@ public final class IVar extends IntegerExpression {
     return this;
   }
 
+  @Override
+  public boolean containsMemoryUpdateOperation() {
+    return false;
+  }
+
   public void addToSmtString(StringBuilder builder) {
     builder.append("i" + _index);
   }

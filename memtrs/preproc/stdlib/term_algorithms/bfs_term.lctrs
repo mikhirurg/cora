@@ -1,0 +1,22 @@
+#include ../term_ds/graph.lctrs
+#include ../term_ds/list.lctrs
+
+/* bfs */
+/* graph, currentNode, queue, visitedNodes */
+bfs :: graph -> Int -> list
+bfsLoop1 :: graph -> list -> list -> list
+bfsLoop2 :: graph -> Int -> list -> list -> list
+bfsLoop3 :: graph -> Int -> list -> list -> list -> list
+bfsLoop4 :: graph -> Int -> list -> list -> list -> Int -> list
+
+bfs(graph, v) -> bfsLoop1(graph, cons(v, nil), genList(numNodes(graph)))
+bfsLoop1(graph, nil, visited) -> visited
+bfsLoop1(graph, cons(x, q), visited) -> bfsLoop2(graph, x, q, visited)
+bfsLoop2(graph, x, q, visited) -> bfsLoop3(graph, x, q, setl(x, 1, visited), getg(x, graph))
+bfsLoop3(graph, x, q, visited, nil) -> bfsLoop1(graph, q, visited)
+bfsLoop3(graph, x, q, visited, cons(u, l)) ->
+    bfsLoop4(graph, x, q, visited, cons(u, l), getl(u, visited))
+bfsLoop4(graph, x, q, visited, cons(u, l), isVisited) ->
+    bfsLoop3(graph, x, cons(u, q), visited, l) | isVisited = 0
+bfsLoop4(graph, x, q, visited, cons(u, l), isVisited) ->
+    bfsLoop3(graph, x, q, visited, l) | isVisited = 1

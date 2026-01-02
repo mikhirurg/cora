@@ -2,11 +2,10 @@ package memtrs.util;
 
 import charlie.reader.CoraInputReader;
 import charlie.terms.Term;
-import charlie.terms.TermFactory;
 import charlie.terms.TheoryFactory;
 import charlie.trs.TRS;
-import charlie.types.TypeFactory;
 import cora.config.Settings;
+import cora.reduction.MemReducer;
 import cora.reduction.Reducer;
 import memtrs.util.graph.Graph;
 import memtrs.util.graph.Vertex;
@@ -75,7 +74,7 @@ public class MemTRSUtil {
     return list;
   }
 
-  public static int[] termToArray(Term listTerm, TRS trs) {
+  public static int[] listTermToArray(Term listTerm, TRS trs) {
     List<Integer> result = termToList(listTerm, trs);
     if (result == null) {
       return null;
@@ -109,6 +108,15 @@ public class MemTRSUtil {
         .apply(list);
     }
     return list;
+  }
+
+  public static int[] arrayFromMem(int addr) {
+    int[] arr = new int[MemReducer.GET(addr)];
+    for (int k = addr + 1; k < arr.length + addr + 1; k++) {
+      arr[k - (addr + 1)] = MemReducer.GET(k);
+    }
+
+    return arr;
   }
 
   public static int[] genRandomArray(int size, int min, int max) {
@@ -155,6 +163,16 @@ public class MemTRSUtil {
     return matrix;
   }
 
+  public static Matrix matrixFromMem(int addr) {
+    int[] addrArr = arrayFromMem(addr);
+    int[][] matrix = new int[addrArr.length][];
+    for (int i = 0; i < addrArr.length; i++) {
+      matrix[i] = arrayFromMem(addrArr[i]);
+    }
+
+    return new Matrix(matrix);
+  }
+
   public static Graph termToGraph(Term graphTerm, TRS trs) {
     Graph graph = new Graph();
     Term t = reduceToNF(graphTerm, trs, STRATEGY);
@@ -180,7 +198,7 @@ public class MemTRSUtil {
     return graph;
   }
 
-  public static String graphToListTerm(Graph graph) {
+  public static String graphToTermString(Graph graph) {
     StringBuilder builder = new StringBuilder();
     for (Vertex v : graph.getVertices()) {
       int[] arr = new int[graph.getNeighbours(v).size()];
@@ -195,6 +213,20 @@ public class MemTRSUtil {
       .append(")".repeat(graph.getVertices().size()));
 
     return builder.toString();
+  }
+
+  public static Term graphToTerm(Graph graph, TRS trs) {
+    Term graphTerm = trs.lookupSymbol("nilG");
+    for (Vertex v: graph.getVertices().stream().toList().reversed()) {
+      int[] arr = new int[graph.getNeighbours(v).size()];
+      for (int i = 0; i < graph.getNeighbours(v).size(); i++) {
+        arr[i] = graph.getNeighbours(v).get(i).to().id();
+      }
+      graphTerm = trs.lookupSymbol("consG")
+        .apply(arrayToListTerm(arr, trs))
+        .apply(graphTerm);
+    }
+    return graphTerm;
   }
 
   public static TRS constructTRS(String trsDefinition) {
