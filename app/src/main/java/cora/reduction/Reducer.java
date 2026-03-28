@@ -29,6 +29,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import charlie.util.Pair;
@@ -47,6 +49,7 @@ import cora.config.Settings;
 public class Reducer {
   private static final Random random = new Random();
   public static int totalParallelSteps = 0;
+  public static volatile AtomicLong totalVirtualThreads = new AtomicLong(0);
 
   private final ArrayList<ReduceObject> _components;
   private TreeMap<FunctionSymbol, Integer> _arity;
@@ -59,9 +62,6 @@ public class Reducer {
     _arityKeySet = new HashSet<>();
     for (int i = 0; i < trs.querySchemeCount(); i++) {
       switch (trs.queryScheme(i)) {
-        case RuleScheme.Mem:
-          _components.add(new MemReducer());
-          break;
         case RuleScheme.Eta:
           _components.add(new EtaReducer());
           break;
@@ -199,7 +199,7 @@ public class Reducer {
    * If multiple rules or schemes can be used, an arbitrary one is chosen.
    */
   public Term reduce(Term s) {
-    //System.out.println(s);
+    // System.out.println(s);
     // shuffle the list of all rules and rule schemes to get some randomness
     Collections.shuffle(_components);
     // handle the strategy by deciding on the (order of the) list of positions
@@ -257,13 +257,13 @@ public class Reducer {
       return null;
     } else if (Settings.queryReductionMode() == Settings.ReductionMode.Parallel) {
       boolean isReduced = false;
-
       try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
         List<Future<Pair<Position, Term>>> results = new ArrayList<>();
         subterms.forEach(subterm -> {
             Term sub = subterm.fst();
             Position pos = subterm.snd();
             results.add(executor.submit(() -> {
+              totalVirtualThreads.incrementAndGet();
               Term result = null;
               for (int j = 0; j < _components.size() && result == null; j++) {
                 result = _components.get(j).apply(sub);

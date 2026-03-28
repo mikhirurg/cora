@@ -5,7 +5,7 @@ import charlie.terms.Term;
 import charlie.terms.TheoryFactory;
 import charlie.trs.TRS;
 import cora.config.Settings;
-import cora.reduction.MemReducer;
+import cora.reduction.CalcReducer;
 import cora.reduction.Reducer;
 import memtrs.util.graph.Graph;
 import memtrs.util.graph.Vertex;
@@ -18,7 +18,7 @@ import java.util.Random;
 public class MemTRSUtil {
 
   public final static String MEMTRS_STDLIB_PATH =
-    "/home/mikhirurg/Contribution/cora/memtrs/preproc/stdlib/";
+    "/home/mikhirurg/Contribution/cora/memtrs/stdlib/";
 
   public static Settings.Strategy STRATEGY = Settings.Strategy.CallByValue;
 
@@ -111,9 +111,9 @@ public class MemTRSUtil {
   }
 
   public static int[] arrayFromMem(int addr) {
-    int[] arr = new int[MemReducer.GET(addr)];
+    int[] arr = new int[CalcReducer.GET(addr)];
     for (int k = addr + 1; k < arr.length + addr + 1; k++) {
-      arr[k - (addr + 1)] = MemReducer.GET(k);
+      arr[k - (addr + 1)] = CalcReducer.GET(k);
     }
 
     return arr;

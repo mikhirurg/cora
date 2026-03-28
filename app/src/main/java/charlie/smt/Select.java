@@ -1,6 +1,6 @@
 package charlie.smt;
 
-import cora.reduction.MemReducer;
+import cora.reduction.CalcReducer;
 
 public final class Select extends IntegerExpression {
   private final IntegerExpression _addr;
@@ -21,7 +21,7 @@ public final class Select extends IntegerExpression {
       result = val.queryArrayAssignment(_addr.evaluate(val));
     }
     if (result == null) {
-      result = MemReducer.GET(_addr.evaluate(val));
+      result = CalcReducer.GET(_addr.evaluate(val));
     }
     return result;
   }

@@ -3,7 +3,7 @@ package memtrs;
 import charlie.terms.Term;
 import charlie.terms.TheoryFactory;
 import charlie.trs.TRS;
-import cora.reduction.MemReducer;
+import cora.reduction.CalcReducer;
 import memtrs.util.MemTRSUtil;
 import org.junit.jupiter.api.Test;
 
@@ -29,16 +29,17 @@ public class HeapSortTest {
     for (int i = 1; i < 2000; i += 10) {
       for (int j = 0; j < 3; j++) {
 
-        MemReducer.resetMemory();
+        CalcReducer.resetMemory();
 
         int size = i;
 
         int[] arr = MemTRSUtil.genRandomArray(size, -100, 100);
 
-        MemReducer.SET(0, size + 2);
-        MemReducer.SET(1, size);
+        CalcReducer.SET(0, size + 3);
+        CalcReducer.SET(1, 0);
+        CalcReducer.SET(2, size);
         for (int k = 2; k < size + 2; k++) {
-          MemReducer.SET(k, arr[k - 2]);
+          CalcReducer.SET(k, arr[k - 2]);
         }
 
         Term term = trs.lookupSymbol("test").apply(TheoryFactory.createValue(1));
@@ -51,7 +52,7 @@ public class HeapSortTest {
 
         int[] arr2 = new int[size];
         for (int k = 2; k < size + 2; k++) {
-          arr2[k - 2] = MemReducer.GET(k);
+          arr2[k - 2] = CalcReducer.GET(k);
         }
 
         assertEquals(true, b);

@@ -18,9 +18,47 @@ package cora.reduction;
 import charlie.terms.Term;
 import charlie.terms.FunctionSymbol;
 import charlie.theorytranslation.TermAnalyser;
+import cora.config.Settings;
+
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 /** This class implements the calculation rule scheme. */
-class CalcReducer implements ReduceObject {
+public class CalcReducer implements ReduceObject {
+
+  public static final AtomicIntegerArray MEMORY = new AtomicIntegerArray(Settings.getMemMaxSize());
+
+  private static final Random random = new Random();
+
+  static {
+    resetMemory();
+  }
+
+  public static Integer GET(int addr) {
+    if (addr < 0 || addr >= Settings.getMemMaxSize()) {
+      return null;
+    }
+    return MEMORY.get(addr);
+  }
+
+  public static boolean SET(int addr, int val) {
+    if (addr >= 0 && addr < Settings.getMemMaxSize()) {
+      MEMORY.set(addr, val);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  public static void resetMemory() {
+    for (int i = 0; i < Settings.getMemMaxSize(); i++) {
+      int randVal = random.nextInt();
+      MEMORY.set(i, randVal);
+    }
+    MEMORY.set(0, 2);
+    MEMORY.set(1, 0);
+  }
+
   public boolean applicable(Term t) {
     if (!t.queryType().isBaseType() || !t.queryType().isTheoryType()) return false;
     if (!t.isFunctionalTerm()) return false;

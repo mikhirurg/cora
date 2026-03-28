@@ -3,15 +3,15 @@ package memtrs;
 import charlie.terms.Term;
 import charlie.trs.TRS;
 import cora.config.Settings;
-import cora.reduction.MemReducer;
+import cora.reduction.CalcReducer;
 import memtrs.util.MemTRSUtil;
 
 import static memtrs.util.MemTRSUtil.MEMTRS_STDLIB_PATH;
 
 public class QueueTest {
   public static void main(String[] args) {
-    MemReducer.SET(0, 2);
-    MemReducer.SET(1, 0);
+    CalcReducer.SET(0, 2);
+    CalcReducer.SET(1, 0);
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/queue.lctrs\n\n" +
         """
@@ -28,6 +28,6 @@ public class QueueTest {
     );
     Term term = MemTRSUtil.constructTerm("test(10)", trs);
     MemTRSUtil.reduceToNF(term, trs, Settings.Strategy.CallByValue);
-    System.out.println(MemReducer.MEMORY);
+    System.out.println(CalcReducer.MEMORY);
   }
 }

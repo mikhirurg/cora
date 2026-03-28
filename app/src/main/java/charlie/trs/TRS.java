@@ -76,7 +76,7 @@ import charlie.trs.TrsProperties.*;
  * starting points for analysis, which can be used in some analysis techniques.
  */
 public class TRS {
-  public enum RuleScheme { Beta, Eta, Calc, Mem };
+  public enum RuleScheme { Beta, Eta, Calc };
 
   private final Alphabet _alphabet;
   private final ImmutableList<Rule> _rules;

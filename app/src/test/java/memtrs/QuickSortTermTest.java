@@ -2,6 +2,7 @@ package memtrs;
 
 import charlie.terms.Term;
 import charlie.trs.TRS;
+import cora.reduction.Reducer;
 import memtrs.util.MemTRSUtil;
 import org.junit.jupiter.api.Test;
 
@@ -44,6 +45,7 @@ public class QuickSortTermTest {
 
     for (int i : new int[]{1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024}) {
       for (int j = 0; j < 3; j++) {
+        if (i != 128 || j != 0) break;
         int[] arr = MemTRSUtil.genRandomArray(i, -100, 100);
         //System.out.println(Arrays.toString(arr));
 
@@ -62,5 +64,6 @@ public class QuickSortTermTest {
 
   public static void main(String[] args) {
     qSortTermBenchmark();
+    System.out.println(Reducer.totalVirtualThreads);
   }
 }

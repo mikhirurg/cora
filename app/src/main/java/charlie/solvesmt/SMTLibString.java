@@ -19,7 +19,6 @@ import charlie.smt.Conjunction;
 import charlie.smt.Constraint;
 import charlie.smt.SmtProblem;
 import cora.config.Settings;
-import cora.reduction.MemReducer;
 
 import java.util.ArrayList;
 

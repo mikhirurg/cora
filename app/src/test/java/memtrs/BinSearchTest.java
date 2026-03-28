@@ -3,7 +3,7 @@ package memtrs;
 import charlie.terms.Term;
 import charlie.terms.TheoryFactory;
 import charlie.trs.TRS;
-import cora.reduction.MemReducer;
+import cora.reduction.CalcReducer;
 import memtrs.util.MemTRSUtil;
 import org.junit.jupiter.api.Test;
 
@@ -21,11 +21,11 @@ public class BinSearchTest {
       "#include " + MEMTRS_STDLIB_PATH + "algorithms/binsearch.lctrs\n\n" +
         """
           test :: list -> Int -> Int
-          test1 :: list -> Int -> Bool -> Int
+          test1 :: list -> Int -> Bool -> Bool -> Int
           test2 :: list -> Int -> Int -> Int
           
-          test(l, x) -> test1(l, x, SET(0, 1))
-          test1(l, x, true) -> test2(l, x, listToArray(l))
+          test(l, x) -> test1(l, x, SET(0, 2), SET(1, 0))
+          test1(l, x, true, true) -> test2(l, x, listToArray(l))
           test2(l, x, addr) -> binsearch(addr, x)
           """
     );
@@ -91,7 +91,7 @@ public class BinSearchTest {
     for (int i = 1; i < 2000; i += 10) {
       for (int j = 0; j < 3; j++) {
 
-        MemReducer.resetMemory();
+        CalcReducer.resetMemory();
 
         int size = i;
 
@@ -128,17 +128,17 @@ public class BinSearchTest {
     for (int i = 1; i < 2000; i += 10) {
       for (int j = 0; j < 3; j++) {
 
-        MemReducer.resetMemory();
+        CalcReducer.resetMemory();
 
         int size = i;
 
         int[] arr = MemTRSUtil.genRandomUniqueArray(size, -1000, 1000);
         Arrays.sort(arr);
 
-        MemReducer.SET(0, size + 2);
-        MemReducer.SET(1, size);
+        CalcReducer.SET(0, size + 2);
+        CalcReducer.SET(1, size);
         for (int k = 2; k < size + 2; k++) {
-          MemReducer.SET(k, arr[k - 2]);
+          CalcReducer.SET(k, arr[k - 2]);
         }
 
         int index = MemTRSUtil.random.nextInt(0, size);

@@ -1,6 +1,6 @@
 package charlie.smt;
 
-import cora.reduction.MemReducer;
+import cora.reduction.CalcReducer;
 
 public final class Store extends Constraint {
   private final IntegerExpression _addr;
@@ -21,7 +21,7 @@ public final class Store extends Constraint {
   }
 
   public boolean evaluate(Valuation val) {
-    return MemReducer.SET(_addr.evaluate(val), _val.evaluate(val));
+    return CalcReducer.SET(_addr.evaluate(val), _val.evaluate(val));
   }
 
   @Override

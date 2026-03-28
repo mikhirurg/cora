@@ -2,7 +2,7 @@ package memtrs;
 
 import charlie.terms.Term;
 import charlie.trs.TRS;
-import cora.reduction.MemReducer;
+import cora.reduction.CalcReducer;
 import cora.reduction.Reducer;
 import memtrs.util.MemTRSUtil;
 import memtrs.util.graph.Edge;
@@ -94,9 +94,9 @@ public class FloydWarshallTest {
         """
     );
 
-    MemReducer.resetMemory();
-    MemReducer.SET(0, 2);
-    MemReducer.SET(1, 0);
+    CalcReducer.resetMemory();
+    CalcReducer.SET(0, 2);
+    CalcReducer.SET(1, 0);
 
     Term term = trs.lookupSymbol("test").apply(MemTRSUtil.graphToTerm(graph, trs));
 
@@ -119,14 +119,12 @@ public class FloydWarshallTest {
 
     Graph graph = Graph.generateRandomGraph(nodes, edges);
 
-    /*
     try {
       graph.saveToImage(Path.of("graph_images_floyd_warshall_par/n" + nodes + "_e" + edges + "_i" + iteration +
         "_out.png"));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    */
 
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "algorithms/floyd_warshall.lctrs\n\n" +
@@ -137,9 +135,9 @@ public class FloydWarshallTest {
         """
     );
 
-    MemReducer.resetMemory();
-    MemReducer.SET(0, 2);
-    MemReducer.SET(1, 0);
+    CalcReducer.resetMemory();
+    CalcReducer.SET(0, 2);
+    CalcReducer.SET(1, 0);
 
     Term term = trs.lookupSymbol("test").apply(MemTRSUtil.graphToTerm(graph, trs));
 
@@ -152,7 +150,7 @@ public class FloydWarshallTest {
     System.out.println(actual);
     System.out.println("nodes: " + nodes + ", edges: " + edges + ", iteration: " + iteration +
       ", parallel steps: " + Reducer.totalParallelSteps);
-    //System.out.println(MemReducer.MEMORY);
+    //System.out.println(CalcReducer.MEMORY);
     assertEquals(expected, actual);
   }
 
@@ -162,13 +160,11 @@ public class FloydWarshallTest {
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "algorithms/floyd_warshall.lctrs\n\n" +
         """
-        test :: graph -> matrix
-        test1 :: graph -> Bool -> Int
-        test2 :: Int -> matrix
+        test :: graph -> Int
+        test1 :: graph -> Bool -> Bool -> Int
         
-        test(g) -> test1(g, SET(0, 1))
-        test1(g, true) -> test2(floyd_warshall(g))
-        test2(addr) -> matrixToTerm(addr)
+        test(g) -> test1(g, SET(0, 2), SET(1, 0))
+        test1(g, true, true) -> floyd_warshall(g)
         """
     );
 
@@ -176,7 +172,7 @@ public class FloydWarshallTest {
       .constructTerm("test(" +MemTRSUtil.graphToTermString(graph1) + ")", trs);
 
     Matrix expected = floydWarshall(graph1);
-    Matrix actual = MemTRSUtil.termToMatrix(term, trs);
+    Matrix actual = MemTRSUtil.matrixFromMem(MemTRSUtil.termToInt(term, trs));
 
     assertEquals(expected, actual);
   }
@@ -187,13 +183,11 @@ public class FloydWarshallTest {
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "algorithms/floyd_warshall.lctrs\n\n" +
         """
-        test :: graph -> matrix
-        test1 :: graph -> Bool -> matrix
-        test2 :: Int -> matrix
+        test :: graph -> Int
+        test1 :: graph -> Bool -> Bool -> Int
         
-        test(g) -> test1(g, SET(0, 1))
-        test1(g, true) -> test2(floyd_warshall_par(g))
-        test2(addr) -> matrixToTerm(addr)
+        test(g) -> test1(g, SET(0, 2), SET(1, 0))
+        test1(g, true, true) -> parFloydWarshall(g)
         """
     );
 
@@ -201,7 +195,7 @@ public class FloydWarshallTest {
       .constructTerm("test(" +MemTRSUtil.graphToTermString(graph1) + ")", trs);
 
     Matrix expected = floydWarshall(graph1);
-    Matrix actual = MemTRSUtil.termToMatrix(term, trs);
+    Matrix actual = MemTRSUtil.matrixFromMem(MemTRSUtil.termToInt(term, trs));
 
     System.out.println("Expected:");
     System.out.println(expected);

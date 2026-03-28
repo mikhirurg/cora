@@ -2,7 +2,7 @@ package memtrs;
 
 import charlie.terms.Term;
 import charlie.trs.TRS;
-import cora.reduction.MemReducer;
+import cora.reduction.CalcReducer;
 import cora.reduction.Reducer;
 import memtrs.util.MemTRSUtil;
 import memtrs.util.graph.Edge;
@@ -78,9 +78,9 @@ public class BFSTest {
           """
     );
 
-    MemReducer.resetMemory();
-    MemReducer.SET(0, 2);
-    MemReducer.SET(1, 0);
+    CalcReducer.resetMemory();
+    CalcReducer.SET(0, 2);
+    CalcReducer.SET(1, 0);
 
     Term term =
       trs.lookupSymbol("test").apply(MemTRSUtil.constructTerm(MemTRSUtil.graphToTermString(graph),
@@ -123,9 +123,9 @@ public class BFSTest {
           """
     );
 
-    MemReducer.resetMemory();
-    MemReducer.SET(0, 2);
-    MemReducer.SET(1, 0);
+    CalcReducer.resetMemory();
+    CalcReducer.SET(0, 2);
+    CalcReducer.SET(1, 0);
 
     Term term =
       trs.lookupSymbol("test").apply(MemTRSUtil.constructTerm(MemTRSUtil.graphToTermString(graph),
@@ -135,7 +135,7 @@ public class BFSTest {
 
     int[] arr = new int[nodes];
     for (int k = address + 1; k < nodes + address + 1; k++) {
-      arr[k - (address + 1)] = MemReducer.GET(k);
+      arr[k - (address + 1)] = CalcReducer.GET(k);
     }
 
     int[] expected = bfs(graph, new Vertex(0));
@@ -144,26 +144,26 @@ public class BFSTest {
     System.out.println(Arrays.toString(arr));
     System.out.println("nodes: " + nodes + ", edges: " + edges + ", iteration: " + iteration +
       ", parallel steps: " + Reducer.totalParallelSteps);
-
     Assertions.assertArrayEquals(expected, arr);
   }
 
   public static void main(String[] args) throws FileNotFoundException {
     int[] sizes = IntStream.iterate(1, i -> i + 1).limit(30).toArray();
 
-    /*
-    System.setOut(new PrintStream(new FileOutputStream("bfs_test1_not_par.txt")));
+
+    System.setOut(new PrintStream(new FileOutputStream("bfs_test1_not_par_fix.txt")));
     for (int i = 1; i < 30; i++) {
       for (int j = 1; j <= i * i; j++) {
         for (int k = 0; k < 3; k++) {
+          System.err.println(i + ", " + j + ", " + k);
           bfsTest(i, j, k);
         }
       }
     }
-    */
 
-//mcBfsTest(4,4,0);
-    System.setOut(new PrintStream(new FileOutputStream("bfs_test1_par2_1.txt")));
+    //mcBfsTest(4,4,0);
+    /*
+    System.setOut(new PrintStream(new FileOutputStream("bfs_test1_par2_2.txt")));
     for (int i = 1; i < 30; i++) {
       for (int j = 1; j <= i * i; j++) {
         for (int k = 0; k < 3; k++) {
@@ -172,6 +172,7 @@ public class BFSTest {
         }
       }
     }
+     */
     //mcBfsTest(5, 5, 1);
   }
 }

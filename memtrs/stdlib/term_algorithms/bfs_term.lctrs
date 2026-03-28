@@ -17,6 +17,6 @@ bfsLoop3(graph, x, q, visited, nil) -> bfsLoop1(graph, q, visited)
 bfsLoop3(graph, x, q, visited, cons(u, l)) ->
     bfsLoop4(graph, x, q, visited, cons(u, l), getl(u, visited))
 bfsLoop4(graph, x, q, visited, cons(u, l), isVisited) ->
-    bfsLoop3(graph, x, cons(u, q), visited, l) | isVisited = 0
+    bfsLoop3(graph, x, pushBack(u, q), visited, l) | isVisited = 0
 bfsLoop4(graph, x, q, visited, cons(u, l), isVisited) ->
     bfsLoop3(graph, x, q, visited, l) | isVisited = 1

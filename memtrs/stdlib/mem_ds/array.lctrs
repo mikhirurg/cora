@@ -21,16 +21,15 @@ createArray4(arrAddr, addr, size, true) -> createArray3(arrAddr, addr, size)
 
 /* ACCESS Array element */
 /* addr -> index -> value */
-
 /*
 getArr :: Int -> Int -> Int
 getArr1 :: Int -> Int -> Int -> Int
 getArr(addr, i) -> getArr1(addr, i, GET(addr))
 getArr1(addr, i, size) -> GET(addr + i + 1) | i < size
 */
-
 getArr :: Int -> Int -> Int
 getArr(addr, i) -> GET(addr + i + 1) | i < GET(addr)
+getArr(addr, i) -> -1 | i >= GET(addr)
 
 
 /* SET Array element */

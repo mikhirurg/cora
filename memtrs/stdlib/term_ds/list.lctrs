@@ -53,4 +53,9 @@ readRange(start, end) -> readRange1(start, end, nil)
 readRange1(start, end, l) -> cons(GET(start), readRange1(start + 1, end, l)) | start <= end
 readRange1(start, end, l) -> l | start > end
 
+/* Push back - pushes the element to the end of the list */
+pushBack :: Int -> list -> list
+pushBack(element, cons(u, l)) -> cons(u, pushBack(element, l))
+pushBack(element, nil) -> cons(element, nil)
+
 /* ============================================================================================== */

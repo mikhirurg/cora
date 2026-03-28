@@ -35,7 +35,7 @@ import static charlie.solvesmt.ProcessSmtSolver.PhysicalSolver.Z3;
 import static charlie.solvesmt.SMTLibString.Version.V27;
 
 public class ProcessSmtSolver implements SmtSolver {
-  public static int TIMEOUT = 30;
+  public static int TIMEOUT = 300;
 
   public enum PhysicalSolver {
     // Possible solvers supported by the process caller.
