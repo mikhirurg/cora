@@ -275,7 +275,9 @@ public class Reducer {
               totalVirtualThreads.incrementAndGet();
               Term result = null;
               for (int j = 0; j < _components.size() && result == null; j++) {
-                result = _components.get(j).apply(sub);
+                if (_components.get(j).applicable(sub)) {
+                  result = _components.get(j).apply(sub);
+                }
               }
               return new Pair<>(pos, result);
             }));
@@ -303,7 +305,7 @@ public class Reducer {
 
         if (isReduced) {
           totalParallelSteps++;
-          System.out.println(s);
+          //System.out.println(s);
           //System.out.println(MemReducer.MEMORY.toString());
           return s;
         } else {

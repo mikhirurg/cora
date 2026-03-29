@@ -23,66 +23,16 @@ bfs5(graph, addr, x, stk, cons(u, l), 0) -> bfs4(graph, addr, x, cons(u, stk), l
 bfs5(graph, addr, x, stk, cons(u, l), 1) -> bfs4(graph, addr, x, stk, l, true)
 
 /* bfs: multi-core */
-mc_bfs :: graph -> Int -> Int
-mc_bfs1 :: graph -> Int -> Int -> Int
-mc_bfs2 :: graph -> Int -> Int -> Int -> Int
-mc_bfs3 :: graph -> Int -> Int -> Bool -> Int
-mc_bfs4 :: graph -> Int -> Int -> Int -> Int
-mc_bfs5 :: graph -> Int -> Int -> list -> list -> Int
-mc_bfs6 :: graph -> Int -> Int -> list -> Bool -> Int
-mc_bfs_parallel :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int
-launch :: graph -> Int -> Int -> Int -> Int
-
-mc_bfs(graph, start) -> mc_bfs1(graph, start, numNodes(graph))
-mc_bfs1(graph, start, size) ->
-    mc_bfs2(graph, start, createArray(size), createQueue(size * size + 1))
-mc_bfs2(graph, start, arrAddr, queueAddr) ->
-    mc_bfs3(graph, arrAddr, queueAddr, push(queueAddr, start))
-mc_bfs3(graph, arrAddr, queueAddr, true) ->
-    mc_bfs_parallel(arrAddr,
-                    launch(graph, arrAddr, queueAddr, pop(queueAddr)),
-                    launch(graph, arrAddr, queueAddr, pop(queueAddr)),
-                    launch(graph, arrAddr, queueAddr, pop(queueAddr)),
-                    -1,
-                    -1,
-                    -1,
-                    -1,
-                    -1,
-                    -1,
-                    -1)
-mc_bfs_parallel(arrAddr, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10) -> arrAddr
-launch(graph, arrAddr, queueAddr, x) -> mc_bfs4(graph, arrAddr, queueAddr, x) | x >= 0
-launch(graph, arrAddr, queueAddr, x) -> -1 | x < 0
-mc_bfs4(graph, arrAddr, queueAddr, x) ->
-    launch(graph, arrAddr, queueAddr, pop(queueAddr)) | GET(arrAddr + 1 + x) = 1
-mc_bfs4(graph, arrAddr, queueAddr, x) ->
-    mc_bfs5(graph, arrAddr, queueAddr, getg(x, graph), nil)
-        | GET(arrAddr + 1 + x) = 0 /\ SET(arrAddr + 1 + x, 1)
-mc_bfs5(graph, arrAddr, queueAddr, cons(u, l), newNodes)
-    -> mc_bfs5(graph, arrAddr, queueAddr, l, cons(u, newNodes)) | GET(arrAddr + 1 + u) = 0
-mc_bfs5(graph, arrAddr, queueAddr, cons(u, l), newNodes)
-    -> mc_bfs5(graph, arrAddr, queueAddr, l, newNodes) | GET(arrAddr + 1 + u) = 1
-mc_bfs5(graph, arrAddr, queueAddr, nil, newNodes) ->
-    mc_bfs6(graph, arrAddr, queueAddr, newNodes, true)
-mc_bfs6(graph, arrAddr, queueAddr, cons(u, newNodes), true) ->
-    mc_bfs6(graph, arrAddr, queueAddr, newNodes, push(queueAddr, u)) | GET(arrAddr + 1 + u) = 0
-mc_bfs6(graph, arrAddr, queueAddr, cons(u, newNodes), true) ->
-    mc_bfs6(graph, arrAddr, queueAddr, newNodes, true) | GET(arrAddr + 1 + u) = 1
-mc_bfs6(graph, arrAddr, queueAddr, nil, true) -> mc_bfs3(graph, arrAddr, queueAddr, true)
-/*
-mc_bfs4(graph, addr, x, stk, cons(u, l), true) ->
-    mc_bfs5(graph, addr, x, stk, cons(u, l), getArr(addr, u))
-mc_bfs5(graph, addr, x, stk, cons(u, l), 0) -> mc_bfs4(graph, addr, x, cons(u, stk), l, true)
-mc_bfs5(graph, addr, x, stk, cons(u, l), 1) -> mc_bfs4(graph, addr, x, stk, l, true)*/
-
 parBFS :: graph -> Int -> Int
 parBFS1 :: graph -> Int -> Int -> Int
 parBFS2 :: graph -> Int -> Int -> Int -> Int -> Int
-parBFS3 :: graph -> Int -> Int -> Int -> Bool -> Int
+parBFS3 :: graph -> Int -> Int -> Int -> Bool -> Bool -> Int
 parBFS4 :: graph -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int
 worker :: graph -> Int -> Int -> Int -> Int
 worker1 :: graph -> Int -> Int -> Int -> Int
-worker2 :: graph -> Int -> Int -> Int -> list -> Bool -> Int
+worker2 :: graph -> Int -> Int -> Int -> list -> Int
+worker3 :: graph -> Int -> Int -> Int -> list -> Bool -> Int
+worker4 :: graph -> Int -> Int -> Int -> list -> Bool -> Int
 /* parallel bfs */
 /* 1) create array, create queue for the current layer, create queue for the next layer */
 parBFS(graph, start) -> parBFS1(graph, start, numNodes(graph))
@@ -90,10 +40,9 @@ parBFS1(graph, start, size) ->
     parBFS2(graph, start, createArray(size), createQueue(size * size + 1), createQueue(size * size + 1))
 /* 2) insert start node to the current queue */
 parBFS2(graph, start, arrAddr, queue1Addr, queue2Addr) ->
-    parBFS3(graph, arrAddr, queue1Addr, queue2Addr, push(queue1Addr, start))
-    | SET(arrAddr + 1 + start, 1)
+    parBFS3(graph, arrAddr, queue1Addr, queue2Addr, push(queue1Addr, start), SET(arrAddr + 1 + start, 1))
 /* 3) pop nodes from the current queue in parallel */
-parBFS3(graph, arrAddr, queue1Addr, queue2Addr, true) ->
+parBFS3(graph, arrAddr, queue1Addr, queue2Addr, true, true) ->
     parBFS4(graph, arrAddr, queue1Addr, queue2Addr,
             worker(graph, arrAddr, queue2Addr, pop(queue1Addr)),
             worker(graph, arrAddr, queue2Addr, pop(queue1Addr)),
@@ -111,7 +60,7 @@ worker(graph, arrAddr, queueAddr, x) ->
     worker1(graph, arrAddr, queueAddr, x) | x >= 0
 /* 4.1) for current node: fetch the graph row, set current node as visited */
 worker1(graph, arrAddr, queueAddr, x) ->
-    worker2(graph, arrAddr, queueAddr, x, getg(x, graph), true)
+    worker2(graph, arrAddr, queueAddr, x, getg(x, graph))
 /* 4.1.1) if we can't fetch, try the next node in the queue */
 /*worker1(graph, arrAddr, queueAddr, x) ->
     worker(graph, arrAddr, queueAddr, pop(queueAddr)) | GET(arrAddr + 1 + x) = 1*/
@@ -125,24 +74,27 @@ worker2(graph, arrAddr, queueAddr, x, nil, newNodes) ->
     worker3(graph, arrAddr, queueAddr, x, newNodes, true)
 */
 /* 4.3) push all non-visited nodes in the new layer */
-worker2(graph, arrAddr, queueAddr, x, cons(u, newNodes), true) ->
-    worker2(graph, arrAddr, queueAddr, x, newNodes, push(queueAddr, u))
-    | GET(arrAddr + 1 + u) = 0 /\ SET(arrAddr + 1 + u, 1)
-worker2(graph, arrAddr, queueAddr, x, cons(u, newNodes), true) ->
-    worker2(graph, arrAddr, queueAddr, x, newNodes, true) | GET(arrAddr + 1 + u) = 1
+worker2(graph, arrAddr, queueAddr, x, cons(u, newNodes)) ->
+    worker3(graph, arrAddr, queueAddr, x, cons(u, newNodes), CAS(arrAddr + 1 + u, 0, 1))
+worker3(graph, arrAddr, queueAddr, x, cons(u, newNodes), true) ->
+    worker4(graph, arrAddr, queueAddr, x, newNodes, push(queueAddr, u))
+worker3(graph, arrAddr, queueAddr, x, cons(u, newNodes), false) ->
+    worker2(graph, arrAddr, queueAddr, x, newNodes)
+worker4(graph, arrAddr, queueAddr, x, newNodes, true) ->
+    worker2(graph, arrAddr, queueAddr, x, newNodes)
 /* 4.5) return 1 */
-worker2(graph, arrAddr, queueAddr, x, nil, true) -> 1
+worker2(graph, arrAddr, queueAddr, x, nil) -> 1
 /* 5) If all workers were scheduled => try fetching nodes from the current layer */
 parBFS4(graph, arrAddr, queue1Addr, queue2Addr,
         c1, c2, c3, c4, c5,
         c6, c7, c8, c9, c10) ->
-    parBFS3(graph, arrAddr, queue1Addr, queue2Addr, true)
+    parBFS3(graph, arrAddr, queue1Addr, queue2Addr, true, true)
     | c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8 + c9 + c10 = 10
 /* 6) If some workers were not scheduled => swap queues and launch parallel step for new layer */
 parBFS4(graph, arrAddr, queue1Addr, queue2Addr,
         c1, c2, c3, c4, c5,
         c6, c7, c8, c9, c10) ->
-    parBFS3(graph, arrAddr, queue2Addr, queue1Addr, true)
+    parBFS3(graph, arrAddr, queue2Addr, queue1Addr, true, true)
     | (c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8 + c9 + c10 < 10) /\
         (c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8 + c9 + c10 > -10)
 /* 7) If none of the workers were scheduled => finish the algorithm, return the array address */

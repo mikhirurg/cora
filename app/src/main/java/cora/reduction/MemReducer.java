@@ -1,9 +1,9 @@
 package cora.reduction;
 
+import charlie.terms.BooleanValue;
 import charlie.terms.IntegerValue;
 import charlie.terms.Term;
 import charlie.terms.TheoryFactory;
-import com.sun.jdi.BooleanValue;
 import cora.config.Settings;
 
 import java.util.Random;
@@ -35,15 +35,15 @@ public class MemReducer implements ReduceObject {
       (t.queryArgument(2) instanceof IntegerValue);
   }
 
-  private boolean checkIfSETIF(Term t) {
-    return "SETIF".equals(t.queryRoot().queryName()) &&
+  private boolean checkIfCAS(Term t) {
+    return "CAS".equals(t.queryRoot().queryName()) &&
       t.numberArguments() == 3 &&
       t.queryArgument(1).isValue() &&
       t.queryArgument(2).isValue() &&
       t.queryArgument(3).isValue() &&
       (t.queryArgument(1) instanceof IntegerValue) &&
       (t.queryArgument(2) instanceof IntegerValue) &&
-      (t.queryArgument(3) instanceof BooleanValue);
+      (t.queryArgument(3) instanceof IntegerValue);
   }
 
   public static Integer GET(int addr) {
@@ -53,7 +53,7 @@ public class MemReducer implements ReduceObject {
     return MEMORY.get(addr);
   }
 
-  public static boolean SET(int addr, int val) {
+  public static synchronized boolean SET(int addr, int val) {
     if (addr >= 0 && addr < Settings.getMemMaxSize()) {
       MEMORY.set(addr, val);
       return true;
@@ -62,9 +62,9 @@ public class MemReducer implements ReduceObject {
     }
   }
 
-  public static boolean SETIF(int addr, int val, boolean condition) {
-    if (condition) {
-      return SET(addr, val);
+  public static synchronized boolean CAS(int addr, int expected, int update) {
+    if (addr >= 0 && addr < Settings.getMemMaxSize()) {
+      return MEMORY.compareAndSet(addr, expected, update);
     } else {
       return false;
     }
@@ -81,7 +81,7 @@ public class MemReducer implements ReduceObject {
 
   @Override
   public boolean applicable(Term t) {
-    return checkIfGET(t) || checkIfSET(t) || checkIfSETIF(t);
+    return checkIfGET(t) || checkIfSET(t) || checkIfCAS(t);
   }
 
   @Override
@@ -93,11 +93,11 @@ public class MemReducer implements ReduceObject {
       int arg1 = ((IntegerValue) t.queryArgument(1)).getInt();
       int arg2 = ((IntegerValue) t.queryArgument(2)).getInt();
       return TheoryFactory.createValue(SET(arg1, arg2));
-    } else if (checkIfSETIF(t)) {
+    } else if (checkIfCAS(t)) {
       int arg1 = ((IntegerValue) t.queryArgument(1)).getInt();
       int arg2 = ((IntegerValue) t.queryArgument(2)).getInt();
-      boolean arg3 = ((BooleanValue) t.queryArgument(3)).booleanValue();
-      return TheoryFactory.createValue(SETIF(arg1, arg2, arg3));
+      int arg3 = ((IntegerValue) t.queryArgument(3)).getInt();
+      return TheoryFactory.createValue(CAS(arg1, arg2, arg3));
     }
     return null;
   }

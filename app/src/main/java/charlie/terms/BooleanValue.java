@@ -20,7 +20,7 @@ import charlie.types.TypeFactory;
 import java.util.Map;
 
 /** BooleanValues are the function symbols true and false (which are both theory symbols). */
-class BooleanValue extends ValueInherit {
+public class BooleanValue extends ValueInherit {
   private final boolean _value;
 
   BooleanValue(boolean b) {

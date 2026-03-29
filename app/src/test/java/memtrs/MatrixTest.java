@@ -18,11 +18,11 @@ public class MatrixTest {
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/matrix.lctrs\n\n" +
         """
         test :: matrix
-        test1 :: Bool -> matrix
+        test1 :: Bool -> Bool -> matrix
         test2 :: Int -> matrix
         
-        test -> test1(SET(0, 1))
-        test1(true) -> test2(createMatrix(3, 4))
+        test -> test1(SET(0, 2), SET(1, 0))
+        test1(true, true) -> test2(createMatrix(3, 4))
         test2(addr) -> matrixToTerm(addr)
         """
     );
@@ -41,11 +41,11 @@ public class MatrixTest {
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/matrix.lctrs\n\n" +
         """
         test :: Int
-        test1 :: Bool -> Int
+        test1 :: Bool -> Bool -> Int
         test2 :: Int -> Int
         
-        test -> test1(SET(0, 1))
-        test1(true) -> test2(createMatrix(3, 4))
+        test -> test1(SET(0, 2), SET(1, 0))
+        test1(true, true) -> test2(createMatrix(3, 4))
         test2(addr) -> getMatrixWidth(addr)
         """
     );
@@ -64,11 +64,11 @@ public class MatrixTest {
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/matrix.lctrs\n\n" +
         """
         test :: Int
-        test1 :: Bool -> Int
+        test1 :: Bool -> Bool -> Int
         test2 :: Int -> Int
         
-        test -> test1(SET(0, 1))
-        test1(true) -> test2(createMatrix(3, 4))
+        test -> test1(SET(0, 2), SET(1, 0))
+        test1(true, true) -> test2(createMatrix(3, 4))
         test2(addr) -> getMatrixHeight(addr)
         """
     );
@@ -87,13 +87,13 @@ public class MatrixTest {
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/matrix.lctrs\n\n" +
         """
         test :: Int
-        test1 :: Bool -> Int
+        test1 :: Bool -> Bool -> Int
         test2 :: Int -> Int
         test3 :: Int -> Int
         test4 :: Int -> Int -> Int
         
-        test -> test1(SET(0, 1))
-        test1(true) -> test2(createMatrix(3, 4))
+        test -> test1(SET(0, 2), SET(1, 0))
+        test1(true, true) -> test2(createMatrix(3, 4))
         test2(addr) -> test3(createMatrix(2, 2))
         test3(addr) -> test4(addr, createMatrix(5, 5))
         test4(oldAddr, addr) -> getMatrix(oldAddr, 0, 0)
@@ -114,12 +114,12 @@ public class MatrixTest {
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/matrix.lctrs\n\n" +
         """
         test :: matrix
-        test1 :: Bool -> matrix
+        test1 :: Bool -> Bool -> matrix
         test2 :: Int -> matrix
         test3 :: Int -> Bool -> matrix
         
-        test -> test1(SET(0, 1))
-        test1(true) -> test2(createMatrix(3, 4))
+        test -> test1(SET(0, 2), SET(1, 0))
+        test1(true, true) -> test2(createMatrix(3, 4))
         test2(addr) -> test3(addr, setMatrix(addr, 2, 3, 5))
         test3(addr, true) -> matrixToTerm(addr)
         """
@@ -139,12 +139,12 @@ public class MatrixTest {
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/matrix.lctrs\n\n" +
         """
         test :: matrix
-        test1 :: Bool -> matrix
+        test1 :: Bool -> Bool -> matrix
         test2 :: Int -> matrix
         test3 :: Int -> Bool -> matrix
         
-        test -> test1(SET(0, 1))
-        test1(true) -> test2(createMatrix(3, 4))
+        test -> test1(SET(0, 2), SET(1, 0))
+        test1(true, true) -> test2(createMatrix(3, 4))
         test2(addr) -> test3(addr, fillMatrix(addr, 5))
         test3(addr, true) -> matrixToTerm(addr)
         """
@@ -164,12 +164,12 @@ public class MatrixTest {
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/matrix.lctrs\n\n" +
         """
         test :: matrix
-        test1 :: Bool -> matrix
+        test1 :: Bool -> Bool -> matrix
         test2 :: Int -> matrix
         test3 :: Int -> Bool -> matrix
         
-        test -> test1(SET(0, 1))
-        test1(true) -> test2(createMatrix(3, 3))
+        test -> test1(SET(0, 2), SET(1, 0))
+        test1(true, true) -> test2(createMatrix(3, 3))
         test2(addr) -> test3(addr, fillMatrix(addr, 1))
         test3(addr, true) -> matrixToTerm(addr)
         """
