@@ -47,11 +47,6 @@ public final class NBVar extends Constraint {
     return this;
   }
 
-  @Override
-  public boolean containsMemoryUpdateOperation() {
-    return false;
-  }
-
   public void addToSmtString(StringBuilder builder) {
     builder.append("(not ");
     _negated.addToSmtString(builder);

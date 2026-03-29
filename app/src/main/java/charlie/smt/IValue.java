@@ -44,11 +44,6 @@ public final class IValue extends IntegerExpression {
     return new IValue(value * _k);
   }
 
-  @Override
-  public boolean containsMemoryUpdateOperation() {
-    return false;
-  }
-
   public void addToSmtString(StringBuilder builder) {
     if (_k >= 0) builder.append("" + _k);
     else builder.append("(- " + (-_k) + ")");

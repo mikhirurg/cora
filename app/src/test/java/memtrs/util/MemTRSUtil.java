@@ -6,6 +6,7 @@ import charlie.terms.TheoryFactory;
 import charlie.trs.TRS;
 import cora.config.Settings;
 import cora.reduction.CalcReducer;
+import cora.reduction.MemReducer;
 import cora.reduction.Reducer;
 import memtrs.util.graph.Graph;
 import memtrs.util.graph.Vertex;
@@ -111,9 +112,9 @@ public class MemTRSUtil {
   }
 
   public static int[] arrayFromMem(int addr) {
-    int[] arr = new int[CalcReducer.GET(addr)];
+    int[] arr = new int[MemReducer.GET(addr)];
     for (int k = addr + 1; k < arr.length + addr + 1; k++) {
-      arr[k - (addr + 1)] = CalcReducer.GET(k);
+      arr[k - (addr + 1)] = MemReducer.GET(k);
     }
 
     return arr;

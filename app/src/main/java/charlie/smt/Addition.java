@@ -207,12 +207,6 @@ public final class Addition extends IntegerExpression {
     return new Addition(cs, _simplified);
   }
 
-  @Override
-  public boolean containsMemoryUpdateOperation() {
-    return _children.stream().map(IntegerExpression::containsMemoryUpdateOperation)
-      .reduce(Boolean::logicalOr).orElse(false);
-  }
-
   public void addToSmtString(StringBuilder builder) {
     builder.append("(+");
     for (int i = 0; i < _children.size(); i++) {
@@ -227,7 +221,6 @@ public final class Addition extends IntegerExpression {
     return switch (other) {
       case IValue v -> 1;
       case IVar x -> 1;
-      case Select g -> 1;
       case CMult cm -> compareTo(cm.queryChild()) <= 0 ? -1 : 1;
       case Addition a -> {
         for (int i = _children.size()-1, j = a._children.size()-1; i >= 0 && j >= 0; i--, j--) {

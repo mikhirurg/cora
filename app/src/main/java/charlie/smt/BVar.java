@@ -55,11 +55,6 @@ public final class BVar extends Constraint {
     return this;
   }
 
-  @Override
-  public boolean containsMemoryUpdateOperation() {
-    return false;
-  }
-
   public void addToSmtString(StringBuilder builder) {
     builder.append("b" + _index);
   }

@@ -2,7 +2,7 @@ package memtrs;
 
 import charlie.terms.Term;
 import charlie.trs.TRS;
-import cora.reduction.CalcReducer;
+import cora.reduction.MemReducer;
 import memtrs.util.MemTRSUtil;
 import memtrs.util.matrix.Matrix;
 import org.junit.jupiter.api.Test;
@@ -208,9 +208,9 @@ public class MatrixTest {
         """,
       trs);
 
-    CalcReducer.resetMemory();
-    CalcReducer.SET(0, 2);
-    CalcReducer.SET(1, 0);
+    MemReducer.resetMemory();
+    MemReducer.SET(0, 2);
+    MemReducer.SET(1, 0);
 
     assertEquals(
       new Matrix(new int[][]{ {0, 1, 1, 0, 0},
@@ -222,6 +222,6 @@ public class MatrixTest {
       MemTRSUtil.termToMatrix(term, trs)
     );
 
-    System.out.println(CalcReducer.MEMORY.toString());
+    System.out.println(MemReducer.MEMORY.toString());
   }
 }

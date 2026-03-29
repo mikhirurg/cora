@@ -113,6 +113,7 @@ public class TrsFactory {
                               boolean includeEta, TrsKind kind) {
     // build the list of rule schemes
     ImmutableList.Builder<TRS.RuleScheme> newschemes = ImmutableList.<TRS.RuleScheme>builder();
+    newschemes.add(TRS.RuleScheme.Mem);
     if (kind._restrictions.queryLevel().compareTo(Level.LAMBDA) >= 0) {
       newschemes.add(TRS.RuleScheme.Beta);
       if (includeEta) newschemes.add(TRS.RuleScheme.Eta);

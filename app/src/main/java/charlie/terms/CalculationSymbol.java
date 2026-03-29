@@ -22,7 +22,7 @@ import java.util.Set;
 /** CalculationSymbols are symbols in the theory signature that can perform a computation. */
 public interface CalculationSymbol extends FunctionSymbol {
   public enum Kind { AND, OR, IFF, XOR, GREATER, SMALLER, GEQ, LEQ, EQUALS, NEQ, NOT,
-                     PLUS, TIMES, DIV, MOD, MINUS, GET, SET }
+                     PLUS, TIMES, DIV, MOD, MINUS }
   public enum Associativity { ASSOC_LEFT, ASSOC_RIGHT, ASSOC_NONE, NOT_INFIX }
 
   public static int INFIX_IFF = 1;

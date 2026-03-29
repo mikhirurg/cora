@@ -25,11 +25,6 @@ public final class Falsehood extends Constraint {
 
   public Falsehood simplify() { return this; }
 
-  @Override
-  public boolean containsMemoryUpdateOperation() {
-    return false;
-  }
-
   public void addToSmtString(StringBuilder builder) {
     builder.append("false");
   }

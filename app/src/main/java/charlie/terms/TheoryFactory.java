@@ -131,15 +131,6 @@ public class TheoryFactory {
   public static final CalculationSymbol modSymbol = new CalculationConstant("%",
     binaryIntOperatorType, Kind.MOD, Associativity.ASSOC_NONE, CalculationSymbol.INFIX_DIVMOD);
 
-  public static final CalculationSymbol getSymbol = new CalculationConstant("GET ",
-    TypeFactory.createArrow(TypeFactory.intSort, TypeFactory.intSort), Kind.GET,
-    Associativity.NOT_INFIX, CalculationSymbol.INFIX_NONE);
-
-  public static final CalculationSymbol setSymbol  = new CalculationConstant("SET",
-    TypeFactory.createArrow(TypeFactory.intSort,
-      TypeFactory.createArrow(TypeFactory.intSort, TypeFactory.boolSort)), Kind.SET,
-    Associativity.NOT_INFIX, CalculationSymbol.INFIX_NONE);
-
   /** The binary calculation symbol for conjunction */
   public static final CalculationSymbol andSymbol = new CalculationConstant("∧",
     binaryBoolConnectiveType, Kind.AND, Associativity.ASSOC_LEFT, CalculationSymbol.INFIX_ANDOR);

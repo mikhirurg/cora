@@ -25,11 +25,6 @@ public final class Truth extends Constraint {
 
   public Truth simplify() { return this; }
 
-  @Override
-  public boolean containsMemoryUpdateOperation() {
-    return false;
-  }
-
   public void addToSmtString(StringBuilder builder) {
     builder.append("true");
   }

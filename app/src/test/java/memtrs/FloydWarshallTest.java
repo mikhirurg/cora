@@ -2,7 +2,7 @@ package memtrs;
 
 import charlie.terms.Term;
 import charlie.trs.TRS;
-import cora.reduction.CalcReducer;
+import cora.reduction.MemReducer;
 import cora.reduction.Reducer;
 import memtrs.util.MemTRSUtil;
 import memtrs.util.graph.Edge;
@@ -94,9 +94,9 @@ public class FloydWarshallTest {
         """
     );
 
-    CalcReducer.resetMemory();
-    CalcReducer.SET(0, 2);
-    CalcReducer.SET(1, 0);
+    MemReducer.resetMemory();
+    MemReducer.SET(0, 2);
+    MemReducer.SET(1, 0);
 
     Term term = trs.lookupSymbol("test").apply(MemTRSUtil.graphToTerm(graph, trs));
 
@@ -135,9 +135,9 @@ public class FloydWarshallTest {
         """
     );
 
-    CalcReducer.resetMemory();
-    CalcReducer.SET(0, 2);
-    CalcReducer.SET(1, 0);
+    MemReducer.resetMemory();
+    MemReducer.SET(0, 2);
+    MemReducer.SET(1, 0);
 
     Term term = trs.lookupSymbol("test").apply(MemTRSUtil.graphToTerm(graph, trs));
 

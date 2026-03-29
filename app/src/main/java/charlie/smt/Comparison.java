@@ -137,13 +137,8 @@ abstract sealed class Comparison extends Constraint permits Geq0, Is0, Neq0 {
       case Iff _ -> -1;
       case EqS _ -> -1;
       case UneqS _ -> -1;
-      case Store _ -> -1;
     };
   }
 
-  @Override
-  public boolean containsMemoryUpdateOperation() {
-    return _expr.containsMemoryUpdateOperation();
-  }
 }
 

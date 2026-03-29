@@ -56,11 +56,6 @@ public final class CMult extends IntegerExpression {
     return new CMult(newconstant, _main);
   }
 
-  @Override
-  public boolean containsMemoryUpdateOperation() {
-    return _main.containsMemoryUpdateOperation();
-  }
-
   public void addToSmtString(StringBuilder builder) {
     if (_constant == -1) builder.append("(- ");
     else if (_constant < 0) builder.append("(* (- " + (-_constant) + ") ");

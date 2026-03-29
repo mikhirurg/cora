@@ -81,11 +81,6 @@ public final class Iff extends Constraint {
     return new Iff(l, r);
   }
 
-  @Override
-  public boolean containsMemoryUpdateOperation() {
-    return _left.containsMemoryUpdateOperation() && _right.containsMemoryUpdateOperation();
-  }
-
   /** Helper function for negate() */
   private int queryConstraintKind(Constraint c) {
     return switch(c) {

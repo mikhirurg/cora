@@ -21,44 +21,46 @@ createQueue4(queueAddr, addr, limit, true) ->
 
 /* Push element to the queue */
 push :: Int -> Int -> Bool
-push1 :: Int -> Int -> Bool
-push2 :: Int -> Int -> Int -> Bool
+push1 :: Int -> Int -> Bool -> Bool
+push2 :: Int -> Int -> Int -> Bool -> Bool
 push3 :: Int -> Bool -> Bool -> Bool
 push(addr, element) ->
-    push1(addr, element) | GET(addr + 1) = 0 /\ SET(addr + 1, 1)
+    push1(addr, element, SETIF(addr + 1, 1, GET(addr + 1) = 0))
 /* spin lock */
-push(addr, element) -> push(addr, element) | GET(addr + 1) = 1
-/* we insert a new element if there is space in the queue */
-/* first we compute the location of the rear: (front + size) % capacity */
-push1(addr, element) ->
-    push2(addr, element, (GET(addr + 3) + GET(addr + 2)) % GET(addr))
-    | GET(addr + 2) < GET(addr)
+push1(addr, element, false) -> push(addr, element)
+/* we insert a new element if there is free space in the queue */
+/* first, we compute the location of the rear */
+push1(addr, element, true) ->
+    push2(addr, element, (GET(addr + 3) + GET(addr + 2)) % GET(addr), GET(addr + 2) < GET(addr))
 /* then if there is space in the queue we insert the element at the rear position
 and increment the size */
-push2(addr, element, rear) ->
+push2(addr, element, rear, true) ->
     push3(addr, SET(addr + 4 + rear, element), SET(addr + 2, GET(addr + 2) + 1))
 /* we can't insert the elem, so return null and unlock the queue */
-push1(addr, element) -> SET(addr + 1, 0) /\ false | GET(addr + 2) >= GET(addr)
+push2(addr, element, rear, false) -> SET(addr + 1, 0) /\ false
 /* release the lock */
 push3(addr, true, true) -> SET(addr + 1, 0)
+
 
 /* Pop element from the queue */
 pop :: Int -> Int
 pop1 :: Int -> Bool -> Int
-pop2 :: Int -> Int -> Int
-pop3 :: Int -> Int -> Bool -> Bool -> Int
-pop4 :: Int -> Int -> Bool -> Int
-pop(addr) -> pop1(addr, SET(addr + 1, 1)) | GET(addr + 1) = 0 /\ SET(addr + 1, 1)
+pop2 :: Int -> Bool -> Int
+pop3 :: Int -> Int -> Int
+pop4 :: Int -> Int -> Bool -> Bool -> Int
+pop5 :: Int -> Int -> Bool -> Int
+pop(addr) -> pop1(addr, SETIF(addr + 1, 1, GET(addr + 1) = 0 /\ SET(addr + 1, 1)))
 /* spin lock */
-pop(addr) -> pop(addr) | GET(addr + 1) = 1
+pop1(addr,  false) -> pop(addr)
 /* we pop the element if there is at least one element in the queue: res = arr[front] */
-pop1(addr, true) -> pop2(addr, GET(addr + 4 + GET(addr + 3))) | GET(addr + 2) > 0
+pop1(addr, true) -> pop2(addr, GET(addr + 2) > 0)
 /* we can't pop the element, so we return -1 */
-pop1(addr, true) -> pop3(addr, -1, true, true) | GET(addr + 2) <= 0
+pop2(addr, false) -> pop4(addr, -1, true, true)
 /* decrease the size of the queue and move the front of the queue */
-pop2(addr, element) ->
-    pop3(addr, element,
+pop2(addr, true) -> pop3(addr, GET(addr + 4 + GET(addr + 3)))
+pop3(addr, element) ->
+    pop4(addr, element,
         SET(addr + 2, GET(addr + 2) - 1), SET(addr + 3, (GET(addr + 3) + 1) % GET(addr)))
 /* release the lock */
-pop3(addr, element, true, true) -> pop4(addr, element, SET(addr + 1, 0))
-pop4(addr, element, true) -> element
+pop4(addr, element, true, true) -> pop5(addr, element, SET(addr + 1, 0))
+pop5(addr, element, true) -> element

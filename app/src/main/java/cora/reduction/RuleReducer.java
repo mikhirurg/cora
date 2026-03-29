@@ -82,13 +82,7 @@ class RuleReducer implements ReduceObject {
     }
     Term csub = _rule.queryConstraint().substitute(subst);
     if (csub.isGround()) {
-      if (TermAnalyser.containsMemoryOperations(csub)) {
-        synchronized (this) {
-          if (!TermAnalyser.evaluate(csub).getBool()) return null;
-        }
-      } else {
-        if (!TermAnalyser.evaluate(csub).getBool()) return null;
-      }
+      if (!TermAnalyser.evaluate(csub).getBool()) return null;
     }
     else {
       Substitution result = null;

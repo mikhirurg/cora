@@ -19,7 +19,7 @@ import java.lang.Comparable;
 
 /** Boolean constraints, to be sent to an SMT solver. */
 public sealed abstract class Constraint implements Comparable<Constraint>
-  permits BVar, Comparison, EqS, Falsehood, Iff, Junction, NBVar, Store, Truth, UneqS {
+  permits BVar, Comparison, EqS, Falsehood, Iff, Junction, NBVar, Truth, UneqS {
 
   /**
    * This variable should be set to true in the constructor if the Constraint is simplified.
@@ -103,6 +103,5 @@ public sealed abstract class Constraint implements Comparable<Constraint>
     return (other instanceof Constraint) && compareTo((Constraint)other) == 0;
   }
 
-  public abstract boolean containsMemoryUpdateOperation();
 }
 

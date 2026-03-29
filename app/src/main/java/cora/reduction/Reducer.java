@@ -62,6 +62,9 @@ public class Reducer {
     _arityKeySet = new HashSet<>();
     for (int i = 0; i < trs.querySchemeCount(); i++) {
       switch (trs.queryScheme(i)) {
+        case RuleScheme.Mem:
+          _components.add(new MemReducer());
+          break;
         case RuleScheme.Eta:
           _components.add(new EtaReducer());
           break;
@@ -132,6 +135,7 @@ public class Reducer {
     while (!parts.isEmpty()) {
       Term sub = parts.pop();
 
+      /*
       if (sub.queryRoot().queryName().equals("GET")) {
         return false;
       }
@@ -139,6 +143,11 @@ public class Reducer {
       if (sub.queryRoot().queryName().equals("SET")) {
         return false;
       }
+
+      if (sub.queryRoot().queryName().equals("SETIF")) {
+        return false;
+      }
+       */
 
       if (sub.isVariable() || sub.isValue()) continue;
       for (int i = 1; i <= sub.numberArguments(); i++) parts.add(sub.queryArgument(i));
@@ -294,7 +303,7 @@ public class Reducer {
 
         if (isReduced) {
           totalParallelSteps++;
-          //System.out.println(s);
+          System.out.println(s);
           //System.out.println(MemReducer.MEMORY.toString());
           return s;
         } else {

@@ -93,11 +93,6 @@ public final class Division extends IntegerExpression {
     }
   }
 
-  @Override
-  public boolean containsMemoryUpdateOperation() {
-    return _numerator.containsMemoryUpdateOperation() && _denominator.containsMemoryUpdateOperation();
-  }
-
   public void addToSmtString(StringBuilder builder) {
     builder.append("(div ");
     _numerator.addToSmtString(builder);
@@ -110,7 +105,6 @@ public final class Division extends IntegerExpression {
     return switch (other) {
       case IValue v -> 1;
       case IVar x -> 1;
-      case Select g -> 1;
       case CMult cm -> compareTo(cm.queryChild()) <= 0 ? -1 : 1;
       case Addition a -> 1;
       case Multiplication m -> 1;
