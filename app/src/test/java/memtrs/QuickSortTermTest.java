@@ -20,7 +20,7 @@ public class QuickSortTermTest {
         """
         test :: list -> list
         
-        test(lst) -> qSort_term(lst, 0, listLen(lst))
+        test(lst) -> quicksortList(lst)
         """
     );
 
@@ -39,7 +39,7 @@ public class QuickSortTermTest {
         """
         test :: list -> list
         
-        test(lst) -> qSort_term(lst, 0, listLen(lst))
+        test(lst) -> quicksortList(lst)
         """
     );
 

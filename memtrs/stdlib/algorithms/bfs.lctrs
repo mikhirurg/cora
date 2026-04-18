@@ -55,7 +55,7 @@ parBFS3(graph, arrAddr, queue1Addr, queue2Addr, true, true) ->
             worker(graph, arrAddr, queue2Addr, pop(queue1Addr)),
             worker(graph, arrAddr, queue2Addr, pop(queue1Addr)))
 /* 4) explore child nodes in parallel, add to the next layer queue */
-worker(graph, arrAddr, queueAddr, x) -> -1 | x < 0
+worker(graph, arrAddr, queueAddr, x) -> 0 | x < 0
 worker(graph, arrAddr, queueAddr, x) ->
     worker1(graph, arrAddr, queueAddr, x) | x >= 0
 /* 4.1) for current node: fetch the graph row, set current node as visited */
@@ -96,9 +96,9 @@ parBFS4(graph, arrAddr, queue1Addr, queue2Addr,
         c6, c7, c8, c9, c10) ->
     parBFS3(graph, arrAddr, queue2Addr, queue1Addr, true, true)
     | (c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8 + c9 + c10 < 10) /\
-        (c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8 + c9 + c10 > -10)
+        (c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8 + c9 + c10 > 0)
 /* 7) If none of the workers were scheduled => finish the algorithm, return the array address */
 parBFS4(graph, arrAddr, queue1Addr, queue2Addr,
         c1, c2, c3, c4, c5,
         c6, c7, c8, c9, c10) -> arrAddr
-    | c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8 + c9 + c10 = -10
+    | c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8 + c9 + c10 = 0

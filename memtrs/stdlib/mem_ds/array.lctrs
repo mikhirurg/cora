@@ -25,6 +25,7 @@ getArr :: Int -> Int -> Int
 getArr1 :: Int -> Int -> Int -> Int
 getArr(addr, i) -> getArr1(addr, i, GET(addr))
 getArr1(addr, i, size) -> GET(addr + i + 1) | i < size
+getArr1(addr, i, size) -> -1 | i < 0 \/ i >= size
 
 /* SET Array element */
 /* addr -> index -> value -> is successful? */
@@ -32,7 +33,7 @@ setArr :: Int -> Int -> Int -> Bool
 setArr1 :: Int -> Int -> Int -> Int -> Bool
 setArr(addr, i, value) -> setArr1(addr, i, value, GET(addr))
 setArr1(addr, i, value, size) -> SET(addr + i + 1, value) | i < size
-setArr1(addr, i, value, size) -> false | i >= size
+setArr1(addr, i, value, size) -> false | i < 0 \/ i >= size
 
 /* Get Array size */
 getArrSize :: Int -> Int
@@ -54,9 +55,10 @@ swapArr1 :: Int -> Int -> Int -> Int -> Bool
 swapArr2 :: Int -> Int -> Int -> Int -> Int -> Bool
 swapArr3 :: Bool -> Bool -> Bool
 swapArr(addr, i1, i2) -> swapArr1(addr, i1, i2, GET(addr))
-swapArr1(addr, i1, i2, size) -> false | (i1 >= size) \/ (i2 >= size)
+swapArr1(addr, i1, i2, size) -> false | (i1 >= size) \/ (i2 >= size) \/ (i1 < 0) \/ (i2 < 0)
 swapArr1(addr, i1, i2, size) ->
-    swapArr2(addr, i1, i2, GET(addr + i1 + 1), GET(addr + i2 + 1)) | (i1 < size) /\ (i2 < size)
+    swapArr2(addr, i1, i2, GET(addr + i1 + 1), GET(addr + i2 + 1))
+    | (i1 < size) /\ (i2 < size) /\ (i1 >= 0) /\ (i2 >= 0)
 swapArr2(addr, i1, i2, val1, val2) -> swapArr3(SET(addr + i2 + 1, val1), SET(addr + i1 + 1, val2))
 swapArr3(status1, status2) -> true | status1 /\ status2
 swapArr3(status1, status2) -> false | not(status1 /\ status2)

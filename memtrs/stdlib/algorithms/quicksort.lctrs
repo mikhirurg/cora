@@ -1,23 +1,6 @@
 #include ../mem_ds/array.lctrs
 
 /* Quick Sort */
-qSortPartition :: Int -> Int -> Int -> Int
-qSortPartition1 :: Int -> Int -> Int -> Int -> Int
-qSortPartition2 :: Int -> Int -> Int -> Int -> Int -> Int -> Int
-qSortPartition3 :: Int -> Int -> Int -> Int -> Bool -> Int
-qSortPartition4 :: Int -> Int -> Int -> Int -> Bool -> Int
-qSortPartition(addr, l, r) -> qSortPartition1(addr, l, r, l)
-qSortPartition1(addr, l, r, i) ->
-    qSortPartition2(addr, l, r, i, getArr(addr, l), getArr(addr, r - 1)) | l < r - 1
-qSortPartition2(addr, l, r, i, val1, val2) ->
-    qSortPartition3(addr, l, r, i, swapArr(addr, i, l)) | val1 <= val2
-qSortPartition3(addr, l, r, i, true) -> qSortPartition1(addr, l + 1, r, i + 1)
-qSortPartition2(addr, l, r, i, val1, val2) ->
-    qSortPartition1(addr, l + 1, r, i) | val1 > val2
-qSortPartition1(addr, l, r, i) ->
-    qSortPartition4(addr, l, r, i, swapArr(addr, i, r - 1)) | l >= r - 1
-qSortPartition4(addr, l, r, i, true) -> i
-
 partition :: Int -> Int -> Int -> Int
 partition1 :: Int -> Int -> Int -> Int -> Int -> Int -> Int
 partition2 :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int

@@ -10,7 +10,8 @@ createQueue1 :: Int -> Int -> Int
 createQueue2 :: Int -> Int -> Bool -> Int
 createQueue3 :: Int -> Int -> Int -> Int
 createQueue4 :: Int -> Int -> Int -> Bool -> Int
-createQueue(cap) -> createQueue1(alloc(cap + 4), cap)
+createQueue(cap) -> createQueue1(alloc(cap + 4), cap) | cap > 0
+createQueue(cap) -> -1 | cap <= 0
 createQueue1(addr, cap) -> createQueue2(addr, cap, SET(addr, cap))
 createQueue2(addr, cap, true) -> createQueue3(addr, addr + 1, cap + 3)
 createQueue3(queueAddr, addr, limit) ->
@@ -24,6 +25,8 @@ push :: Int -> Int -> Bool
 push1 :: Int -> Int -> Bool -> Bool
 push2 :: Int -> Int -> Int -> Bool -> Bool
 push3 :: Int -> Bool -> Bool -> Bool
+push4 :: Int -> Bool
+push5 :: Int -> Bool
 push(addr, element) ->
     push1(addr, element, CAS(addr + 1, 0, 1))
 /* spin lock */
@@ -37,9 +40,11 @@ and increment the size */
 push2(addr, element, rear, true) ->
     push3(addr, SET(addr + 4 + rear, element), SET(addr + 2, GET(addr + 2) + 1))
 /* we can't insert the elem, so return null and unlock the queue */
-push2(addr, element, rear, false) -> SET(addr + 1, 0) /\ false
+push2(addr, element, rear, false) -> push4(addr)
+push4(addr) -> SET(addr + 1, 0) /\ false
 /* release the lock */
-push3(addr, true, true) -> SET(addr + 1, 0)
+push3(addr, true, true) -> push5(addr)
+push5(addr) -> SET(addr + 1, 0)
 
 
 /* Pop element from the queue */

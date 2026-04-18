@@ -152,7 +152,7 @@ public class BFSTest {
     int[] sizes = IntStream.iterate(1, i -> i + 1).limit(30).toArray();
 
 
-    System.setOut(new PrintStream(new FileOutputStream("bfs_test1_not_par_cas.txt")));
+    System.setOut(new PrintStream(new FileOutputStream("bfs_test1_not_par_cas_trie.txt")));
     for (int i = 1; i < 30; i++) {
       for (int j = 1; j <= i * i; j++) {
         for (int k = 0; k < 3; k++) {
@@ -162,9 +162,11 @@ public class BFSTest {
       }
     }
 
+
     //mcBfsTest(4,4,0);
-/*
-    System.setOut(new PrintStream(new FileOutputStream("bfs_test1_par_cas.txt")));
+
+    /*
+    System.setOut(new PrintStream(new FileOutputStream("bfs_test1_par_cas_1.txt")));
     for (int i = 1; i < 30; i++) {
       for (int j = 1; j <= i * i; j++) {
         for (int k = 0; k < 3; k++) {
@@ -172,8 +174,7 @@ public class BFSTest {
           mcBfsTest(i, j, k);
         }
       }
-    }
+    }*/
     //mcBfsTest(5, 5, 1);
-  */
   }
 }

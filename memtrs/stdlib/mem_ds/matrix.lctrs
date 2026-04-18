@@ -1,6 +1,7 @@
 #include array.lctrs
 #include ../term_ds/graph.lctrs
 #include ../term_ds/matrix_term.lctrs
+#include ../math.lctrs
 
 /* ================================== IN-MEM DS: MATRIX ========================================= */
 
@@ -9,7 +10,8 @@ createMatrix1 :: Int -> Int -> Int -> Int
 createMatrix2 :: Int -> Int -> Int -> Int -> Int
 createMatrix3 :: Int -> Int -> Int -> Int -> Int -> Int
 createMatrix4 :: Bool -> Int -> Int -> Int -> Int -> Int -> Int
-createMatrix(w, h) -> createMatrix1(createArray(h), w, h)
+createMatrix(w, h) -> createMatrix1(createArray(h), w, h) | w > 0 /\ h > 0
+createMatrix(w, h) -> -1 | w <= 0 \/ h <= 0
 createMatrix1(arrsAddr, w, h) -> createMatrix2(arrsAddr, w, h, 0)
 createMatrix2(arrsAddr, w, h, i) -> createMatrix3(createArray(w), arrsAddr, w, h, i) | i < h
 createMatrix3(addr, arrsAddr, w, h, i) ->
@@ -49,15 +51,18 @@ fillMatrix(addr, val) -> fillMatrix1(addr, val, getMatrixHeight(addr), 0)
 fillMatrix1(addr, val, height, i) ->
     fillMatrix2(addr, val, height, i, fillArray(getArr(addr, i), val)) | i < height
 fillMatrix2(addr, val, height, i, true) -> fillMatrix1(addr, val, height, i + 1)
+fillMatrix2(addr, val, height, i, false) -> false
 fillMatrix1(addr, val, height, i) -> true | i >= height
 
 fillMatrixDiag :: Int -> Int -> Bool
 fillMatrixDiag1 :: Int -> Int -> Int -> Int -> Bool
 fillMatrixDiag2 :: Int -> Int -> Int -> Int -> Bool -> Bool
-fillMatrixDiag(addr, val) -> fillMatrixDiag1(addr, val, getMatrixWidth(addr), 0)
+fillMatrixDiag(addr, val) ->
+    fillMatrixDiag1(addr, val, min(getMatrixWidth(addr), getMatrixHeight(addr)), 0)
 fillMatrixDiag1(addr, val, width, i) ->
     fillMatrixDiag2(addr, val, width, i, setMatrix(addr, i, i, val)) | i < width
 fillMatrixDiag2(addr, val, width, i, true) -> fillMatrixDiag1(addr, val, width, i + 1)
+fillMatrixDiag2(addr, val, width, i, false) -> false
 fillMatrixDiag1(addr, val, width, i) -> true | i >= width
 
 /* Matrix to Term */
@@ -78,7 +83,9 @@ graphToMatrix3 :: graph -> Int -> Int -> Bool -> Int
 graphToMatrix4 :: graph -> list -> Int -> Int -> Int
 graphToMatrix5 :: graph -> list -> Int -> Int -> Bool -> Int
 graphToMatrix(graph, default) -> graphToMatrix1(graph, default, numNodes(graph))
-graphToMatrix1(graph, default, size) -> graphToMatrix2(graph, default, createMatrix(size, size), 0)
+graphToMatrix1(graph, default, size) ->
+    graphToMatrix2(graph, default, createMatrix(size, size), 0) | size > 0
+graphToMatrix1(graph, default, size) -> -1 | size <= 0
 graphToMatrix2(graph, default, addr, i) ->
     graphToMatrix3(graph, addr, i, fillMatrix(addr, default))
 graphToMatrix3(consG(l, graph), addr, i, true) ->

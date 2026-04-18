@@ -42,6 +42,7 @@ import charlie.trs.Rule;
 import charlie.trs.TRS;
 import charlie.trs.TRS.RuleScheme;
 import cora.config.Settings;
+import cora.reduction.disjointTree.PrefixFreeTrie;
 
 /**
  * A Reducer is a straightforward class to reduce terms for a given TRS.
@@ -135,20 +136,6 @@ public class Reducer {
     while (!parts.isEmpty()) {
       Term sub = parts.pop();
 
-      /*
-      if (sub.queryRoot().queryName().equals("GET")) {
-        return false;
-      }
-
-      if (sub.queryRoot().queryName().equals("SET")) {
-        return false;
-      }
-
-      if (sub.queryRoot().queryName().equals("SETIF")) {
-        return false;
-      }
-       */
-
       if (sub.isVariable() || sub.isValue()) continue;
       for (int i = 1; i <= sub.numberArguments(); i++) parts.add(sub.queryArgument(i));
       if (sub.isAbstraction() || hasBinder(sub)) continue;
@@ -161,45 +148,6 @@ public class Reducer {
       }
     }
     return true;
-  }
-
-  private boolean isPrefix(List<String> a, List<String> b) {
-    if (a.size() > b.size()) {
-      return false;
-    }
-    for (int i = 0; i < a.size(); i++) {
-      if (!a.get(i).equals(b.get(i))) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  private List<Position> getArgsPositions(Term t) {
-    List<Pair<Term, Position>> subterms = t.querySubterms().reversed();
-    List<Position> children = new ArrayList<>();
-
-    List<String> parentPos = List.of(subterms.getFirst().toString().split("\\."));
-    parentPos = parentPos.subList(0, parentPos.size() - 1);
-    for (int i = 1; i < subterms.size(); i++) {
-      List<String> childPos = List.of(subterms.get(i).snd().toString().split("\\."));
-      childPos = childPos.subList(0, childPos.size() - 1);
-      if (childPos.size() == parentPos.size() + 1 && isPrefix(parentPos, childPos)) {
-        children.add(subterms.get(i).snd());
-      }
-    }
-
-    return children;
-  }
-
-  private List<Position> findInTerm(Term t, String name) {
-    List<Position> positions = new ArrayList<>();
-    for (Pair<Term, Position> subterm : t.querySubterms()) {
-      if (subterm.fst().queryRoot().toString().equals(name)) {
-        positions.add(subterm.snd());
-      }
-    }
-    return positions;
   }
 
   /**
@@ -266,8 +214,9 @@ public class Reducer {
       return null;
     } else if (Settings.queryReductionMode() == Settings.ReductionMode.Parallel) {
       boolean isReduced = false;
+
       try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
-        List<Future<Pair<Position, Term>>> results = new ArrayList<>();
+        List<Future<Pair<Term, Position>>> results = new ArrayList<>();
         subterms.forEach(subterm -> {
             Term sub = subterm.fst();
             Position pos = subterm.snd();
@@ -279,18 +228,23 @@ public class Reducer {
                   result = _components.get(j).apply(sub);
                 }
               }
-              return new Pair<>(pos, result);
+              return new Pair<>(result, pos);
             }));
           }
         );
 
-        for (Future<Pair<Position, Term>> future : results) {
-          Pair<Position, Term> p = future.get();
-          if (p.snd() != null) {
-            if (s.queryPositions(false).contains(p.fst())) {
-              s = s.replaceSubterm(p.fst(), p.snd());
+        PrefixFreeTrie trie = new PrefixFreeTrie();
+
+        for (Future<Pair<Term, Position>> future : results) {
+          Pair<Term, Position> p = future.get();
+          if (p.fst() != null) {
+            if (trie.insert(p.snd())) {
+              s = s.replaceSubterm(p.snd(), p.fst());
+              isReduced = true;
             }
-            isReduced = true;
+            if (isReduced) {
+              //System.out.println(p.fst());
+            }
           }
         }
 
