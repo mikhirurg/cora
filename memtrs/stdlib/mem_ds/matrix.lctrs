@@ -6,18 +6,20 @@
 /* ================================== IN-MEM DS: MATRIX ========================================= */
 
 createMatrix :: Int -> Int -> Int
-createMatrix1 :: Int -> Int -> Int -> Int
-createMatrix2 :: Int -> Int -> Int -> Int -> Int
-createMatrix3 :: Int -> Int -> Int -> Int -> Int -> Int
-createMatrix4 :: Bool -> Int -> Int -> Int -> Int -> Int -> Int
-createMatrix(w, h) -> createMatrix1(createArray(h), w, h) | w > 0 /\ h > 0
+createMatrixInit :: Int -> Int -> Int -> Int
+createMatrixLoop :: Int -> Int -> Int -> Int -> Int
+createMatrixCreateRow :: Int -> Int -> Int -> Int -> Int -> Int
+createMatrixStoreRow :: Bool -> Int -> Int -> Int -> Int -> Int -> Int
+createMatrix(w, h) -> createMatrixInit(createArray(h), w , h) | w > 0 /\ h > 0
 createMatrix(w, h) -> -1 | w <= 0 \/ h <= 0
-createMatrix1(arrsAddr, w, h) -> createMatrix2(arrsAddr, w, h, 0)
-createMatrix2(arrsAddr, w, h, i) -> createMatrix3(createArray(w), arrsAddr, w, h, i) | i < h
-createMatrix3(addr, arrsAddr, w, h, i) ->
-    createMatrix4(setArr(arrsAddr, i, addr), addr, arrsAddr, w, h, i)
-createMatrix4(true, addr, arrsAddr, w, h, i) -> createMatrix2(arrsAddr, w, h, i + 1)
-createMatrix2(arrsAddr, w, h, i) -> arrsAddr | i >= h
+createMatrixInit(arrsAddr, w, h) -> createMatrixLoop(arrsAddr, w, h, 0) | true
+createMatrixLoop(arrsAddr, w, h, i) ->
+    createMatrixCreateRow(createArray(w), arrsAddr, w, h, i) | i < h
+createMatrixCreateRow(addr, arrsAddr, w, h, i) ->
+    createMatrixStoreRow(setArr(arrsAddr, i, addr), addr, arrsAddr, w, h, i) | true
+createMatrixStoreRow(true, addr, arrsAddr, w, h, i) ->
+    createMatrixLoop(arrsAddr, w, h, i + 1) | true
+createMatrixLoop(arrsAddr, w, h, i) -> arrsAddr | i >= h
 
 /* Get matrix width */
 getMatrixWidth :: Int -> Int
@@ -29,69 +31,73 @@ getMatrixHeight(addr) -> getArrSize(addr)
 
 /* Get element from matrix */
 getMatrix :: Int -> Int -> Int -> Int
-getMatrix1 :: Int -> Int -> Int -> Int -> Int -> Int
-getMatrix(addr, x, y) -> getMatrix1(addr, getMatrixWidth(addr), getMatrixHeight(addr), x, y)
-getMatrix1(addr, width, height, x, y) ->
+getMatrixBounds :: Int -> Int -> Int -> Int -> Int -> Int
+getMatrix(addr, x, y) ->
+    getMatrixBounds(addr, getMatrixWidth(addr), getMatrixHeight(addr), x, y) | true
+getMatrixBounds(addr, width, height, x, y) ->
     getArr(getArr(addr, y), x) | 0 <= x /\ x < width /\ 0 <= y /\ y < height
+getMatrixBounds(addr, width, height, x, y) -> -1 | 0 > x \/ x >= width \/ 0 > y \/ y >= height
 
 /* Set element in matrix */
 setMatrix :: Int -> Int -> Int -> Int -> Bool
-setMatrix1 :: Int -> Int -> Int -> Int -> Int -> Int -> Bool
+setMatrixBounds :: Int -> Int -> Int -> Int -> Int -> Int -> Bool
 setMatrix(addr, x, y, val) ->
-    setMatrix1(addr, getMatrixWidth(addr), getMatrixHeight(addr), x, y, val)
-setMatrix1(addr, width, height, x, y, val) ->
+    setMatrixBounds(addr, getMatrixWidth(addr), getMatrixHeight(addr), x, y, val) | true
+setMatrixBounds(addr, width, height, x, y, val) ->
     setArr(getArr(addr, y), x, val) | 0 <= x /\ x < width /\ 0 <= y /\ y < height
-setMatrix1(addr, width, height, x, y, val) -> false | 0 > x \/ x >= width \/ 0 > y \/ y >= height
+setMatrixBounds(addr, width, height, x, y, val) ->
+    false | 0 > x \/ x >= width \/ 0 > y \/ y >= height
 
 /* Fill Matrix */
 fillMatrix :: Int -> Int -> Bool
-fillMatrix1 :: Int -> Int -> Int -> Int -> Bool
-fillMatrix2 :: Int -> Int -> Int -> Int -> Bool -> Bool
-fillMatrix(addr, val) -> fillMatrix1(addr, val, getMatrixHeight(addr), 0)
-fillMatrix1(addr, val, height, i) ->
-    fillMatrix2(addr, val, height, i, fillArray(getArr(addr, i), val)) | i < height
-fillMatrix2(addr, val, height, i, true) -> fillMatrix1(addr, val, height, i + 1)
-fillMatrix2(addr, val, height, i, false) -> false
-fillMatrix1(addr, val, height, i) -> true | i >= height
+fillMatrixLoop :: Int -> Int -> Int -> Int -> Bool
+fillMatrixStep :: Int -> Int -> Int -> Int -> Bool -> Bool
+fillMatrix(addr , val) -> fillMatrixLoop(addr, val, getMatrixHeight(addr), 0) | true
+fillMatrixLoop(addr, val, height, i) ->
+    fillMatrixStep(addr, val, height, i, fillArray(getArr(addr , i), val)) | i < height
+fillMatrixStep(addr, val, height, i, true) -> fillMatrixLoop(addr, val, height, i + 1) | true
+fillMatrixStep(addr, val, height, i, false) -> false | true
+fillMatrixLoop(addr, val, height, i) -> true | i >= height
 
+/* Fill Matrix Diagonal */
 fillMatrixDiag :: Int -> Int -> Bool
-fillMatrixDiag1 :: Int -> Int -> Int -> Int -> Bool
-fillMatrixDiag2 :: Int -> Int -> Int -> Int -> Bool -> Bool
+fillMatrixDiagLoop :: Int -> Int -> Int -> Int -> Bool
+fillMatrixDiagStep :: Int -> Int -> Int -> Int -> Bool -> Bool
 fillMatrixDiag(addr, val) ->
-    fillMatrixDiag1(addr, val, min(getMatrixWidth(addr), getMatrixHeight(addr)), 0)
-fillMatrixDiag1(addr, val, width, i) ->
-    fillMatrixDiag2(addr, val, width, i, setMatrix(addr, i, i, val)) | i < width
-fillMatrixDiag2(addr, val, width, i, true) -> fillMatrixDiag1(addr, val, width, i + 1)
-fillMatrixDiag2(addr, val, width, i, false) -> false
-fillMatrixDiag1(addr, val, width, i) -> true | i >= width
+    fillMatrixDiagLoop(addr, val, min(getMatrixWidth(addr), getMatrixHeight(addr)), 0) | true
+fillMatrixDiagLoop(addr, val, side, i) ->
+    fillMatrixDiagStep(addr, val, side, i, setMatrix(addr, i, i, val)) | i < side
+fillMatrixDiagStep(addr, val, side, i, true) -> fillMatrixDiagLoop(addr, val, side, i + 1) | true
+fillMatrixDiagStep(addr, val, side, i, false) -> false | true
+fillMatrixDiagLoop(addr, val, side, i) -> true | i >= side
 
 /* Matrix to Term */
 matrixToTerm :: Int -> matrix
-matrixToTerm1 :: Int -> Int -> Int -> matrix -> matrix
-matrixToTerm2 :: Int -> Int -> Int -> matrix -> matrix
-matrixToTerm(addr) -> matrixToTerm1(addr, getMatrixHeight(addr), 0, rowNil)
-matrixToTerm1(addr, size, i, m) ->
-    row(arrayToList(getArr(addr, i)), matrixToTerm2(addr, size, i, m)) | i < size
-matrixToTerm2(addr, size, i, m) -> matrixToTerm1(addr, size, i + 1, m)
-matrixToTerm1(addr, size, i, m) -> m | i >= size
+matrixToTermLoop :: Int -> Int -> Int -> matrix -> matrix
+matrixToTermNext :: Int -> Int -> Int -> matrix -> matrix
+matrixToTerm(addr) -> matrixToTermLoop(addr, getMatrixHeight(addr), 0, rowNil) | true
+matrixToTermLoop(addr, size, i, m) ->
+    row(arrayToList(getArr(addr, i)), matrixToTermNext(addr, size, i, m)) | i < size
+matrixToTermNext(addr, size, i, m) -> matrixToTermLoop(addr, size, i + 1, m) | true
+matrixToTermLoop(addr, size, i, m) -> m | i >= size
 
 /* Graph to Matrix */
 graphToMatrix :: graph -> Int -> Int
-graphToMatrix1 :: graph -> Int -> Int -> Int
-graphToMatrix2 :: graph -> Int -> Int -> Int -> Int
-graphToMatrix3 :: graph -> Int -> Int -> Bool -> Int
-graphToMatrix4 :: graph -> list -> Int -> Int -> Int
-graphToMatrix5 :: graph -> list -> Int -> Int -> Bool -> Int
-graphToMatrix(graph, default) -> graphToMatrix1(graph, default, numNodes(graph))
-graphToMatrix1(graph, default, size) ->
-    graphToMatrix2(graph, default, createMatrix(size, size), 0) | size > 0
-graphToMatrix1(graph, default, size) -> -1 | size <= 0
-graphToMatrix2(graph, default, addr, i) ->
-    graphToMatrix3(graph, addr, i, fillMatrix(addr, default))
-graphToMatrix3(consG(l, graph), addr, i, true) ->
-    graphToMatrix4(graph, l, addr, i)
-graphToMatrix3(nilG, addr, i, true) -> addr
-graphToMatrix4(graph, cons(x, l), addr, i) ->
-    graphToMatrix5(graph, l, addr, i, setMatrix(addr, x, i, 1))
-graphToMatrix4(graph, nil, addr, i) -> graphToMatrix3(graph, addr, i + 1, true)
-graphToMatrix5(graph, l, addr, i, true) -> graphToMatrix4(graph, l, addr, i)
+graphToMatrixSize :: graph -> Int -> Int -> Int
+graphToMatrixInit :: graph -> Int -> Int -> Int -> Int
+graphToMatrixLoop :: graph -> Int -> Int -> Bool -> Int
+graphToMatrixEdges :: graph -> list -> Int -> Int -> Int
+graphToMatrixStoreEdge :: graph -> list -> Int -> Int -> Bool -> Int
+graphToMatrix(graph, default) -> graphToMatrixSize(graph, default, numNodes(graph)) | true
+graphToMatrixSize(graph, default, size) ->
+    graphToMatrixInit(graph, default, createMatrix(size, size), 0) | size > 0
+graphToMatrixSize(graph, default, size) -> -1 | size <= 0
+graphToMatrixInit(graph, default, addr, i) ->
+    graphToMatrixLoop(graph, addr, i, fillMatrix(addr, default)) | addr = addr
+graphToMatrixLoop(consG(l, graph), addr, i, true) ->
+    graphToMatrixEdges(graph, l, addr, i) | true
+graphToMatrixLoop(nilG, addr , i, true) -> addr | true
+graphToMatrixEdges(graph, cons(x, l), addr, i) ->
+    graphToMatrixStoreEdge(graph, l, addr, i, setMatrix(addr, x, i, 1)) | true
+graphToMatrixEdges(graph, nil, addr, i) -> graphToMatrixLoop(graph, addr, i + 1, true) | true
+graphToMatrixStoreEdge(graph, l, addr, i, true) -> graphToMatrixEdges(graph, l, addr, i) | true

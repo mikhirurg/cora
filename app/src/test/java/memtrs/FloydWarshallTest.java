@@ -1,6 +1,7 @@
 package memtrs;
 
 import charlie.terms.Term;
+import charlie.terms.TheoryFactory;
 import charlie.trs.TRS;
 import cora.reduction.MemReducer;
 import cora.reduction.Reducer;
@@ -16,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 import static memtrs.util.MemTRSUtil.MEMTRS_STDLIB_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,7 +25,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class FloydWarshallTest {
 
   public static Graph graph1;
-
+  /* Example graph:
+     (1) --> (2)
+      |       ^
+      |       |
+      |    > (5)
+      |   /
+      |  /
+      v /
+     (3) --> (4) */
   static {
     graph1 = new Graph();
     graph1.addVertice(new Vertex(0));
@@ -64,9 +74,41 @@ public class FloydWarshallTest {
           }
         }
       }
+      System.out.println(Arrays.deepToString(dist));
     }
 
     return new Matrix(dist);
+  }
+
+  @Test
+  void exampleGraph() {
+    Graph graph = new Graph();
+    graph.addVertice(new Vertex(0));
+    graph.addVertice(new Vertex(1));
+    graph.addVertice(new Vertex(2));
+
+    graph.addEdge(new Vertex(0), new Vertex(1));
+    graph.addEdge(new Vertex(1), new Vertex(2));
+    graph.addEdge(new Vertex(2), new Vertex(0));
+
+    //floydWarshall(graph);
+
+    TRS trs = MemTRSUtil.constructTRS("#include " + MEMTRS_STDLIB_PATH + "algorithms/floyd_warshall.lctrs\n\n" +
+      """
+      """);
+
+    Term graphTerm = MemTRSUtil.graphToTerm(graph, trs);
+    System.out.println(graphTerm);
+    Term result =
+      trs.lookupSymbol("graphToMatrix").apply(graphTerm).apply(TheoryFactory.createValue(0));
+
+    MemReducer.resetMemory();
+    MemReducer.SET(0, 2);
+    MemReducer.SET(1, 0);
+
+    int address = MemTRSUtil.termToInt(result, trs);
+
+    System.out.println(MemReducer.MEMORY);
   }
 
   static void floydWarshallTest(int nodes, int edges, int iteration) {
@@ -90,7 +132,7 @@ public class FloydWarshallTest {
         test1 :: graph -> Bool -> Int
         
         test(g) -> test1(g, SET(0, 1))
-        test1(g, true) -> floyd_warshall(g)
+        test1(g, true) -> floydWarshall(g)
         """
     );
 
@@ -164,7 +206,7 @@ public class FloydWarshallTest {
         test1 :: graph -> Bool -> Bool -> Int
         
         test(g) -> test1(g, SET(0, 2), SET(1, 0))
-        test1(g, true, true) -> floyd_warshall(g)
+        test1(g, true, true) -> floydWarshall(g)
         """
     );
 

@@ -4,95 +4,80 @@
 #include ../term_ds/matrix_term.lctrs
 #include ../math.lctrs
 
-floyd_warshall :: graph -> Int
-floyd_warshall1 :: Int -> Int
-floyd_warshall2 :: Int -> Int -> Bool -> Int
-floyd_warshall3 :: Int -> Int -> Int -> Int -> Int -> Int
-floyd_warshall4 :: Int -> Int -> Int -> Int -> Int -> Int
-floyd_warshall5 :: Int -> Int -> Int -> Int -> Int -> Int
-floyd_warshall6 :: Int -> Int -> Int -> Int -> Int -> Bool -> Int
-floyd_warshall(g) -> floyd_warshall1(graphToMatrix(g, numNodes(g) * 100))
-floyd_warshall1(addr) -> floyd_warshall2(addr, getMatrixWidth(addr), fillMatrixDiag(addr, 0))
-floyd_warshall2(addr, size, true) -> floyd_warshall3(addr, size, 0, 0, 0)
-floyd_warshall3(addr, size, i, j, k) -> floyd_warshall4(addr, size, i, j, k) | k < size
-floyd_warshall4(addr, size, i, j, k) -> floyd_warshall5(addr, size, i, j, k) | i < size
-floyd_warshall5(addr, size, i, j, k) ->
-    floyd_warshall6(addr, size, i, j, k,
+floydWarshall :: graph -> Int
+floydWarshallInit :: Int -> Int
+floydWarshallZeroDiag :: Int -> Int -> Bool -> Int
+floydWarshallLoopK :: Int -> Int -> Int -> Int -> Int -> Int
+floydWarshallLoopI :: Int -> Int -> Int -> Int -> Int -> Int
+floydWarshallLoopJ :: Int -> Int -> Int -> Int -> Int -> Int
+floydWarshallStore :: Int -> Int -> Int -> Int -> Int -> Bool -> Int
+
+floydWarshall(g) -> floydWarshallInit(graphToMatrix(g, numNodes(g) * 100))
+floydWarshallInit(addr) ->
+    floydWarshallZeroDiag(addr, getMatrixWidth(addr), fillMatrixDiag(addr, 0)) | addr >= 0
+floydWarshallInit(addr) -> -1 | addr < 0
+floydWarshallZeroDiag(addr, size, true) -> floydWarshallLoopK(addr, size, 0, 0, 0)
+floydWarshallLoopK(addr, size, i, j, k) -> floydWarshallLoopI(addr, size, i, j, k) | k < size
+floydWarshallLoopI(addr, size, i, j, k) -> floydWarshallLoopJ(addr, size, i, j, k) | i < size
+floydWarshallLoopJ(addr, size, i, j, k) ->
+    floydWarshallStore(addr, size, i, j, k,
         setMatrix(addr, i, j,
             min(getMatrix(addr, i, j), getMatrix(addr, i, k) + getMatrix(addr, k, j)))) | j < size
-floyd_warshall6(addr, size, i, j, k, true) -> floyd_warshall5(addr, size, i, j + 1, k)
-floyd_warshall5(addr, size, i, j, k) -> floyd_warshall4(addr, size, i + 1, 0, k) | j >= size
-floyd_warshall4(addr, size, i, j, k) -> floyd_warshall3(addr, size, 0, j, k + 1) | i >= size
-floyd_warshall3(addr, size, i, j, k) -> addr | k >= size
+floydWarshallStore(addr, size, i, j, k, true) -> floydWarshallLoopJ(addr, size, i, j + 1, k)
+floydWarshallLoopJ(addr, size, i, j, k) -> floydWarshallLoopI(addr, size, i + 1, 0, k) | j >= size
+floydWarshallLoopI(addr, size, i, j, k) -> floydWarshallLoopK(addr, size, 0, j, k + 1) | i >= size
+floydWarshallLoopK(addr, size, i, j, k) -> addr | k >= size
 
 bnil :: blist
 bcons :: Bool -> blist -> blist
 
-/*
-floyd_warshall_par :: graph -> Int
-floyd_warshall_par1 :: Int -> blist -> Int
-floyd_warshall_par2 :: Int -> Int -> Bool -> blist -> Int
-floyd_warshall_par3 :: Int -> Int -> Int -> Int -> Int -> blist -> Int
-floyd_warshall_par4 :: Int -> Int -> Int -> Int -> Int -> blist -> Int
-floyd_warshall_par5 :: Int -> Int -> Int -> Int -> Int -> blist -> Int
-floyd_warshall_par6 :: Int -> Int -> Int -> Int -> Int -> blist -> Int
-compute_cell :: Int -> Int -> Int -> Int -> Bool
-floyd_warshall_par(g) -> floyd_warshall_par1(graphToMatrix(g, numNodes(g) * 100), bnil)
-floyd_warshall_par1(addr, l) ->
-    floyd_warshall_par2(addr, getMatrixWidth(addr), fillMatrixDiag(addr, 0), l)
-compute_cell(addr, i, j, k) -> setMatrix(addr, i, j,
-                                           min(getMatrix(addr, i, j),
-                                               getMatrix(addr, i, k) + getMatrix(addr, k, j)))
-floyd_warshall_par2(addr, size, true, l) -> floyd_warshall_par4(addr, size, 0, 0, 0, l)
-floyd_warshall_par4(addr, size, i, j, k, l) ->
-    floyd_warshall_par4(addr, size, i, j + 1, k, bcons(compute_cell(addr, i, j, k), l)) | j < size /\ i < size /\ k < size
-floyd_warshall_par4(addr, size, i, j, k, l) ->
-    floyd_warshall_par4(addr, size, i + 1, 0, k, bcons(compute_cell(addr, i, j, k), l)) | j >= size /\ i < size /\ k < size
-floyd_warshall_par4(addr, size, i, j, k, l) ->
-    floyd_warshall_par4(addr, size, 0, 0, k + 1, l) | i >= size /\ k < size
-floyd_warshall_par4(addr, size, i, j, k, l) -> addr | k >= size
-*/
-
 /* parallel floyd warshall */
 parFloydWarshall :: graph -> Int
-parFloydWarshall1 :: graph -> Int -> Int
-parFloydWarshall2 :: Int -> Int -> Int -> Int
-parFloydWarshall3 :: Int -> Int -> Int -> Bool -> Bool -> Int
-parFloydWarshall4 :: Int -> Int -> Int -> Int -> Int
-parFloydWarshall5 :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int
-worker :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int
-worker1 :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Bool -> Int
-compute_cell :: Int -> Int -> Int -> Int -> Int -> Bool
+parFloydWarshallAlloc :: graph -> Int -> Int
+parFloydWarshallInitDiag :: Int -> Int -> Int -> Int
+parFloydWarshallStart :: Int -> Int -> Int -> Bool -> Bool -> Int
+parFloydWarshallLoopK :: Int -> Int -> Int -> Int -> Int
+parFloydWarshallSync :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int
+fwBlockWorker :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int
+fwBlockContinue :: Int -> Int -> Int -> Int -> Int -> Int -> Int ->  Int -> Int -> Int -> Bool -> Int
+fwUpdateCell :: Int -> Int -> Int -> Int -> Int -> Bool
+
 /* 1) create 2 matrices: for previous step and current step */
-parFloydWarshall(g) -> parFloydWarshall1(g, numNodes(g))
-parFloydWarshall1(g, size) ->
-    parFloydWarshall2(size, graphToMatrix(g, size * 100), graphToMatrix(g, size * 100))
-parFloydWarshall2(size, matrix1, matrix2) ->
-    parFloydWarshall3(size, matrix1, matrix2,
-        fillMatrixDiag(matrix1, 0), fillMatrixDiag(matrix2, 0))
+parFloydWarshall(g) -> parFloydWarshallAlloc(g, numNodes(g))
+parFloydWarshallAlloc(g, size) ->
+    parFloydWarshallInitDiag(size, graphToMatrix(g, size * 100),
+        graphToMatrix(g, size * 100)) | size >= 0
+parFloydWarshallAlloc(g, size) -> -1 | size < 0
+parFloydWarshallInitDiag(size, curr, next) ->
+    parFloydWarshallStart(size, curr , next,
+        fillMatrixDiag(curr, 0), fillMatrixDiag(next, 0)) | curr >= 0 /\ next >= 0
+parFloydWarshallInitDiag(size, curr, next) -> -1 | curr < 0 \/ next < 0
 /* 2) start outer loop to compute k steps of matrices, and schedule parallel workers */
-parFloydWarshall3(size, matrix1, matrix2, true, true) ->
-    parFloydWarshall4(size, matrix1, matrix2, 0)
-parFloydWarshall4(size, matrix1, matrix2, k) ->
-    parFloydWarshall5(size, matrix1, matrix2, k,
-        worker(size, matrix1, matrix2, k, size / 2, size / 2, 0, 0),
-        worker(size, matrix1, matrix2, k, size, size / 2, size / 2, 0),
-        worker(size, matrix1, matrix2, k, size / 2, size, 0, size / 2),
-        worker(size, matrix1, matrix2, k, size, size, size / 2, size / 2)) | k < size
+parFloydWarshallStart(size, curr, next, true, true) ->
+    parFloydWarshallLoopK(size, curr, next, 0)
+parFloydWarshallLoopK(size, curr, next, k) ->
+    parFloydWarshallSync(size, curr, next, k,
+        fwBlockWorker(size, curr, next, k, 0, 0, size / 2, size / 2, 0, 0),
+        fwBlockWorker(size, curr, next, k, size / 2, 0, size, size / 2, size / 2, 0),
+        fwBlockWorker(size, curr, next, k, 0, size / 2, size / 2, size, 0, size / 2),
+        fwBlockWorker(size, curr, next, k, size / 2, size / 2, size, size, size / 2, size / 2))
+            | k < size
 /* if we reached the end of k steps => return the address of the last computed matrix */
-parFloydWarshall4(size, matrix1, matrix2, k) -> matrix1 | k >= size
+parFloydWarshallLoopK(size, curr, next, k) -> curr | k >= size
 /* 3) run worker to process a matrix block in parallel */
-worker(size, matrix1, matrix2, k, endX, endY, x, y) ->
-    worker1(size, matrix1, matrix2, k, endX, endY, x + 1, y,
-        compute_cell(matrix1, matrix2, x, y, k)) | x < endX /\ y < endY
-worker(size, matrix1, matrix2, k, endX, endY, x, y) ->
-    worker(size, matrix1, matrix2, k, endX, endY, 0, y + 1) | x >= endX /\ y < endY
-worker(size, matrix1, matrix2, k, endX, endY, x, y) -> 1 | y >= endY
-worker1(size, matrix1, matrix2, k, endX, endY, x, y, true) ->
-    worker(size, matrix1, matrix2, k, endX, endY, x, y)
-compute_cell(matrix1, matrix2, x, y, k) ->
-    setMatrix(matrix2, x, y,
-        min(getMatrix(matrix1, x, y), getMatrix(matrix1, x, k) + getMatrix(matrix1, k, y)))
+fwBlockWorker(size, curr, next, k, rowStart, colStart, rowEnd, colEnd, i, j) ->
+    fwBlockContinue(size, curr, next, k, rowStart, colStart, rowEnd, colEnd, i + 1, j,
+        fwUpdateCell(curr, next, i, j, k)) | i < rowEnd /\ j < colEnd
+fwBlockWorker(size, curr, next, k, rowStart, colStart, rowEnd, colEnd, i, j) ->
+    fwBlockWorker(size, curr, next, k, rowStart, colStart, rowEnd, colEnd, rowStart, j + 1)
+        | i >= rowEnd /\ j < colEnd
+fwBlockWorker(size, curr, next, k, rowStart, colStart, rowEnd, colEnd, i, j) -> 1
+        | j >= colEnd
+fwBlockContinue(size, curr, next, k, rowStart, colStart, rowEnd, colEnd, i, j, true) ->
+    fwBlockWorker(size, curr, next, k, rowStart, colStart, rowEnd, colEnd, i, j)
+fwUpdateCell(curr, next, i, j, k) ->
+    setMatrix(next, i, j,
+        min(getMatrix(curr, i, j), getMatrix(curr, i, k) + getMatrix(curr, k, j)))
 /* 4) wait for all workers to finish, swap distance matrices and continue computation */
-parFloydWarshall5(size, matrix1, matrix2, k, 1, 1, 1, 1) ->
-    parFloydWarshall4(size, matrix2, matrix1, k + 1)
+parFloydWarshallSync(size, curr, next, k, 1, 1, 1, 1) ->
+    parFloydWarshallLoopK(size, next, curr, k + 1)

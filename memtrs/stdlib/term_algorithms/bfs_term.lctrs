@@ -3,20 +3,21 @@
 
 /* bfs */
 /* graph, currentNode, queue, visitedNodes */
-bfs :: graph -> Int -> list
-bfsLoop1 :: graph -> list -> list -> list
-bfsLoop2 :: graph -> Int -> list -> list -> list
-bfsLoop3 :: graph -> Int -> list -> list -> list -> list
-bfsLoop4 :: graph -> Int -> list -> list -> list -> Int -> list
+seqBFS :: graph -> Int -> list
+seqBFSQueue :: graph -> list -> list -> list
+seqBFSVisit :: graph -> Int -> list -> list -> list
+seqBFSScanAdj :: graph -> Int -> list -> list -> list -> list
+seqBFSCheckNeighbor :: graph -> Int -> list -> list -> list -> Int -> list
 
-bfs(graph, v) -> bfsLoop1(graph, cons(v, nil), genList(numNodes(graph)))
-bfsLoop1(graph, nil, visited) -> visited
-bfsLoop1(graph, cons(x, q), visited) -> bfsLoop2(graph, x, q, visited)
-bfsLoop2(graph, x, q, visited) -> bfsLoop3(graph, x, q, setl(x, 1, visited), getg(x, graph))
-bfsLoop3(graph, x, q, visited, nil) -> bfsLoop1(graph, q, visited)
-bfsLoop3(graph, x, q, visited, cons(u, l)) ->
-    bfsLoop4(graph, x, q, visited, cons(u, l), getl(u, visited))
-bfsLoop4(graph, x, q, visited, cons(u, l), isVisited) ->
-    bfsLoop3(graph, x, pushBack(u, q), visited, l) | isVisited = 0
-bfsLoop4(graph, x, q, visited, cons(u, l), isVisited) ->
-    bfsLoop3(graph, x, q, visited, l) | isVisited = 1
+seqBFS(graph, v) -> seqBFSQueue(graph, cons(v , nil), genList(numNodes(graph)))
+seqBFSQueue(graph, nil, visited ) -> visited
+seqBFSQueue(graph, cons(x, q), visited) -> seqBFSVisit(graph, x, q, visited)
+seqBFSVisit(graph, x, q, visited) ->
+    seqBFSScanAdj(graph, x, q, setl(x, 1, visited), getAdj(x, graph))
+seqBFSScanAdj(graph, x, q, visited, nil) -> seqBFSQueue(graph, q, visited)
+seqBFSScanAdj(graph, x, q, visited, cons(u, l)) ->
+    seqBFSCheckNeighbor(graph, x, q, visited, cons(u, l), getl(u, visited))
+seqBFSCheckNeighbor(graph, x, q, visited, cons(u, l), isVisited) ->
+    seqBFSScanAdj(graph, x, pushBack(u, q), visited, l) | isVisited = 0
+seqBFSCheckNeighbor(graph, x, q, visited, cons(u, l), isVisited) ->
+    seqBFSScanAdj(graph, x, q, visited, l) | isVisited = 1

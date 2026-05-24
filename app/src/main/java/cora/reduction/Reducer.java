@@ -175,6 +175,8 @@ public class Reducer {
         // we do nothing: the list is already ordered in (leftmost) innermost order
     }
 
+    Term reductionResult = null;
+
     if (Settings.queryReductionMode() == Settings.ReductionMode.FirstMatch) {
       // go over all the subterms and all the rules, and find the first matching one!
 
@@ -185,10 +187,10 @@ public class Reducer {
         for (int j = 0; j < _components.size() && result == null; j++) {
           result = _components.get(j).apply(sub);
         }
-        if (result != null) return s.replaceSubterm(pos, result);
+        if (result != null) {
+          reductionResult = s.replaceSubterm(pos, result);
+        }
       }
-
-      return null;
     } else if (Settings.queryReductionMode() == Settings.ReductionMode.Random) {
 
       List<Pair<Position, Term>> matchingSubterms = new ArrayList<>();
@@ -206,12 +208,11 @@ public class Reducer {
       }
       if (!matchingSubterms.isEmpty()) {
         int reduction = random.nextInt(0, matchingSubterms.size());
-        return s.replaceSubterm(
+        reductionResult = s.replaceSubterm(
           matchingSubterms.get(reduction).fst(),
           matchingSubterms.get(reduction).snd()
         );
       }
-      return null;
     } else if (Settings.queryReductionMode() == Settings.ReductionMode.Parallel) {
       boolean isReduced = false;
 
@@ -242,9 +243,6 @@ public class Reducer {
               s = s.replaceSubterm(p.snd(), p.fst());
               isReduced = true;
             }
-            if (isReduced) {
-              //System.out.println(p.fst());
-            }
           }
         }
 
@@ -259,18 +257,20 @@ public class Reducer {
 
         if (isReduced) {
           totalParallelSteps++;
-          //System.out.println(s);
-          //System.out.println(MemReducer.MEMORY.toString());
-          return s;
-        } else {
-          return null;
+          reductionResult = s;
         }
       } catch (ExecutionException | InterruptedException e) {
         throw new RuntimeException(e);
       }
     }
 
-    return null;
+    if (Settings.isShowIntermediateReductions()) {
+      System.out.println(s);
+    }
+    if (Settings.isShowIntermediateMemory()) {
+      System.out.println(MemReducer.MEMORY.toString().substring(0, 300));
+    }
+    return reductionResult;
   }
 
   public Reduction normalise(Term s) {

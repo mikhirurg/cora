@@ -1,20 +1,21 @@
 /* =================================== MEMTRS KERNEL ============================================ */
 
-READ :: Int
-WRITE :: Int -> Bool
-
 GET :: Int -> Int
 SET :: Int -> Int -> Bool
 CAS :: Int -> Int -> Int -> Bool
 
 alloc :: Int -> Int
-alloc1 :: Int -> Int -> Bool -> Int
-alloc2 :: Int -> Bool -> Int
-alloc3 :: Int -> Bool -> Int
-alloc(size) -> alloc1(size, GET(0), CAS(1, 0, 1))
-alloc1(size, freshAddr, true) -> alloc2(freshAddr, SET(0, freshAddr + size)) | freshAddr = freshAddr
-alloc1(size, freshAddr, false) -> alloc(size)
-alloc2(addr, true) -> alloc3(addr, SET(1, 0))
-alloc3(addr, true) -> addr
+allocLock :: Int -> Bool -> Int
+allocRead :: Int -> Int -> Int
+allocReserve :: Int -> Bool -> Int
+allocUnlock :: Int -> Bool -> Int
+
+alloc(size) -> allocLock(size, CAS(1, 0, 1)) | size > 0
+alloc(size) -> -1 | size <= 0
+allocLock(size, false) -> alloc(size) | true
+allocLock(size, true) -> allocRead(size, GET(0)) | true
+allocRead(size, fresh) -> allocReserve(fresh, SET(0, fresh + size)) | true
+allocReserve(addr, true) -> allocUnlock(addr, SET(1, 0)) | true
+allocUnlock(addr, true) -> addr | true
 
 /* ============================================================================================== */

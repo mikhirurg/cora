@@ -6,66 +6,68 @@
 /* Arguments: Capacity */
 /* MEM LAYOUT: |<capacity>|<monitor>|<currSize>|<front>|...data...| */
 createQueue :: Int -> Int
-createQueue1 :: Int -> Int -> Int
-createQueue2 :: Int -> Int -> Bool -> Int
-createQueue3 :: Int -> Int -> Int -> Int
-createQueue4 :: Int -> Int -> Int -> Bool -> Int
-createQueue(cap) -> createQueue1(alloc(cap + 4), cap) | cap > 0
+createQueueStoreCap :: Int -> Int -> Int
+createQueueInitRest :: Int -> Int -> Bool -> Int
+createQueueInitLoop :: Int -> Int -> Int -> Int
+createQueueInitStep :: Int -> Int -> Int -> Bool -> Int
+createQueue(cap) -> createQueueStoreCap(alloc(cap + 4), cap) | cap > 0
 createQueue(cap) -> -1 | cap <= 0
-createQueue1(addr, cap) -> createQueue2(addr, cap, SET(addr, cap))
-createQueue2(addr, cap, true) -> createQueue3(addr, addr + 1, cap + 3)
-createQueue3(queueAddr, addr, limit) ->
-    createQueue4(queueAddr, addr + 1, limit - 1, SET(addr, 0)) | limit > 0
-createQueue3(queueAddr, addr, limit) -> queueAddr | limit <= 0
-createQueue4(queueAddr, addr, limit, true) ->
-    createQueue3(queueAddr, addr, limit)
+createQueueStoreCap(addr, cap) -> createQueueInitRest(addr, cap, SET(addr, cap)) | addr >= 0
+createQueueStoreCap(addr, cap) -> -1 | addr < 0
+createQueueInitRest(addr, cap, true) -> createQueueInitLoop(addr, addr + 1, cap + 3)
+createQueueInitLoop(queueAddr, addr, remaining) ->
+    createQueueInitStep(queueAddr, addr + 1, remaining - 1, SET(addr , 0)) | remaining > 0
+createQueueInitLoop(queueAddr, addr, remaining) -> queueAddr | remaining <= 0
+createQueueInitStep(queueAddr, addr, remaining, true) ->
+    createQueueInitLoop(queueAddr, addr, remaining)
 
 /* Push element to the queue */
 push :: Int -> Int -> Bool
-push1 :: Int -> Int -> Bool -> Bool
-push2 :: Int -> Int -> Int -> Bool -> Bool
-push3 :: Int -> Bool -> Bool -> Bool
-push4 :: Int -> Bool
-push5 :: Int -> Bool
-push(addr, element) ->
-    push1(addr, element, CAS(addr + 1, 0, 1))
+pushTryLock :: Int -> Int -> Bool -> Bool
+pushCheckSpace :: Int -> Int -> Int -> Bool -> Bool
+pushCommit :: Int -> Bool -> Bool -> Bool
+pushUnlockFail :: Int -> Bool
+pushUnlockSuccess :: Int -> Bool
+push(addr, element) -> pushTryLock(addr, element, CAS(addr + 1, 0, 1))
 /* spin lock */
-push1(addr, element, false) -> push(addr, element)
+pushTryLock(addr, element, false) -> push(addr, element)
 /* we insert a new element if there is free space in the queue */
 /* first, we compute the location of the rear */
-push1(addr, element, true) ->
-    push2(addr, element, (GET(addr + 3) + GET(addr + 2)) % GET(addr), GET(addr + 2) < GET(addr))
+pushTryLock(addr, element, true) ->
+    pushCheckSpace(addr, element,
+        (GET(addr + 3) + GET(addr + 2)) % GET(addr), GET(addr + 2) < GET(addr))
 /* then if there is space in the queue we insert the element at the rear position
 and increment the size */
-push2(addr, element, rear, true) ->
-    push3(addr, SET(addr + 4 + rear, element), SET(addr + 2, GET(addr + 2) + 1))
+pushCheckSpace(addr, element, rear, true) ->
+    pushCommit(addr, SET(addr + 4 + rear, element), SET(addr + 2, GET(addr + 2) + 1))
+        | rear = rear
 /* we can't insert the elem, so return null and unlock the queue */
-push2(addr, element, rear, false) -> push4(addr)
-push4(addr) -> SET(addr + 1, 0) /\ false
+pushCheckSpace(addr, element, rear, false) -> pushUnlockFail(addr)
+pushUnlockFail(addr) -> SET(addr + 1, 0) /\ false
 /* release the lock */
-push3(addr, true, true) -> push5(addr)
-push5(addr) -> SET(addr + 1, 0)
-
+pushCommit(addr, true, true) -> pushUnlockSuccess(addr)
+pushUnlockSuccess(addr) -> SET(addr + 1, 0)
 
 /* Pop element from the queue */
 pop :: Int -> Int
-pop1 :: Int -> Bool -> Int
-pop2 :: Int -> Bool -> Int
-pop3 :: Int -> Int -> Int
-pop4 :: Int -> Int -> Bool -> Bool -> Int
-pop5 :: Int -> Int -> Bool -> Int
-pop(addr) -> pop1(addr, CAS(addr + 1, 0, 1))
+popTryLock :: Int -> Bool -> Int
+popCheckNonEmpty :: Int -> Bool -> Int
+popReadFront :: Int -> Int -> Int
+popCommit :: Int -> Int -> Bool -> Bool -> Int
+popUnlock :: Int -> Int -> Bool -> Int
+pop(addr) -> popTryLock(addr, CAS(addr + 1, 0, 1))
 /* spin lock */
-pop1(addr,  false) -> pop(addr)
+popTryLock(addr, false) -> pop(addr)
 /* we pop the element if there is at least one element in the queue: res = arr[front] */
-pop1(addr, true) -> pop2(addr, GET(addr + 2) > 0)
+popTryLock(addr, true) -> popCheckNonEmpty(addr, GET(addr + 2) > 0)
 /* we can't pop the element, so we return -1 */
-pop2(addr, false) -> pop4(addr, -1, true, true)
+popCheckNonEmpty(addr, false) -> popCommit(addr, -1, true, true)
 /* decrease the size of the queue and move the front of the queue */
-pop2(addr, true) -> pop3(addr, GET(addr + 4 + GET(addr + 3)))
-pop3(addr, element) ->
-    pop4(addr, element,
-        SET(addr + 2, GET(addr + 2) - 1), SET(addr + 3, (GET(addr + 3) + 1) % GET(addr)))
+popCheckNonEmpty(addr, true) ->
+    popReadFront(addr, GET(addr + 4 + GET(addr + 3)))
+popReadFront(addr, element) ->
+    popCommit(addr, element, SET(addr + 2, GET(addr + 2) - 1),
+           SET(addr + 3, (GET(addr + 3) + 1) % GET(addr)))
 /* release the lock */
-pop4(addr, element, true, true) -> pop5(addr, element, SET(addr + 1, 0))
-pop5(addr, element, true) -> element
+popCommit(addr, element, true, true) -> popUnlock(addr, element, SET(addr + 1, 0))
+popUnlock(addr, element, true) -> element

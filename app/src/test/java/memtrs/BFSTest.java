@@ -1,6 +1,7 @@
 package memtrs;
 
 import charlie.terms.Term;
+import charlie.terms.TheoryFactory;
 import charlie.trs.TRS;
 import cora.reduction.CalcReducer;
 import cora.reduction.MemReducer;
@@ -10,6 +11,7 @@ import memtrs.util.graph.Edge;
 import memtrs.util.graph.Graph;
 import memtrs.util.graph.Vertex;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -75,7 +77,7 @@ public class BFSTest {
       "#include " + MEMTRS_STDLIB_PATH + "term_algorithms/bfs_term.lctrs\n\n" +
         """
           test :: graph -> list
-          test(g) -> bfs(g, 0)
+          test(g) -> seqBFS(g, 0)
           """
     );
 
@@ -146,6 +148,53 @@ public class BFSTest {
     System.out.println("nodes: " + nodes + ", edges: " + edges + ", iteration: " + iteration +
       ", parallel steps: " + Reducer.totalParallelSteps);
     Assertions.assertArrayEquals(expected, arr);
+  }
+
+  @Test
+  void termBFSTest() {
+    bfsTest(3, 4, 0);
+    bfsTest(4, 8, 0);
+    bfsTest(6, 35, 0);
+    bfsTest(8, 20, 0);
+    bfsTest(8, 55, 0);
+    bfsTest(11, 53, 0);
+    bfsTest(12, 49, 0);
+    // bfsTest(12, 112, 0);
+    // bfsTest(15, 224, 0);
+  }
+
+  @Test
+  void memBFSTest() {
+    mcBfsTest(3, 4, 0);
+    mcBfsTest(4, 8, 0);
+    mcBfsTest(6, 35, 0);
+    mcBfsTest(8, 20, 0);
+    mcBfsTest(8, 55, 0);
+    mcBfsTest(11, 53, 0);
+    mcBfsTest(12, 49, 0);
+    mcBfsTest(12, 112, 0);
+    mcBfsTest(15, 224, 0);
+  }
+
+  @Test
+  void graphDemoTest() throws FileNotFoundException {
+    System.setOut(new PrintStream(new FileOutputStream("out.txt")));
+    TRS trs = MemTRSUtil.constructTRS("#include " + MEMTRS_STDLIB_PATH + "algorithms/bfs.lctrs\n\n" +
+      """
+      """);
+
+    Term graphTerm = MemTRSUtil.graphToTerm(FloydWarshallTest.graph1, trs);
+    System.out.println(graphTerm);
+    Term result =
+      trs.lookupSymbol("parBFS").apply(graphTerm).apply(TheoryFactory.createValue(0));
+
+    MemReducer.resetMemory();
+    MemReducer.SET(0, 2);
+    MemReducer.SET(1, 0);
+
+    int address = MemTRSUtil.termToInt(result, trs);
+
+    System.out.println(MemReducer.MEMORY);
   }
 
   public static void main(String[] args) throws FileNotFoundException {

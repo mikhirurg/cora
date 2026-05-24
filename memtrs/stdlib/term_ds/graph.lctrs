@@ -17,6 +17,6 @@ fill(nil, a) -> nil
 fill(cons(a, l), v) -> cons(v, fill(l, v))
 
 /* Get from graph */
-getg :: Int -> graph -> list
-getg(n, consG(l, g)) -> l | n = 0
-getg(n, consG(l, g)) -> getg(n-1, g) | n > 0
+getAdj :: Int -> graph -> list
+getAdj(n, consG(l, g)) -> l | n = 0
+getAdj(n, consG(l, g)) -> getAdj(n - 1, g) | n > 0

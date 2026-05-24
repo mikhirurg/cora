@@ -29,11 +29,13 @@ public class Settings {
   public enum Strategy { Full , Innermost , CallByValue };
   public enum ReductionMode { FirstMatch, Random, Parallel }
 
-  private static int MEM_MAX_SIZE = 2000;
+  private static int MEM_MAX_SIZE = 50000;
 
   private static Set<String> _disabled = Set.of();
   private static Strategy _strategy = Strategy.CallByValue;
   private static ReductionMode _reductionMode = ReductionMode.Parallel;
+  private static boolean showIntermediateReductions = false;
+  private static boolean showIntermediateMemory = false;
 
   /** The SMT solver that any SMT-encoding submodule should use. */
   public static SmtSolver smtSolver = new ProcessSmtSolver(ProcessSmtSolver.PhysicalSolver.Z3);
@@ -77,5 +79,21 @@ public class Settings {
 
   public static void setMemMaxSize(int memMaxSize) {
     MEM_MAX_SIZE = memMaxSize;
+  }
+
+  public static boolean isShowIntermediateReductions() {
+    return showIntermediateReductions;
+  }
+
+  public static void setShowIntermediateReductions(boolean showIntermediateReductions) {
+    Settings.showIntermediateReductions = showIntermediateReductions;
+  }
+
+  public static boolean isShowIntermediateMemory() {
+    return showIntermediateMemory;
+  }
+
+  public static void setShowIntermediateMemory(boolean showIntermediateMemory) {
+    Settings.showIntermediateMemory = showIntermediateMemory;
   }
 }

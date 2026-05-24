@@ -5,18 +5,17 @@
 /* create min heap */
 createMinHeap :: Int -> Int
 createMinHeap1 :: Int -> Int
-createMinHeap2 :: Int -> Bool -> Bool -> Int
-createMinHeap(cap) -> createMinHeap1(createArray(cap + 2))
-createMinHeap1(addr) -> createMinHeap2(addr, SET(addr + 1, 0), SET(addr, GET(addr) - 1))
-createMinHeap2(addr, true, true) -> addr
+createMinHeap2 :: Int -> Bool -> Bool -> Bool -> Int
 
-/* Heap Sift down - transforming the heap to satisfy the heap properties */
-/*
-Used to fix the heap when some element value increases
-If ith element is less than the smallest of the children,
-we swap the element with the child, and perform this procedure again
-*/
-/* addr -> index -> status? */
+createMinHeap(cap) -> createMinHeap1(createArray(cap + 2))
+
+createMinHeap1(addr) ->
+    createMinHeap2(addr, SET(addr + 1, 0), SET(addr + 2, 0), SET(addr, GET(addr) - 2))
+
+createMinHeap2(addr, true, true, true) -> addr
+
+
+/* Heap Sift down */
 heapSiftDown :: Int -> Int -> Bool
 heapSiftDown1 :: Int -> Int -> Int -> Bool -> Bool
 heapSiftDown2 :: Int -> Int -> Int -> Int -> Bool
@@ -24,65 +23,134 @@ heapSiftDown3 :: Int -> Int -> Int -> Int -> Int -> Bool
 heapSiftDown4 :: Int -> Int -> Int -> Int -> Int -> Int -> Bool
 heapSiftDown5 :: Int -> Int -> Int -> Bool -> Bool
 
-heapSiftDown(addr, i) -> heapSiftDown1(addr, i, GET(addr), CAS(addr + 1, 0, 1))
-heapSiftDown1(addr, i, size, false) -> heapSiftDown(addr, i)
-heapSiftDown1(addr, 0, 0, true) -> SET(addr + 1, 0)
-heapSiftDown1(addr, i, size, true) -> false | i >= size /\ size > 0
-heapSiftDown1(addr, i, size, true) -> true | 2 * i + 1 >= size
+heapSiftDown(addr, i) ->
+    heapSiftDown1(addr, i, GET(addr + 2), CAS(addr + 1, 0, 1))
+
+heapSiftDown1(addr, i, size, false) ->
+    heapSiftDown(addr, i)
+
+heapSiftDown1(addr, 0, 0, true) ->
+    SET(addr + 1, 0)
+
 heapSiftDown1(addr, i, size, true) ->
-    heapSiftDown2(addr, i, size, getArr(addr, 2 * i + 1)) | 2 * i + 1 < size
+    SET(addr + 1, 0) /\ false
+    | i < 0 \/ (i >= size /\ size > 0) \/ (i > 0 /\ size <= 0)
+
+heapSiftDown1(addr, i, size, true) ->
+    SET(addr + 1, 0)
+    | i >= 0 /\ i < size /\ 2 * i + 1 >= size
+
+heapSiftDown1(addr, i, size, true) ->
+    heapSiftDown2(addr, i, size, getArr(addr + 2, 2 * i + 1))
+    | i >= 0 /\ i < size /\ 2 * i + 1 < size
+
 heapSiftDown2(addr, i, size, left) ->
-    heapSiftDown3(addr, i, size, left, getArr(addr, 2 * i + 2)) | 2 * i + 2 < size
+    heapSiftDown3(addr, i, size, left, getArr(addr + 2, 2 * i + 2))
+    | 2 * i + 2 < size
+
 heapSiftDown2(addr, i, size, left) ->
-    heapSiftDown4(addr, i, size, 2 * i + 1, left, getArr(addr, i)) | 2 * i + 2 >= size
+    heapSiftDown4(addr, i, size, 2 * i + 1, left, getArr(addr + 2, i))
+    | 2 * i + 2 >= size
+
 heapSiftDown3(addr, i, size, left, right) ->
-    heapSiftDown4(addr, i, size, 2 * i + 1, left, getArr(addr, i)) | right >= left
+    heapSiftDown4(addr, i, size, 2 * i + 1, left, getArr(addr + 2, i))
+    | right >= left
+
 heapSiftDown3(addr, i, size, left, right) ->
-    heapSiftDown4(addr, i, size, 2 * i + 2, right, getArr(addr, i)) | right < left
-heapSiftDown4(addr, i, size, childIndex, childVal, nodeVal) -> true | nodeVal <= childVal
+    heapSiftDown4(addr, i, size, 2 * i + 2, right, getArr(addr + 2, i))
+    | right < left
+
 heapSiftDown4(addr, i, size, childIndex, childVal, nodeVal) ->
-    heapSiftDown5(addr, i, childIndex, swapArr(addr, i, childIndex))
-heapSiftDown5(addr, i, childIndex, true) -> heapSiftDown1(addr, childIndex, GET(addr), true)
-heapSiftDown5(addr, i, childIndex, false) -> SET(addr + 1, 0) /\ false
+    SET(addr + 1, 0)
+    | nodeVal <= childVal
+
+heapSiftDown4(addr, i, size, childIndex, childVal, nodeVal) ->
+    heapSiftDown5(addr, i, childIndex, swapArr(addr + 2, i, childIndex))
+    | nodeVal > childVal
+
+heapSiftDown5(addr, i, childIndex, true) ->
+    heapSiftDown1(addr, childIndex, GET(addr + 2), true)
+
+heapSiftDown5(addr, i, childIndex, false) ->
+    SET(addr + 1, 0) /\ false
+
 
 /* Heap Sift up */
-/* If some element is smaller than the parent node, we swap them,
-then we perform this operation for the parent */
 heapSiftUp :: Int -> Int -> Bool
 heapSiftUp1 :: Int -> Int -> Bool -> Bool
 heapSiftUp2 :: Int -> Int -> Int -> Bool
 heapSiftUp3 :: Int -> Int -> Int -> Int -> Int -> Bool
 heapSiftUp4 :: Int -> Int -> Bool -> Bool
-heapSiftUp(addr, i) -> heapSiftUp1(addr, i, CAS(addr + 1, 0, 1))
-heapSiftUp1(addr, i, false) -> heapSiftUp(addr, i)
-heapSiftUp1(addr, i, true) -> SET(addr + 1, 0) | i <= 0
-heapSiftUp1(addr, i, true) -> heapSiftUp2(addr, i, GET(addr)) | i > 0
-heapSiftUp2(addr, i, size) -> SET(addr + 1, 0) /\ false | i >= size
+
+heapSiftUp(addr, i) ->
+    heapSiftUp1(addr, i, CAS(addr + 1, 0, 1))
+
+heapSiftUp1(addr, i, false) ->
+    heapSiftUp(addr, i)
+
+heapSiftUp1(addr, i, true) ->
+    SET(addr + 1, 0)
+    | i <= 0
+
+heapSiftUp1(addr, i, true) ->
+    heapSiftUp2(addr, i, GET(addr + 2))
+    | i > 0
+
 heapSiftUp2(addr, i, size) ->
-    heapSiftUp3(addr, i, size, getArr(addr, i), getArr(addr, (i - 1) / 2)) | i < size
-heapSiftUp3(addr, i, size, nodeVal, parentVal) -> SET(addr + 1, 0) | nodeVal >= parentVal
+    SET(addr + 1, 0) /\ false
+    | i >= size
+
+heapSiftUp2(addr, i, size) ->
+    heapSiftUp3(addr, i, size, getArr(addr + 2, i), getArr(addr + 2, (i - 1) / 2))
+    | i < size
+
 heapSiftUp3(addr, i, size, nodeVal, parentVal) ->
-    heapSiftUp4(addr, i, swapArr(addr, i, (i - 1) / 2)) | nodeVal < parentVal
-heapSiftUp4(addr, i, true) -> heapSiftUp1(addr, (i - 1) / 2, true)
-heapSiftUp4(addr, i, false) -> SET(addr + 1, 0) /\ false
+    SET(addr + 1, 0)
+    | nodeVal >= parentVal
+
+heapSiftUp3(addr, i, size, nodeVal, parentVal) ->
+    heapSiftUp4(addr, i, swapArr(addr + 2, i, (i - 1) / 2))
+    | nodeVal < parentVal
+
+heapSiftUp4(addr, i, true) ->
+    heapSiftUp1(addr, (i - 1) / 2, true)
+
+heapSiftUp4(addr, i, false) ->
+    SET(addr + 1, 0) /\ false
+
 
 /* Heap insert */
 heapInsert :: Int -> Int -> Bool
 heapInsert1 :: Int -> Int -> Int -> Int -> Bool -> Bool
 heapInsert2 :: Int -> Int -> Int -> Bool -> Bool
 heapInsert3 :: Int -> Int -> Int -> Bool -> Bool
-heapInsert4 :: Int -> Int -> Bool -> Bool
-heapInsert(addr, el) -> heapInsert1(addr, el, GET(addr), GET(addr + 2), CAS(addr + 1, 0, 1))
-heapInsert1(addr, el, cap, size, false) -> heapInsert(addr, el)
+
+heapInsert(addr, el) ->
+    heapInsert1(addr, el, GET(addr), GET(addr + 2), CAS(addr + 1, 0, 1))
+
+heapInsert1(addr, el, cap, size, false) ->
+    heapInsert(addr, el)
+
 heapInsert1(addr, el, cap, size, true) ->
-    heapInsert2(addr, el, size, SET(addr, size + 1)) | size < cap
+    heapInsert2(addr, el, size, SET(addr + 2, size + 1))
+    | size < cap
+
 heapInsert1(addr, el, cap, size, true) ->
-    SET(addr + 1, 0) /\ false | size >= cap
-heapInsert2(addr, el, size, false) -> SET(addr + 1, 0) /\ false
-heapInsert2(addr, el, size, true) -> heapInsert3(addr, el, size, setArr(addr, size, el))
-heapInsert3(addr, el, size, false) -> SET(addr + 1, 0) /\ false
-heapInsert3(addr, el, size, true) -> heapInsert4(addr, size, SET(addr + 1, 0))
-heapInsert4(addr, size, true) -> heapSiftUp(addr, size)
+    SET(addr + 1, 0) /\ false
+    | size >= cap
+
+heapInsert2(addr, el, size, false) ->
+    SET(addr + 1, 0) /\ false
+
+heapInsert2(addr, el, size, true) ->
+    heapInsert3(addr, el, size, setArr(addr + 2, size, el))
+
+heapInsert3(addr, el, size, false) ->
+    SET(addr + 1, 0) /\ false
+
+heapInsert3(addr, el, size, true) ->
+    heapSiftUp1(addr, size, true)
+
 
 /* Heap extract minimum */
 heapExtractMin :: Int -> Int
@@ -90,16 +158,34 @@ heapExtractMin1 :: Int -> Int -> Int -> Bool -> Int
 heapExtractMin2 :: Int -> Int -> Int -> Bool -> Int
 heapExtractMin3 :: Int -> Int -> Bool -> Int
 heapExtractMin4 :: Int -> Int -> Bool -> Int
+heapExtractMinEmpty :: Int -> Bool -> Int
+
 heapExtractMin(addr) ->
     heapExtractMin1(addr, getArr(addr + 2, 0), GET(addr + 2), CAS(addr + 1, 0, 1))
-heapExtractMin1(addr, minVal, size, false) -> heapExtractMin(addr)
+
+heapExtractMin1(addr, minVal, size, false) ->
+    heapExtractMin(addr)
+
+heapExtractMin1(addr, minVal, 0, true) ->
+    heapExtractMinEmpty(addr, SET(addr + 1, 0))
+
+heapExtractMinEmpty(addr, true) ->
+    -1
+
 heapExtractMin1(addr, minVal, size, true) ->
-    heapExtractMin2(addr, minVal, size, setArr(addr, 0, getArr(addr, size - 1)))
+    heapExtractMin2(addr, minVal, size, setArr(addr + 2, 0, getArr(addr + 2, size - 1)))
+    | size > 0
+
 heapExtractMin2(addr, minVal, size, true) ->
-    heapExtractMin3(addr, minVal, SET(addr, size - 1))
-heapExtractMin3(addr, minVal, true) -> heapExtractMin4(addr, minVal, heapSiftDown(addr, 0))
-heapExtractMin4(addr, minVal, true) ->  minVal
+    heapExtractMin3(addr, minVal, SET(addr + 2, size - 1))
+
+heapExtractMin3(addr, minVal, true) ->
+    heapExtractMin4(addr, minVal, heapSiftDown1(addr, 0, GET(addr + 2), true))
+
+heapExtractMin4(addr, minVal, true) ->
+    minVal
+
 
 /* Heap to list */
 heapToList :: Int -> list
-heapToList(addr) -> arrayToList(addr + 1)
+heapToList(addr) -> arrayToList(addr + 2)

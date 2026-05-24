@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 
 public class MemReducer implements ReduceObject {
 
-  public static final AtomicIntegerArray MEMORY = new AtomicIntegerArray(Settings.getMemMaxSize());
+  public static AtomicIntegerArray MEMORY = new AtomicIntegerArray(Settings.getMemMaxSize());
 
   private static final Random random = new Random();
 
@@ -77,6 +77,12 @@ public class MemReducer implements ReduceObject {
     }
     MEMORY.set(0, 2);
     MEMORY.set(1, 0);
+  }
+
+  public static void resizeMemory(int size) {
+    MEMORY = new AtomicIntegerArray(size);
+    Settings.setMemMaxSize(size);
+    resetMemory();
   }
 
   @Override

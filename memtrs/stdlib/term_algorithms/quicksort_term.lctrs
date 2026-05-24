@@ -2,13 +2,15 @@
 
 /* Quick Sort */
 quicksortList :: list -> list
-quicksortList(lst) -> qsortList(lst, nil)
+quicksortList(lst) -> qsortList(lst, nil) | true
 
 qsortList :: list -> list -> list
-qsortList(nil, rest) -> rest
-qsortList(cons(x, xs), rest) -> partitionList(x, xs, nil, nil, rest)
+qsortList(nil, rest) -> rest | true
+qsortList(cons(x, xs), rest) -> partitionList(x, xs, nil, nil, rest) | true
 
 partitionList :: Int -> list -> list -> list -> list -> list
-partitionList(pivot, cons(x, xs), ys, zs, rest) -> partitionList(pivot, xs, cons(x, ys), zs, rest) | x < pivot
-partitionList(pivot, cons(x, xs), ys, zs, rest) -> partitionList(pivot, xs, ys, cons(x, zs), rest) | x >= pivot
-partitionList(pivot, nil, ys, zs, rest) -> qsortList(ys, cons(pivot, qsortList(zs, rest)))
+partitionList(pivot, cons(x, xs), ys, zs, rest) ->
+    partitionList(pivot, xs, cons(x, ys), zs, rest) | x < pivot
+partitionList(pivot, cons(x, xs), ys, zs, rest) ->
+    partitionList(pivot, xs, ys, cons(x, zs), rest) | x >= pivot
+partitionList(pivot, nil, ys, zs, rest) -> qsortList(ys, cons(pivot, qsortList(zs, rest))) | true

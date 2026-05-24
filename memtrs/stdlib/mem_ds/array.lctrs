@@ -7,33 +7,37 @@
 
 /* signature: size -> Bool */
 createArray :: Int -> Int
-createArray1 :: Int -> Int -> Int
-createArray2 :: Int -> Int -> Bool -> Int
-createArray3 :: Int -> Int -> Int -> Int
-createArray4 :: Int -> Int -> Int -> Bool -> Int
-createArray(size) -> createArray1(alloc(size + 1), size)
-createArray1(addr, size) -> createArray2(addr, size, SET(addr, size)) | addr = addr
-createArray2(addr, size, true) -> createArray3(addr, addr + 1, size) | size > 0
-createArray3(arrAddr, addr, size) ->
-    createArray4(arrAddr, addr + 1, size - 1, SET(addr, 0)) | size > 0
-createArray3(arrAddr, addr, size) -> arrAddr | size <= 0
-createArray4(arrAddr, addr, size, true) -> createArray3(arrAddr, addr, size)
+createArraySetSize :: Int -> Int -> Int
+createArraySetSizeDone :: Int -> Int -> Bool -> Int
+createArrayFillZeros :: Int -> Int -> Int -> Int
+createArrayFillZerosDone :: Int -> Int -> Int -> Bool -> Int
+createArray(size) -> createArraySetSize(alloc(size + 1), size) | size > 0
+createArray(size) -> -1 | size <= 0
+createArraySetSize(addr, size) ->
+    createArraySetSizeDone(addr, size, SET(addr, size)) | addr >= 0
+createArraySetSize(addr, size) -> -1 | addr < 0
+createArraySetSizeDone(addr, size, true) -> createArrayFillZeros(addr, addr + 1, size)
+createArrayFillZeros(aAddr, addr, rem) ->
+    createArrayFillZerosDone(aAddr, addr + 1, rem - 1, SET(addr, 0)) | rem > 0
+createArrayFillZeros(aAddr, addr, rem) -> aAddr | rem <= 0
+createArrayFillZerosDone(aAddr, addr, rem, true) ->
+    createArrayFillZeros(aAddr, addr, rem)
 
 /* ACCESS Array element */
 /* addr -> index -> value */
 getArr :: Int -> Int -> Int
-getArr1 :: Int -> Int -> Int -> Int
-getArr(addr, i) -> getArr1(addr, i, GET(addr))
-getArr1(addr, i, size) -> GET(addr + i + 1) | i < size
-getArr1(addr, i, size) -> -1 | i < 0 \/ i >= size
+getArrBounds :: Int -> Int -> Int -> Int
+getArr(addr, i) -> getArrBounds(addr, i, GET(addr))
+getArrBounds(addr, i, size) -> GET(addr + i + 1) | 0 <= i /\ i < size
+getArrBounds(addr, i, size) -> -1 | i < 0 \/ i >= size
 
 /* SET Array element */
 /* addr -> index -> value -> is successful? */
 setArr :: Int -> Int -> Int -> Bool
-setArr1 :: Int -> Int -> Int -> Int -> Bool
-setArr(addr, i, value) -> setArr1(addr, i, value, GET(addr))
-setArr1(addr, i, value, size) -> SET(addr + i + 1, value) | i < size
-setArr1(addr, i, value, size) -> false | i < 0 \/ i >= size
+setArrBounds :: Int -> Int -> Int -> Int -> Bool
+setArr(addr, i, value) -> setArrBounds(addr, i, value, GET(addr))
+setArrBounds(addr, i, value, size) -> SET(addr + i + 1, value) | 0 <= i /\ i < size
+setArrBounds(addr, i, value, size) -> false | i < 0 \/ i >= size
 
 /* Get Array size */
 getArrSize :: Int -> Int
@@ -41,27 +45,32 @@ getArrSize(addr) -> GET(addr)
 
 /* Fill Array */
 fillArray :: Int -> Int -> Bool
-fillArray1 :: Int -> Int -> Int -> Int -> Bool
-fillArray2 :: Int -> Int -> Int -> Int -> Bool -> Bool
-fillArray(addr, val) -> fillArray1(addr, val, 0, getArrSize(addr))
-fillArray1(addr, val, i, size) -> fillArray2(addr, val, i, size, setArr(addr, i, val)) | i < size
-fillArray1(addr, val, i, size) -> true | i >= size
-fillArray2(addr, val, i, size, true) -> fillArray1(addr, val, i + 1, size)
+fillArrayLoop :: Int -> Int -> Int -> Int -> Bool
+fillArrayStep :: Int -> Int -> Int -> Int -> Bool -> Bool
+
+fillArray(addr, val) -> fillArrayLoop(addr, val, 0, getArrSize(addr))
+fillArrayLoop(addr, val, i, size) ->
+    fillArrayStep(addr, val, i, size, setArr(addr, i, val)) | i < size
+fillArrayLoop(addr, val, i, size) -> true | i >= size
+fillArrayStep(addr, val, i, size, true) -> fillArrayLoop(addr, val, i + 1, size)
+fillArrayStep(addr, val, i, size, false) -> false
 
 /* Swap Array elements */
 /* addr -> i1 -> i2 -> Bool */
 swapArr :: Int -> Int -> Int -> Bool
-swapArr1 :: Int -> Int -> Int -> Int -> Bool
-swapArr2 :: Int -> Int -> Int -> Int -> Int -> Bool
-swapArr3 :: Bool -> Bool -> Bool
-swapArr(addr, i1, i2) -> swapArr1(addr, i1, i2, GET(addr))
-swapArr1(addr, i1, i2, size) -> false | (i1 >= size) \/ (i2 >= size) \/ (i1 < 0) \/ (i2 < 0)
-swapArr1(addr, i1, i2, size) ->
-    swapArr2(addr, i1, i2, GET(addr + i1 + 1), GET(addr + i2 + 1))
-    | (i1 < size) /\ (i2 < size) /\ (i1 >= 0) /\ (i2 >= 0)
-swapArr2(addr, i1, i2, val1, val2) -> swapArr3(SET(addr + i2 + 1, val1), SET(addr + i1 + 1, val2))
-swapArr3(status1, status2) -> true | status1 /\ status2
-swapArr3(status1, status2) -> false | not(status1 /\ status2)
+swapArrBounds :: Int -> Int -> Int -> Int -> Bool
+swapArrLoad :: Int -> Int -> Int -> Int -> Int -> Bool
+swapArrWrite :: Bool -> Bool -> Bool
+
+swapArr(addr, i1, i2) -> swapArrBounds(addr, i1, i2, GET(addr))
+swapArrBounds(addr, i1, i2, size) -> false | (i1 >= size) \/ (i2 >= size) \/ (i1 < 0) \/ (i2 < 0)
+swapArrBounds(addr, i1, i2, size) ->
+    swapArrLoad(addr, i1, i2, GET(addr + i1 + 1), GET(addr + i2 + 1))
+    | (0 <= i1 ) /\ (i1 < size) /\ (0 <= i2 ) /\ (i2 < size)
+swapArrLoad(addr, i1, i2, val1, val2) ->
+    swapArrWrite(SET(addr + i2 + 1, val1), SET(addr + i1 + 1, val2))
+swapArrWrite(status1, status2) -> true | status1 /\ status2
+swapArrWrite(status1, status2) -> false | not(status1 /\ status2)
 
 /* Array to List */
 arrayToList :: Int -> list
