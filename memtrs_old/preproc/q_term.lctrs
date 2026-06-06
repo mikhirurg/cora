@@ -1,4 +1,0 @@
-#include stdlib/kernel.lctrs
-#include stdlib/term_ds/list.lctrs
-#include stdlib/mem_ds/array.lctrs
-#include stdlib/algorithms/quicksort.lctrs

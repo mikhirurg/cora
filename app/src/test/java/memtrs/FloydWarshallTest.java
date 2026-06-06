@@ -83,13 +83,22 @@ public class FloydWarshallTest {
   @Test
   void exampleGraph() {
     Graph graph = new Graph();
-    graph.addVertice(new Vertex(0));
-    graph.addVertice(new Vertex(1));
-    graph.addVertice(new Vertex(2));
+    Vertex v1 = new Vertex(0);
+    Vertex v2 = new Vertex(1);
+    Vertex v3 = new Vertex(2);
+    Vertex v4 = new Vertex(3);
+    graph.addVertice(v1);
+    graph.addVertice(v2);
+    graph.addVertice(v3);
+    graph.addVertice(v4);
 
-    graph.addEdge(new Vertex(0), new Vertex(1));
-    graph.addEdge(new Vertex(1), new Vertex(2));
-    graph.addEdge(new Vertex(2), new Vertex(0));
+    graph.addEdge(v1, v2);
+    graph.addEdge(v1, v3);
+    graph.addEdge(v2, v3);
+    graph.addEdge(v2, v4);
+    graph.addEdge(v3, v1);
+    graph.addEdge(v3, v4);
+    graph.addEdge(v4, v2);
 
     //floydWarshall(graph);
 
@@ -97,7 +106,7 @@ public class FloydWarshallTest {
       """
       """);
 
-    Term graphTerm = MemTRSUtil.graphToTerm(graph, trs);
+    Term graphTerm = MemTRSUtil.graphToTerm(graph1, trs);
     System.out.println(graphTerm);
     Term result =
       trs.lookupSymbol("graphToMatrix").apply(graphTerm).apply(TheoryFactory.createValue(0));

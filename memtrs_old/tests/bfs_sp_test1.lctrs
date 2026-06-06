@@ -1,8 +1,0 @@
-#include ../stdlib/algorithms/bfs_sp.lctrs
-#include test_structs.lctrs
-
-exec0 :: graph -> Int -> list
-exec1 :: graph -> Int -> Bool -> list
-exec0(g, v) -> exec1(g, v, SET(0, 1))
-exec1(g, v, true) -> arrayToList(mc_bfs_sp(g, v))
-

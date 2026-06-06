@@ -38,6 +38,11 @@ public class Parameters {
   private ArrayList<String> _input;
   private TreeSet<String> _disable;
   private Settings.Strategy _strategy;
+  private Settings.ReductionMode _reductionMode;
+  private Boolean _highlight;
+  private Boolean _interReductions;
+  private Boolean _interMem;
+  private Integer _maxMemSize;
   private OutputModule.Style _style;
   private Request _request;
   private SmtSolver _solver;
@@ -99,6 +104,10 @@ public class Parameters {
     _style = null;
     _request = null;
     _strategy = null;
+    _maxMemSize = null;
+    _highlight = null;
+    _interReductions = null;
+    _interMem = null;
 
     for (int i = 0; i < args.length; ) {
       i = handleArgument(args, i);
@@ -134,6 +143,45 @@ public class Parameters {
         }
         setStrategy(args[index+1]);
         return index+2;
+      case "-m": case "--mode":
+        if (index + 1 == args.length) {
+          throw new WrongParametersException("Parameter " + arg + " without a given reduction " +
+            "mode!");
+        }
+        if (_strategy != null) {
+          throw new WrongParametersException("Received reduction mode parameter twice!");
+        }
+        setReductionMode(args[index+1]);
+        return index+2;
+      case "--max-mem":
+        if (index + 1 == args.length) {
+          throw new WrongParametersException("Parameter " + arg + " without a given memory size " +
+            "value.");
+        }
+        if (_maxMemSize != null) {
+          throw new WrongParametersException("Received max memory size parameter twice!");
+        }
+        setMaxMemSize(args[index+1]);
+        return index+2;
+      case "--highlight":
+        if (_highlight != null) {
+          throw new WrongParametersException("Received syntax highlighting parameter twice!");
+        }
+        enableHighlight();
+        return index+1;
+      case "--inter-reductions":
+        if (_interReductions != null) {
+          throw new WrongParametersException("Received intermediate reductions flag twice!");
+        }
+        enableInterReductions();
+        return index+1;
+      case "--inter-mem":
+        if (_interMem != null) {
+          throw new WrongParametersException("Received intermediate memory configurations flag " +
+            "twice!");
+        }
+        enableInterMem();
+        return index+1;
       case "-p": case "--print":
         setRequest(Request.Print);
         return index+1;
@@ -208,6 +256,35 @@ public class Parameters {
       "strategies are full, innermost and cbv (call-by-value).");
   }
 
+  private void setReductionMode(String mode) {
+    mode = mode.toLowerCase();
+    if (mode.equals("first-match")) _reductionMode = Settings.ReductionMode.FirstMatch;
+    else if (mode.equals("random")) _reductionMode = Settings.ReductionMode.Random;
+    else if (mode.equals("parallel")) _reductionMode = Settings.ReductionMode.Parallel;
+    else throw new WrongParametersException("Unknown reduction mode: " + mode + ".  Supported" +
+        " reduction modes are first-match, random and parallel.");
+  }
+
+  private void setMaxMemSize(String size) {
+    try {
+      _maxMemSize = Integer.parseInt(size);
+    } catch (NumberFormatException e) {
+      throw new WrongParametersException("Invalid value for the maximum memory size: \"" + size + "\".");
+    }
+  }
+
+  private void enableHighlight() {
+    _highlight = true;
+  }
+
+  private void enableInterReductions() {
+    _interReductions = true;
+  }
+
+  private void enableInterMem() {
+    _interMem = true;
+  }
+
   /** Sets up config.Settings based on what the input arguments were. */
   public void setupSettings() {
     TreeMap<String,String> codes = disableableTechniques();
@@ -219,6 +296,11 @@ public class Parameters {
     Settings.setDisabled(new TreeSet<String>(_disable));
     if (_solver != null) Settings.setSolver(_solver);
     if (_strategy != null) Settings.setStrategy(_strategy);
+    if (_reductionMode != null) Settings.setReductionMode(_reductionMode);
+    if (_maxMemSize != null) Settings.setMemMaxSize(_maxMemSize);
+    if (_highlight != null) Settings.setAnsiTermsHighlighting(_highlight);
+    if (_interReductions != null) Settings.setShowIntermediateReductions(_interReductions);
+    if (_interMem != null) Settings.setShowIntermediateMemory(_interMem);
   }
 
   /** Returns the task Cora is set to do. */
@@ -293,6 +375,18 @@ public class Parameters {
       .append(System.lineSeparator());
     str.append("    -g | --strategy             Set the given strategy for reduction.  " +
       "Currently supported strategies are full, innermost and call-by-value (cbv).")
+      .append(System.lineSeparator());
+    str.append("    -m | --mode                 Set the given reduction mode for reduction.  " +
+      "Currently supported reduction modes are first-match, random and parallel.")
+      .append(System.lineSeparator());
+    str.append("    --max-mem                   Set the limit for the MemTRS memory function.")
+      .append(System.lineSeparator());
+    str.append("    --highlight                 Use ANSI codes to highlight terms.")
+      .append(System.lineSeparator());
+    str.append("    --inter-reductions          Display intermediate reduction steps (beta/debug).")
+      .append(System.lineSeparator());
+    str.append("    --inter-mem                 Display intermediate memory configurations " +
+        "(beta/debug).")
       .append(System.lineSeparator());
     str.append("    -y | --style  <style>       Use the given style for printing; " +
       "currently supported styles are \"plain\" and \"unicode\".")

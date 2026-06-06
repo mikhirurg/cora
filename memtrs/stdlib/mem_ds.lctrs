@@ -1,9 +1,0 @@
-/* ============================= IN-MEMORY DATA STRUCTURES ====================================== */
-
-#include mem_ds/array.lctrs
-
-#include mem_ds/min_heap.lctrs
-
-#include mem_ds/matrix.lctrs
-
-/* ============================================================================================== */

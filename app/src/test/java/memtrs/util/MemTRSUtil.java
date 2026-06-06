@@ -5,13 +5,13 @@ import charlie.terms.Term;
 import charlie.terms.TheoryFactory;
 import charlie.trs.TRS;
 import cora.config.Settings;
-import cora.reduction.CalcReducer;
 import cora.reduction.MemReducer;
 import cora.reduction.Reducer;
 import memtrs.util.graph.Graph;
 import memtrs.util.graph.Vertex;
 import memtrs.util.matrix.Matrix;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -19,12 +19,11 @@ import java.util.Random;
 public class MemTRSUtil {
 
   public final static String MEMTRS_STDLIB_PATH =
-    "/home/mikhirurg/Contribution/cora/memtrs/stdlib/";
+    Path.of("../memtrs_stdlib/memtrs/stdlib").toAbsolutePath().normalize() + "/";
 
   public static Settings.Strategy STRATEGY = Settings.Strategy.CallByValue;
 
   public static Random random = new Random(1337);
-  //private static Random random = new Random();
 
   public static Term reduceToNF(Term start, TRS trs, Settings.Strategy strategy) {
     Settings.Strategy oldStrategy = Settings.queryRewritingStrategy();
@@ -97,7 +96,7 @@ public class MemTRSUtil {
         .append(", ");
     }
     builder.append("nil");
-    builder.append(")".repeat(arr.length));
+    builder.repeat(")", arr.length);
     return builder.toString();
   }
 
@@ -239,7 +238,7 @@ public class MemTRSUtil {
     return CoraInputReader.readTerm(termDefinition, trs);
   }
 
-  public static void main(String[] args) {
+  public static void main() {
     TRS trs = CoraInputReader.readTrsFromString(
       """
       nil :: list
@@ -253,5 +252,6 @@ public class MemTRSUtil {
       trs
     );
     List<Integer> list = termToList(listTerm, trs);
+    System.out.println(list);
   }
 }

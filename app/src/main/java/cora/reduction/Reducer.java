@@ -15,13 +15,11 @@
 
 package cora.reduction;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
-import java.util.Stack;
 import java.util.TreeMap;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
@@ -29,7 +27,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
@@ -98,9 +95,9 @@ public class Reducer {
    * such position exists.
    */
   public Position leftmostInnermostRedexPosition(Term s) {
-    Pair<Term, Position> p = s.findSubterm((sub, pos) -> {
-      for (int j = 0; j < _components.size(); j++) {
-        if (_components.get(j).applicable(sub)) return true;
+    Pair<Term, Position> p = s.findSubterm((sub, _) -> {
+      for (ReduceObject component : _components) {
+        if (component.applicable(sub)) return true;
       }
       return false;
     });
@@ -130,7 +127,7 @@ public class Reducer {
     if (hasBinder(t)) return false;
     if (_arity == null) return true;    // call-by-value is not well-defined in this TRS!
 
-    LinkedList<Term> parts = new LinkedList<Term>();
+    LinkedList<Term> parts = new LinkedList<>();
     for (int i = 1; i <= t.numberArguments(); i++) parts.add(t.queryArgument(i));
 
     while (!parts.isEmpty()) {
@@ -265,16 +262,16 @@ public class Reducer {
     }
 
     if (Settings.isShowIntermediateReductions()) {
-      System.out.println(s);
+      System.out.println(" ⇒ " + s);
     }
     if (Settings.isShowIntermediateMemory()) {
-      System.out.println(MemReducer.MEMORY.toString().substring(0, 300));
+      System.out.println(MemReducer.MEMORY.toString());
     }
     return reductionResult;
   }
 
   public Reduction normalise(Term s) {
-    ArrayList<Term> steps = new ArrayList<Term>();
+    ArrayList<Term> steps = new ArrayList<>();
     do {
       steps.add(s);
       s = reduce(s);

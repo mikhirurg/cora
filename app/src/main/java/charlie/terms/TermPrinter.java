@@ -22,6 +22,7 @@ import java.util.TreeSet;
 import java.util.Set;
 import java.util.function.Predicate;
 import charlie.exceptions.UnexpectedPatternException;
+import cora.config.Settings;
 
 /**
  * TermPrinters are used in the overall output process of the tool.  This class provides a default
@@ -29,6 +30,24 @@ import charlie.exceptions.UnexpectedPatternException;
  * to use unicode symbols, ascii-art, html, print smt-style or whatever is needed.
  */
 public class TermPrinter {
+
+  public static class ANSICodes {
+    public static final String RESET = "\u001B[0m";
+    public static final String CYAN = "\u001B[36m";
+    public static final String BLACK = "\u001B[30m";
+    public static final String RED = "\u001B[31m";
+    public static final String GREEN = "\u001B[32m";
+    public static final String YELLOW = "\u001B[33m";
+    public static final String BRIGHT_BLUE = "\u001B[94m";
+    public static final String BLUE = "\u001B[34m";
+    public static final String PURPLE = "\u001B[35m";
+    public static final String WHITE = "\u001B[37m";
+  }
+
+  public static final String TERM_FUNCTION = ANSICodes.BRIGHT_BLUE;
+  public static final String TERM_CONSTANT = ANSICodes.GREEN;
+  public static final String TERM_VARIABLE = ANSICodes.PURPLE;
+
   private TreeSet<String> _blockedNames;  // the names that may not be used as variable names
 
   /**
@@ -231,9 +250,17 @@ public class TermPrinter {
    * then it uses the variable's base name.
    */
   protected void printVariable(Variable variable, Renaming naming, StringBuilder builder) {
+    if (Settings.isAnsiTermsHighlighting()) {
+      builder.append(TERM_VARIABLE);
+    }
+
     String name = naming.getName(variable);
     if (name == null) builder.append(variable.queryName());
     else builder.append(name);
+
+    if (Settings.isAnsiTermsHighlighting()) {
+      builder.append(ANSICodes.RESET);
+    }
   }
 
   /**
@@ -250,7 +277,15 @@ public class TermPrinter {
    * The default functionality just prints the constant's name.
    */
   protected void printConstant(FunctionSymbol constant, StringBuilder builder) {
+    if (Settings.isAnsiTermsHighlighting()) {
+      builder.append(TERM_FUNCTION);
+    }
+
     builder.append(constant.queryName());
+
+    if (Settings.isAnsiTermsHighlighting()) {
+      builder.append(ANSICodes.RESET);
+    }
   }
 
   /**
@@ -259,7 +294,15 @@ public class TermPrinter {
    * The default functionality just prints the value's name.
    */
   protected void printValue(Value value, StringBuilder builder) {
+    if (Settings.isAnsiTermsHighlighting()) {
+      builder.append(TERM_CONSTANT);
+    }
+
     builder.append(value.queryName());
+
+    if (Settings.isAnsiTermsHighlighting()) {
+      builder.append(ANSICodes.RESET);
+    }
   }
 
   /**
@@ -274,9 +317,15 @@ public class TermPrinter {
    * The default functionality prints [name], where name is the name of the constant.
    */
   protected void printSoloCalculationSymbol(CalculationSymbol constant, StringBuilder builder) {
+    if (Settings.isAnsiTermsHighlighting()) {
+      builder.append(TERM_FUNCTION);
+    }
     builder.append("[");
     builder.append(queryCalculationName(constant.queryKind(), constant.queryName()));
     builder.append("]");
+    if (Settings.isAnsiTermsHighlighting()) {
+      builder.append(ANSICodes.RESET);
+    }
   }
 
   /**

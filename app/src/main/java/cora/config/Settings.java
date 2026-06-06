@@ -25,22 +25,23 @@ import java.util.Set;
  * settings that are not set), and can be queried from any class outside of the cora library.
  */
 public class Settings {
-
-  public enum Strategy { Full , Innermost , CallByValue };
+  public enum Strategy { Full , Innermost , CallByValue }
   public enum ReductionMode { FirstMatch, Random, Parallel }
 
-  private static int MEM_MAX_SIZE = 50000;
+  private static int MEM_MAX_SIZE = 500;
 
   private static Set<String> _disabled = Set.of();
   private static Strategy _strategy = Strategy.CallByValue;
-  private static ReductionMode _reductionMode = ReductionMode.Parallel;
+  private static ReductionMode _reductionMode = ReductionMode.FirstMatch;
+
   private static boolean showIntermediateReductions = false;
   private static boolean showIntermediateMemory = false;
+  private static boolean ansiTermsHighlighting = false;
 
   /** The SMT solver that any SMT-encoding submodule should use. */
   public static SmtSolver smtSolver = new ProcessSmtSolver(ProcessSmtSolver.PhysicalSolver.Z3);
 
-  /** Use this to check if a technique is diabled (by name). */
+  /** Use this to check if a technique is disabled (by name). */
   public static boolean isDisabled(String technique) {
     return _disabled.contains(technique);
   }
@@ -95,5 +96,13 @@ public class Settings {
 
   public static void setShowIntermediateMemory(boolean showIntermediateMemory) {
     Settings.showIntermediateMemory = showIntermediateMemory;
+  }
+
+  public static boolean isAnsiTermsHighlighting() {
+    return ansiTermsHighlighting;
+  }
+
+  public static void setAnsiTermsHighlighting(boolean ansiTermsHighlighting) {
+    Settings.ansiTermsHighlighting = ansiTermsHighlighting;
   }
 }

@@ -1,5 +1,0 @@
-#include list.lctrs
-
-/* Matrix data structure */
-rowNil :: matrix
-row :: list -> matrix -> matrix

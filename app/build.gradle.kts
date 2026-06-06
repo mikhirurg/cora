@@ -16,6 +16,7 @@ dependencies {
     implementation("org.graphstream:gs-core:2.0")
     // https://mvnrepository.com/artifact/org.graphstream/gs-ui-swing
     implementation("org.graphstream:gs-ui-swing:2.0")
+    implementation("org.jline:jline:4.0.0")
 
     // Testing dependencies
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
@@ -55,5 +56,20 @@ tasks {
 
     named<JavaExec>("run") {
         jvmArgs = listOf("--enable-preview")
+        standardInput = System.`in`
+    }
+
+    named<Jar>("jar") {
+        manifest {
+            attributes["Main-Class"] = application.mainClass.get()
+        }
+
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+        from({
+            configurations.runtimeClasspath.get()
+                .filter { it.name.endsWith("jar") }
+                .map { zipTree(it) }
+        })
     }
 }

@@ -1,0 +1,3 @@
+[submodule "memtrs_stdlib"]
+	path = memtrs_stdlib
+	url = https://github.com/mikhirurg/memtrs_stdlib
