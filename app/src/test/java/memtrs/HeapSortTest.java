@@ -3,6 +3,7 @@ package memtrs;
 import charlie.terms.Term;
 import charlie.terms.TheoryFactory;
 import charlie.trs.TRS;
+import cora.config.Settings;
 import cora.reduction.MemReducer;
 import cora.reduction.Reducer;
 import memtrs.util.MemTRSUtil;
@@ -18,6 +19,9 @@ public class HeapSortTest {
 
   @Test
   void heapSortTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+    Settings.setMemMaxSize(50000);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "algorithms/heapsort.lctrs\n\n" +
         """

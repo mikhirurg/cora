@@ -2,6 +2,7 @@ package memtrs;
 
 import charlie.terms.Term;
 import charlie.trs.TRS;
+import cora.config.Settings;
 import cora.reduction.MemReducer;
 import memtrs.util.MemTRSUtil;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,8 @@ public class AtomicCounterTest {
 
   @Test
   void atomicCounterTest() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/array.lctrs\n\n" +
         """

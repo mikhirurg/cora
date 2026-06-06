@@ -28,7 +28,7 @@ public class Settings {
   public enum Strategy { Full , Innermost , CallByValue }
   public enum ReductionMode { FirstMatch, Random, Parallel }
 
-  private static int MEM_MAX_SIZE = 500;
+  private static int MEM_MAX_SIZE = 50000;
 
   private static Set<String> _disabled = Set.of();
   private static Strategy _strategy = Strategy.CallByValue;

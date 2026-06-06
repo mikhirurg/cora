@@ -10,6 +10,8 @@ import static memtrs.util.MemTRSUtil.MEMTRS_STDLIB_PATH;
 
 public class QueueTest {
   public static void main(String[] args) {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     MemReducer.SET(0, 2);
     MemReducer.SET(1, 0);
     TRS trs = MemTRSUtil.constructTRS(

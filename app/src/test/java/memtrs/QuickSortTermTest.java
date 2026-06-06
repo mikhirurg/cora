@@ -2,6 +2,7 @@ package memtrs;
 
 import charlie.terms.Term;
 import charlie.trs.TRS;
+import cora.config.Settings;
 import cora.reduction.Reducer;
 import memtrs.util.MemTRSUtil;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,8 @@ public class QuickSortTermTest {
 
   @Test
   void qSortTermTest() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "term_algorithms/quicksort_term.lctrs\n\n" +
         """
@@ -34,6 +37,8 @@ public class QuickSortTermTest {
   }
 
   public static void qSortTermBenchmark() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "term_algorithms/quicksort_term.lctrs\n\n" +
         """
@@ -63,6 +68,7 @@ public class QuickSortTermTest {
   }
 
   public static void main(String[] args) {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
     qSortTermBenchmark();
     System.out.println(Reducer.totalVirtualThreads);
   }

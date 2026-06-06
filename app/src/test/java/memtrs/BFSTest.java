@@ -3,6 +3,7 @@ package memtrs;
 import charlie.terms.Term;
 import charlie.terms.TheoryFactory;
 import charlie.trs.TRS;
+import cora.config.Settings;
 import cora.reduction.CalcReducer;
 import cora.reduction.MemReducer;
 import cora.reduction.Reducer;
@@ -60,18 +61,20 @@ public class BFSTest {
   }
 
   static void bfsTest(int nodes, int edges, int iteration) {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     System.setProperty("org.graphstream.ui", "swing");
 
     Reducer.totalParallelSteps = 0;
 
     Graph graph = Graph.generateRandomGraph(nodes, edges);
 
-    /*try {
+    try {
       graph.saveToImage(Path.of("graph_images_bfs1_not_par/n" + nodes + "_e" + edges + "_i" + iteration +
         "_out.png"));
     } catch (IOException e) {
       throw new RuntimeException(e);
-    }*/
+    }
 
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "term_algorithms/bfs_term.lctrs\n\n" +
@@ -152,6 +155,8 @@ public class BFSTest {
 
   @Test
   void termBFSTest() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     bfsTest(3, 4, 0);
     bfsTest(4, 8, 0);
     bfsTest(6, 35, 0);
@@ -165,6 +170,8 @@ public class BFSTest {
 
   @Test
   void memBFSTest() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     mcBfsTest(3, 4, 0);
     mcBfsTest(4, 8, 0);
     mcBfsTest(6, 35, 0);
@@ -178,6 +185,8 @@ public class BFSTest {
 
   @Test
   void graphDemoTest() throws FileNotFoundException {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     System.setOut(new PrintStream(new FileOutputStream("out.txt")));
     TRS trs = MemTRSUtil.constructTRS("#include " + MEMTRS_STDLIB_PATH + "algorithms/bfs.lctrs\n\n" +
       """
@@ -200,6 +209,7 @@ public class BFSTest {
   public static void main(String[] args) throws FileNotFoundException {
     int[] sizes = IntStream.iterate(1, i -> i + 1).limit(30).toArray();
 
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
 
     System.setOut(new PrintStream(new FileOutputStream("bfs_test1_not_par_cas_trie.txt")));
     for (int i = 1; i < 30; i++) {

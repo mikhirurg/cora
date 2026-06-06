@@ -3,6 +3,7 @@ package memtrs;
 import charlie.terms.Term;
 import charlie.terms.TheoryFactory;
 import charlie.trs.TRS;
+import cora.config.Settings;
 import cora.reduction.CalcReducer;
 import cora.reduction.MemReducer;
 import cora.reduction.Reducer;
@@ -34,6 +35,8 @@ public class QuickSortTest {
 
   @Test
   void qSortTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "algorithms/quicksort.lctrs\n\n" +
         """
@@ -61,6 +64,8 @@ public class QuickSortTest {
 
   @Test
   void qSortTest2() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "term_algorithms/quicksort_term.lctrs"
     );
@@ -77,6 +82,8 @@ public class QuickSortTest {
 
 
   public static void qSortBenchmark() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "algorithms/quicksort.lctrs\n\n" +
         """
@@ -114,6 +121,8 @@ public class QuickSortTest {
   }
 
   public static void qSortTimeBenchmarkMem() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "algorithms/quicksort.lctrs\n\n" +
         """
@@ -159,6 +168,8 @@ public class QuickSortTest {
   }
 
   public static void qSortJFRBenchmarkMem(int inputSize) {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "algorithms/quicksort.lctrs\n\n" +
         """
@@ -193,6 +204,8 @@ public class QuickSortTest {
   }
 
   public static void qSortTotalParallelStepsMem() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "algorithms/quicksort.lctrs\n\n" +
         """
@@ -240,6 +253,8 @@ public class QuickSortTest {
   }
 
   public static void qSortTimeBenchmarkList() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "term_algorithms/quicksort_term.lctrs"
     );
@@ -272,6 +287,8 @@ public class QuickSortTest {
   }
 
   public static void qSortParallelStepBenchmarkList() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "term_algorithms/quicksort_term.lctrs"
     );
@@ -296,6 +313,8 @@ public class QuickSortTest {
   }
 
   public static void qSortJFRBenchmarkList(int inputSize) {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "term_algorithms/quicksort_term.lctrs"
     );
@@ -312,6 +331,8 @@ public class QuickSortTest {
   }
 
   public static void qSortTotalParallelStepsList() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "term_algorithms/quicksort_term.lctrs"
     );
@@ -484,6 +505,8 @@ public class QuickSortTest {
   }
 
   public static void main(String[] args) throws FileNotFoundException {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     if (args.length > 0) {
       switch (args[0]) {
         case "time-clean":

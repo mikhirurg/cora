@@ -3,6 +3,7 @@ package memtrs;
 import charlie.terms.Term;
 import charlie.terms.TheoryFactory;
 import charlie.trs.TRS;
+import cora.config.Settings;
 import cora.reduction.MemReducer;
 import cora.reduction.Reducer;
 import memtrs.util.MemTRSUtil;
@@ -82,6 +83,8 @@ public class FloydWarshallTest {
 
   @Test
   void exampleGraph() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     Graph graph = new Graph();
     Vertex v1 = new Vertex(0);
     Vertex v2 = new Vertex(1);
@@ -121,6 +124,8 @@ public class FloydWarshallTest {
   }
 
   static void floydWarshallTest(int nodes, int edges, int iteration) {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     System.setProperty("org.graphstream.ui", "swing");
 
     Reducer.totalParallelSteps = 0;
@@ -164,6 +169,8 @@ public class FloydWarshallTest {
   }
 
   static void floydWarshallParallelTest(int nodes, int edges, int iteration) {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     System.setProperty("org.graphstream.ui", "swing");
 
     Reducer.totalParallelSteps = 0;
@@ -207,6 +214,7 @@ public class FloydWarshallTest {
 
   @Test
   void floydWarshallTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
 
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "algorithms/floyd_warshall.lctrs\n\n" +
@@ -230,6 +238,7 @@ public class FloydWarshallTest {
 
   @Test
   void floydWarshallParallelTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
 
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "algorithms/floyd_warshall.lctrs\n\n" +
@@ -258,6 +267,7 @@ public class FloydWarshallTest {
   }
 
   public static void main(String[] args) throws FileNotFoundException {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
 /*    System.setOut(new PrintStream(new FileOutputStream("floyd_warshall_not_par.txt")));
     for (int i = 1; i < 30; i++) {
       for (int j = 1; j <= i * i; j++) {

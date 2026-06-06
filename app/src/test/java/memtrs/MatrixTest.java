@@ -2,6 +2,7 @@ package memtrs;
 
 import charlie.terms.Term;
 import charlie.trs.TRS;
+import cora.config.Settings;
 import cora.reduction.MemReducer;
 import memtrs.util.MemTRSUtil;
 import memtrs.util.matrix.Matrix;
@@ -14,6 +15,8 @@ public class MatrixTest {
 
   @Test
   void createMatrixTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/matrix.lctrs\n\n" +
         """
@@ -37,6 +40,8 @@ public class MatrixTest {
 
   @Test
   void getMatrixWidthTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/matrix.lctrs\n\n" +
         """
@@ -60,6 +65,8 @@ public class MatrixTest {
 
   @Test
   void getMatrixHeightTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/matrix.lctrs\n\n" +
         """
@@ -83,6 +90,8 @@ public class MatrixTest {
 
   @Test
   void getMatrixTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/matrix.lctrs\n\n" +
         """
@@ -110,6 +119,8 @@ public class MatrixTest {
 
   @Test
   void setMatrixTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/matrix.lctrs\n\n" +
         """
@@ -135,6 +146,8 @@ public class MatrixTest {
 
   @Test
   void fillMatrixTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/matrix.lctrs\n\n" +
         """
@@ -160,6 +173,8 @@ public class MatrixTest {
 
   @Test
   void matrixToTermTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/matrix.lctrs\n\n" +
         """
@@ -185,6 +200,8 @@ public class MatrixTest {
 
   @Test
   void graphToMatrixTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/matrix.lctrs\n\n" +
         """

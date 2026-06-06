@@ -2,6 +2,7 @@ package memtrs;
 
 import charlie.terms.Term;
 import charlie.trs.TRS;
+import cora.config.Settings;
 import memtrs.util.MemTRSUtil;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +16,8 @@ public class ArrayTest {
 
   @Test
   void createArrayTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/array.lctrs\n\n" +
         """
@@ -34,6 +37,8 @@ public class ArrayTest {
 
   @Test
   void getArrayTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/array.lctrs\n\n" +
         """
@@ -58,6 +63,8 @@ public class ArrayTest {
 
   @Test
   void setArrayTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/array.lctrs\n\n" +
         """
@@ -82,6 +89,8 @@ public class ArrayTest {
 
   @Test
   void getArraySizeTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/array.lctrs\n\n" +
         """
@@ -102,6 +111,8 @@ public class ArrayTest {
 
   @Test
   void fillArrayTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/array.lctrs\n\n" +
         """
@@ -124,6 +135,8 @@ public class ArrayTest {
 
   @Test
   void swapArrayTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/array.lctrs\n\n" +
         """
@@ -150,6 +163,8 @@ public class ArrayTest {
 
   @Test
   void arrayToListTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/array.lctrs\n\n" +
         """
@@ -169,6 +184,8 @@ public class ArrayTest {
 
   @Test
   void listToArrayTest1() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "mem_ds/array.lctrs\n\n" +
         """

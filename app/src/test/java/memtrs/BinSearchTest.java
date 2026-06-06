@@ -3,6 +3,7 @@ package memtrs;
 import charlie.terms.Term;
 import charlie.terms.TheoryFactory;
 import charlie.trs.TRS;
+import cora.config.Settings;
 import cora.reduction.MemReducer;
 import memtrs.util.MemTRSUtil;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,8 @@ public class BinSearchTest {
 
   @Test
   void binSearchTest() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "algorithms/binsearch.lctrs\n\n" +
         """
@@ -47,6 +50,8 @@ public class BinSearchTest {
 
   @Test
   void binSearchTermTest() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "term_algorithms/binsearch_term.lctrs\n\n" +
         """
@@ -73,6 +78,8 @@ public class BinSearchTest {
   }
 
   public static void binSearchBenchmark() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "algorithms/binsearch.lctrs\n\n" +
         """
@@ -114,6 +121,8 @@ public class BinSearchTest {
   }
 
   public static void binSearchBenchmarkOptimal() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "algorithms/binsearch.lctrs\n\n" +
         """
@@ -157,6 +166,8 @@ public class BinSearchTest {
   }
 
   public static void binSearchTermBenchmark() {
+    Settings.setReductionMode(Settings.ReductionMode.Parallel);
+
     TRS trs = MemTRSUtil.constructTRS(
       "#include " + MEMTRS_STDLIB_PATH + "term_algorithms/binsearch_term.lctrs\n\n" +
         """
